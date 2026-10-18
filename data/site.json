@@ -5,37 +5,6 @@
   },
   "pairs": [
     {
-      "id": "pair1",
-      "title": "SYNDROME X LIA",
-      "image": "img/pairs/pair1.webp",
-      "male": {
-        "name": "신드롬",
-        "base": "handsome male, age up, athletic build, v-shaped face, 2::ash brown hair,wolf cut,messy bangs,curtained bangs, face-framing strands::,  0.7::messy hair::, black eyes, -0.5::tsurime::, 0.5::half-lidded eyes::, expressionless,"
-      },
-      "female": {
-        "name": "리아",
-        "base": "girl, cute face, large bust, left-side hair intake, sky blue eyes, dark brown hair, long hair,  low side ponytail, white ribbon, straight bangs, voluminous wavy hair, tareme, round eyes, aegyo sal,soft smile, -1::parted bangs::,"
-      },
-      "variants": [
-        {
-          "label": "제복",
-          "sub": "",
-          "image": "",
-          "male": {
-            "top": "black military uniform, black formal jacket, white collared shirt, black necktie, black leather gloves,",
-            "bottom": "",
-            "shoes": ""
-          },
-          "female": {
-            "top": "white military collared shirt with black ribbon tie, a grey belt ,",
-            "bottom": "mini white High-waisted pleated skirt, white kneehighs,",
-            "shoes": "white Mary Jane shoes,"
-          }
-        }
-      ],
-      "tag": "ARCH"
-    },
-    {
       "id": "pair2",
       "title": "페어 2",
       "image": "img/pairs/pair2.webp",
@@ -61,6 +30,37 @@
             "top": "black long sleeve dress shirt, gray harness,",
             "bottom": "black shorts, gray belt,",
             "shoes": "black combat boots,"
+          }
+        }
+      ],
+      "tag": "ARCH"
+    },
+    {
+      "id": "pair1",
+      "title": "SYNDROME X LIA",
+      "image": "img/pairs/pair1.webp",
+      "male": {
+        "name": "신드롬",
+        "base": "handsome male, age up, athletic build, v-shaped face, 2::ash brown hair,wolf cut,messy bangs,curtained bangs, face-framing strands::,  0.7::messy hair::, black eyes, -0.5::tsurime::, 0.5::half-lidded eyes::, expressionless,"
+      },
+      "female": {
+        "name": "리아",
+        "base": "girl, cute face, large bust, left-side hair intake, sky blue eyes, dark brown hair, long hair,  low side ponytail, white ribbon, straight bangs, voluminous wavy hair, tareme, round eyes, aegyo sal,soft smile, -1::parted bangs::,"
+      },
+      "variants": [
+        {
+          "label": "제복",
+          "sub": "",
+          "image": "",
+          "male": {
+            "top": "black military uniform, black formal jacket, white collared shirt, black necktie, black leather gloves,",
+            "bottom": "",
+            "shoes": ""
+          },
+          "female": {
+            "top": "white military collared shirt with black ribbon tie, a grey belt ,",
+            "bottom": "mini white High-waisted pleated skirt, white kneehighs,",
+            "shoes": "white Mary Jane shoes,"
           }
         }
       ],
