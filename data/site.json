@@ -1,20 +1,21 @@
 {
   "site": {
-    "title": "ZZON"
+    "title": "ZZON",
+    "subtitle": "family"
   },
   "pairs": [
     {
       "id": "pair1",
-      "title": "페어 1",
+      "title": "SYNDROME X LIA",
       "image": "img/pairs/pair1.webp",
       "color": "#d9d4ff",
       "male": {
-        "name": "남캐 이름",
-        "prompt": "남자 캐릭터 프롬프트를 여기에 적어주세요."
+        "name": "신드롬",
+        "prompt": "남자 캐릭터 프롬프트를 여기에 적어주세요.handsome male, age up, athletic build, v-shaped face, 2::ash brown hair,wolf cut,messy bangs,curtained bangs, face-framing strands::,  0.7::messy hair::, black eyes, -0.5::tsurime::, 0.5::half-lidded eyes::, expressionless,\n\nblack military uniform, black formal jacket, white collared shirt, black necktie, black leather gloves,"
       },
       "female": {
-        "name": "여캐 이름",
-        "prompt": "여자 캐릭터 프롬프트를 여기에 적어주세요."
+        "name": "리아",
+        "prompt": "girl, cute face, large bust, left-side hair intake, sky blue eyes, dark brown hair, long hair,  low side ponytail, white ribbon, straight bangs, voluminous wavy hair, tareme, round eyes, aegyo sal,soft smile, -1::parted bangs::,\n\nwhite military collared shirt with black ribbon tie, a grey belt , mini white High-waisted pleated skirt, white kneehighs, white Mary Jane shoes,"
       }
     },
     {
