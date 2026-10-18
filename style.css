@@ -141,6 +141,7 @@ body.world-mode .drop-btn { color: var(--w-dim); }
 }
 .ooc-foot { margin-top: auto; display: flex; justify-content: flex-end; padding-top: 6px; }
 .ooc-card .adm-tools { top: 10px; right: 10px; }
+body.admin .ooc-card { padding-top: 48px; } /* 편집 버튼과 제목이 겹치지 않게 */
 .ooc-search {
   position: relative; max-width: 460px; margin: 0 auto 30px;
   display: flex; align-items: center; border-bottom: 1px solid var(--ink);
