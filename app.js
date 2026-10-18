@@ -435,15 +435,25 @@
     renderDetail();
   }
 
+  let lockY = 0;
   function openModal(html) {
     modalBody.innerHTML = html;
+    // 아이폰에서도 뒤 페이지가 움직이지 않게 고정 (스크롤 위치 기억)
+    if (modal.hidden) {
+      lockY = window.scrollY;
+      Object.assign(document.body.style, { position: "fixed", top: `-${lockY}px`, left: "0", right: "0", overflow: "hidden" });
+    }
     modal.hidden = false;
-    document.body.style.overflow = "hidden";
+    modal.querySelector(".modal-box").scrollTop = 0;
   }
   function closeModal() {
+    const wasOpen = !modal.hidden;
     modal.hidden = true;
     modalBody.innerHTML = "";
-    document.body.style.overflow = "";
+    if (wasOpen) {
+      Object.assign(document.body.style, { position: "", top: "", left: "", right: "", overflow: "" });
+      window.scrollTo(0, lockY);
+    }
   }
 
   function toast(msg, ms = 1600) {

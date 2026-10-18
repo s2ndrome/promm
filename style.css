@@ -294,18 +294,25 @@ body.has-bgm { padding-bottom: 64px; }
   background: rgba(20, 20, 20, .28);
 }
 .modal[hidden] { display: none; }
+.modal { overscroll-behavior: contain; }
 .modal-box {
   position: relative;
   width: min(900px, 100%); max-height: 100%; overflow: auto;
+  overscroll-behavior: contain; -webkit-overflow-scrolling: touch;
   background: #fff; border-radius: 20px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, .18);
   animation: pop .2s ease;
 }
 @keyframes pop { from { opacity: 0; transform: translateY(8px); } }
+/* 닫기 버튼: 스크롤해도 팝업 위쪽에 계속 떠 있음 (float + 음수 margin 으로 내용을 밀지 않음) */
 .modal-close {
-  position: absolute; top: 16px; right: 18px; z-index: 2;
-  border: 0; background: none; cursor: pointer; font-size: 18px; color: #555;
+  position: sticky; top: 12px; float: right; z-index: 5;
+  width: 36px; height: 36px; margin: 12px 14px -48px 0; border-radius: 50%;
+  border: 1px solid var(--line); background: rgba(255, 255, 255, .95); cursor: pointer;
+  font-size: 15px; color: #333; box-shadow: 0 2px 8px rgba(0, 0, 0, .08);
+  display: flex; align-items: center; justify-content: center;
 }
+.modal-close:hover { background: var(--ink); color: #fff; border-color: var(--ink); }
 .detail { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; padding: 44px 44px 40px; align-items: start; }
 .detail-visual { position: sticky; top: 0; }
 .variants { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
@@ -413,7 +420,6 @@ body.admin .adm-badge { display: block; }
   .item-name, .item-sub { font-size: 12px; }
   .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
   .modal { padding: 10px; align-items: flex-end; }
-  .modal-box { max-height: 92vh; }
   .detail { grid-template-columns: 1fr; gap: 10px; padding: 36px 20px 24px; }
   .detail-visual { position: static; }
   .detail-visual .thumb { max-width: 300px; margin: 0 auto; width: 100%; }
@@ -798,9 +804,14 @@ body.admin .w-team header { padding-right: 160px; }
   .bgm-list-ico { display: block; }
 
   /* 팝업 / 편집 창 */
-  .modal { padding: 0; align-items: flex-end; }
-  .modal-box { border-radius: 20px 20px 0 0; max-height: 90vh; width: 100%; padding-bottom: env(safe-area-inset-bottom); }
-  .modal-close { top: 10px; right: 12px; }
+  /* 위쪽 어두운 부분은 눌러서 닫기. 높이는 실제 보이는 화면(dvh) 기준 (아이폰 주소창 대응) */
+  .modal { padding: 48px 0 0; align-items: flex-end; height: 100%; height: 100dvh; }
+  .modal-box {
+    border-radius: 20px 20px 0 0; width: 100%;
+    max-height: calc(100vh - 48px); max-height: calc(100dvh - 48px);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .modal-close { top: 10px; margin: 10px 12px -46px 0; }
   .detail { padding: 34px 18px 22px; }
   .detail-visual .thumb { max-width: 240px; }
   .prompt-head { flex-wrap: wrap; gap: 6px; }
