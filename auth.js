@@ -189,7 +189,7 @@
     if (/invalid login credentials/i.test(m)) return "이메일 또는 비밀번호가 맞지 않아요.";
     if (/already registered/i.test(m)) return "이미 가입된 이메일이에요. 로그인해 주세요.";
     if (/email not confirmed/i.test(m)) return "이메일 인증이 안 된 계정이에요. (Supabase 에서 Confirm email 을 끄고 계정을 지운 뒤 다시 가입해 주세요)";
-    if (/only the owner/i.test(m)) return "World 는 쭌식만 수정할 수 있어요.";
+    if (/only the owner/i.test(m)) return "ARCH 페이지는 쭌식만 수정할 수 있어요.";
     if (/password/i.test(m) && /6/.test(m)) return "비밀번호는 6자 이상이어야 해요.";
     return m;
   }
