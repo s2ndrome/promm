@@ -142,11 +142,11 @@
   }
 
   // ---------- prompt popup ----------
-  function promptBlock(label, who) {
+  function promptBlock(who) {
     if (!who || (!who.name && !who.prompt)) return "";
     return `<div class="prompt">
       <div class="prompt-head">
-        <b>${label}<span>${esc(who.name)}</span></b>
+        <b>${esc(who.name)}</b>
         <button type="button" class="pill-btn" data-copy="${esc(who.prompt)}">Copy</button>
       </div>
       <p class="prompt-text">${esc(who.prompt)}</p>
@@ -174,8 +174,8 @@
         <span class="pill">${tag}</span>
         <h2>${esc(title)}</h2>
         <p class="sub">${esc(sub)}</p>
-        ${promptBlock("HIM", item.male)}
-        ${promptBlock("HER", item.female)}
+        ${promptBlock(item.male)}
+        ${promptBlock(item.female)}
       </div>
     </div>`);
   }

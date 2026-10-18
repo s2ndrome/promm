@@ -154,8 +154,7 @@ body.admin .admin-btn { color: var(--accent); }
 .detail-info .sub { color: var(--muted); font-size: 13px; margin: 0 0 26px; }
 .prompt { border-top: 1px solid #eee; padding: 16px 0 6px; }
 .prompt-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.prompt-head b { font-family: var(--brand); font-weight: 600; font-size: 11px; letter-spacing: .2em; }
-.prompt-head b span { font-family: var(--sans); font-weight: 400; letter-spacing: 0; color: var(--muted); font-size: 12px; margin-left: 8px; }
+.prompt-head b { font-weight: 500; font-size: 14px; }
 .prompt-text {
   margin: 0; white-space: pre-wrap; word-break: break-word;
   font-size: 13px; font-weight: 300; line-height: 1.75;
