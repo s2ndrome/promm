@@ -154,18 +154,18 @@ body.admin .admin-btn { color: var(--accent); }
 .detail-visual { position: sticky; top: 0; }
 .variants { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .vtab {
-  border: 1px solid #d6dde2; background: #fff; cursor: pointer;
+  border: 1px solid var(--line); background: #fff; cursor: pointer;
   font-size: 13px; padding: 7px 13px; color: #333;
   transition: background .15s, color .15s, border-color .15s;
 }
-.vtab em { font-style: normal; font-size: 11px; color: #4f9bd4; margin-left: 4px; font-weight: 400; }
-.vtab:hover { border-color: #8cc4ea; }
-.vtab.active { background: #74b3e3; border-color: #74b3e3; color: #fff; font-weight: 500; }
+.vtab em { font-style: normal; font-size: 11px; color: var(--muted); margin-left: 4px; font-weight: 400; }
+.vtab:hover { border-color: var(--ink); }
+.vtab.active { background: var(--ink); border-color: var(--ink); color: #fff; font-weight: 500; }
 .vtab.active em { color: #fff; }
 .outfit-opts { display: flex; gap: 16px; margin-top: 12px; font-size: 13px; color: #444; }
 .outfit-opts[hidden] { display: none; }
 .outfit-opts label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
-.outfit-opts input { accent-color: #74b3e3; width: 15px; height: 15px; margin: 0; }
+.outfit-opts input { accent-color: var(--ink); width: 15px; height: 15px; margin: 0; }
 .outfit-opts label:has(input:disabled) { opacity: .45; cursor: default; }
 .detail-info .pill { margin-bottom: 14px; }
 .detail-info h2 { font-size: 20px; font-weight: 500; margin: 0 0 2px; }
