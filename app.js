@@ -63,7 +63,7 @@
         <div class="item-foot"><button type="button" class="pill-btn">Prompt</button></div>
       </article>`
     ).join("");
-    return `<div class="adm-bar">${addBtn("pairs", "페어 추가")}${addBtn("site", "사이트 정보")}</div>
+    return `<div class="adm-bar">${addBtn("pairs", "페어 추가")}<span class="owner-only">${addBtn("site", "사이트 정보")}</span></div>
       <section class="grid">${items}</section>`;
   }
 
@@ -122,7 +122,7 @@
       </div>`
     ).join("");
     return `<div class="page-head"><h1>WORLD</h1></div>
-      <div class="world">
+      <div class="world owner-edit">
         <p class="world-intro">${esc(w.intro)}</p>
         <div class="adm-bar">${addBtn("world", "소개 수정")}</div>
         <div class="block-title">STORY</div>

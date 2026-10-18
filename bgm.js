@@ -1,4 +1,4 @@
-// 페이지 아래 BGM 플레이어. 곡 추가는 회원 누구나, 삭제는 owner 만
+// 페이지 아래 BGM 플레이어. 곡 추가는 Vanguard 이상, 삭제는 쭌식(owner)만
 (function () {
   const App = window.App;
   const esc = App.esc;
@@ -163,7 +163,8 @@
       <h2>BGM</h2>
       <p class="desc">곡을 누르면 재생돼요. ${shuffle ? "셔플 재생 중" : ""}</p>
       <div id="bgm-list" class="bgm-list">${listHtml()}</div>
-      <form id="bgm-add" class="bgm-add">
+      ${App.rank >= 2 ? "" : `<p class="hint">곡 추가는 Vanguard 등급부터 할 수 있어요.</p>`}
+      <form id="bgm-add" class="bgm-add" ${App.rank >= 2 ? "" : "hidden"}>
         <div class="bgm-add-tabs">
           <button type="button" class="vtab active" data-kind="file">파일</button>
           <button type="button" class="vtab" data-kind="youtube">유튜브 링크</button>

@@ -7,6 +7,11 @@
 
   const App = window.App;
   const esc = App.esc;
+
+  // 등급: 쭌식(owner) > ARCH PRIMA > Vanguard > Acolyte
+  const ROLE_NAMES = (App.ROLE_NAMES = { owner: "쭌식", prima: "ARCH PRIMA", vanguard: "Vanguard", acolyte: "Acolyte" });
+  const RANKS = { owner: 4, prima: 3, vanguard: 2, acolyte: 1 };
+  App.rank = 0;
   const sb = (App.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY));
   const gate = document.getElementById("gate");
 
@@ -172,6 +177,8 @@
     if (/invalid invite code/i.test(m)) return "초대 코드가 맞지 않아요.";
     if (/invalid login credentials/i.test(m)) return "이메일 또는 비밀번호가 맞지 않아요.";
     if (/already registered/i.test(m)) return "이미 가입된 이메일이에요. 로그인해 주세요.";
+    if (/email not confirmed/i.test(m)) return "이메일 인증이 안 된 계정이에요. 관리자에게 문의해 주세요.";
+    if (/only the owner/i.test(m)) return "World 는 쭌식만 수정할 수 있어요.";
     if (/password/i.test(m) && /6/.test(m)) return "비밀번호는 6자 이상이어야 해요.";
     return m;
   }
@@ -184,7 +191,10 @@
     if (error) return authForm("login", friendly(error));
     if (!role) return codeForm();
     App.role = role;
+    App.rank = RANKS[role] || 0;
     document.body.classList.toggle("owner", role === "owner");
+    document.body.classList.toggle("can-edit", App.rank >= 3);
+    document.getElementById("grade").textContent = ROLE_NAMES[role] || role;
     showGate(`<p class="gate-desc">불러오는 중…</p>`);
     try {
       await loadData();
@@ -202,6 +212,41 @@
     await sb.auth.signOut();
     location.reload();
   }
+
+  // ---------- 회원 관리 (쭌식 전용) ----------
+  async function openMembers() {
+    const { data, error } = await sb.rpc("list_members");
+    if (error) return alert(error.message);
+    const opts = (role) => ["prima", "vanguard", "acolyte"]
+      .map((r) => `<option value="${r}" ${r === role ? "selected" : ""}>${ROLE_NAMES[r]}</option>`).join("");
+    App.openModal(`<div class="form">
+      <h2>MEMBERS</h2>
+      <p class="desc">등급을 바꾸면 바로 저장돼요. 바뀐 등급은 그 회원이 새로고침하면 적용돼요.</p>
+      <div class="member-list">${(data || []).map((m) => `<div class="member-row">
+        <span class="member-email">${esc(m.email || m.user_id)}</span>
+        ${m.role === "owner"
+          ? `<span class="pill">${ROLE_NAMES.owner}</span>`
+          : `<select data-member="${m.user_id}">${opts(m.role)}</select>
+             <button type="button" class="bgm-del" data-kick="${m.user_id}" aria-label="내보내기" title="내보내기">✕</button>`}
+      </div>`).join("")}</div>
+    </div>`);
+  }
+
+  document.addEventListener("change", async (e) => {
+    const sel = e.target.closest("[data-member]");
+    if (!sel) return;
+    const { error } = await sb.rpc("set_member_role", { target: sel.dataset.member, new_role: sel.value });
+    if (error) return alert(error.message);
+    App.toast(`${ROLE_NAMES[sel.value]} 으로 바꿨어요`);
+  });
+  document.addEventListener("click", async (e) => {
+    const k = e.target.closest("[data-kick]");
+    if (!k || !confirm("이 회원을 내보낼까요? (다시 들어오려면 초대 코드가 필요해요)")) return;
+    const { error } = await sb.rpc("remove_member", { target: k.dataset.kick });
+    if (error) return alert(error.message);
+    openMembers();
+  });
+  document.getElementById("members-btn").addEventListener("click", openMembers);
 
   document.getElementById("logout-btn").addEventListener("click", () => {
     if (confirm("로그아웃할까요?")) logout();
