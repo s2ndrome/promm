@@ -142,42 +142,69 @@
   }
 
   // ---------- prompt popup ----------
-  function promptBlock(who) {
-    if (!who || (!who.name && !who.prompt)) return "";
+  function promptBlock(name, prompt) {
+    if (!name && !prompt) return "";
     return `<div class="prompt">
       <div class="prompt-head">
-        <b>${esc(who.name)}</b>
-        <button type="button" class="pill-btn" data-copy="${esc(who.prompt)}">Copy</button>
+        <b>${esc(name)}</b>
+        <button type="button" class="pill-btn" data-copy="${esc(prompt)}">Copy</button>
       </div>
-      <p class="prompt-text">${esc(who.prompt)}</p>
+      <p class="prompt-text">${esc(prompt)}</p>
     </div>`;
   }
 
+  // 지금 열려 있는 팝업 (의상 탭 전환용)
+  let detail = null;
+
   function showPrompt(col, i) {
-    let item, tag, title, sub;
+    let names, variants, image, title, sub;
     if (col === "pairs") {
-      item = App.data.pairs[i];
-      tag = `#${num(i)}`;
-      title = item.title;
-      sub = `${item.male?.name || ""} × ${item.female?.name || ""}`;
+      const p = App.data.pairs[i];
+      names = [p.male?.name, p.female?.name];
+      variants = p.variants || [];
+      image = p.image;
+      title = p.title;
+      sub = `${names[0] || ""} × ${names[1] || ""}`;
     } else {
       const g = App.data.gallery[i];
       const p = pairById(g.pair) || {};
-      item = { image: g.image, male: g.male || p.male, female: g.female || p.female };
-      tag = `#${num(i)}`;
+      if (g.male || g.female) {
+        // 사진에만 따로 적은 프롬프트
+        names = [g.male?.name || p.male?.name, g.female?.name || p.female?.name];
+        variants = [{ label: "", male: g.male?.prompt || "", female: g.female?.prompt || "" }];
+      } else {
+        names = [p.male?.name, p.female?.name];
+        variants = p.variants || [];
+      }
+      image = g.image;
       title = g.caption || p.title || "";
-      sub = p.title && g.caption ? p.title : `${item.male?.name || ""} × ${item.female?.name || ""}`;
+      sub = p.title && g.caption ? p.title : `${names[0] || ""} × ${names[1] || ""}`;
     }
+    detail = { names, variants, image, title };
+    const tabs = variants.length > 1 || variants[0]?.label
+      ? `<div class="variants">${variants.map((v, k) => `<button type="button" class="vtab" data-variant="${k}">${esc(v.label || `#${k + 1}`)}</button>`).join("")}</div>`
+      : "";
     openModal(`<div class="detail">
-      ${thumb(item.image, title)}
+      <div class="detail-visual">
+        <div id="detail-img"></div>
+        ${tabs}
+      </div>
       <div class="detail-info">
-        <span class="pill">${tag}</span>
+        <span class="pill">#${num(i)}</span>
         <h2>${esc(title)}</h2>
         <p class="sub">${esc(sub)}</p>
-        ${promptBlock(item.male)}
-        ${promptBlock(item.female)}
+        <div id="detail-prompts"></div>
       </div>
     </div>`);
+    selectVariant(0);
+  }
+
+  function selectVariant(k) {
+    const v = detail.variants[k] || {};
+    document.getElementById("detail-img").innerHTML = thumb(v.image || detail.image, detail.title);
+    document.getElementById("detail-prompts").innerHTML =
+      promptBlock(detail.names[0], v.male || "") + promptBlock(detail.names[1], v.female || "");
+    document.querySelectorAll(".vtab").forEach((b) => b.classList.toggle("active", Number(b.dataset.variant) === k));
   }
 
   function openModal(html) {
@@ -222,6 +249,8 @@
       route();
       return;
     }
+    const vt = e.target.closest("[data-variant]");
+    if (vt) return selectVariant(Number(vt.dataset.variant));
     const cp = e.target.closest("[data-copy]");
     if (cp) return copy(cp.dataset.copy);
     const open = e.target.closest("[data-open]");
@@ -234,9 +263,21 @@
 
   $("#year").textContent = new Date().getFullYear();
 
+  // 예전 형식(male.prompt)을 의상 목록(variants)으로 변환
+  App.normalize = (d) => {
+    for (const p of d.pairs || []) {
+      if (Array.isArray(p.variants)) continue;
+      const male = p.male?.prompt || "", female = p.female?.prompt || "";
+      p.variants = male || female ? [{ label: "제복", image: "", male, female }] : [];
+      if (p.male) delete p.male.prompt;
+      if (p.female) delete p.female.prompt;
+    }
+    return d;
+  };
+
   // ---------- load ----------
   App.ready = fetch(`data/site.json?v=${Date.now()}`, { cache: "no-store" })
     .then((r) => r.json())
-    .then((d) => { App.data = d; route(); })
+    .then((d) => { App.data = App.normalize(d); route(); })
     .catch(() => { content.innerHTML = `<p style="text-align:center;color:#999">데이터를 불러오지 못했어요.</p>`; });
 })();

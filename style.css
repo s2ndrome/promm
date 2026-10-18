@@ -148,7 +148,20 @@ body.admin .admin-btn { color: var(--accent); }
   border: 0; background: none; cursor: pointer; font-size: 18px; color: #555;
 }
 .detail { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; padding: 44px 44px 40px; align-items: start; }
-.detail .thumb { position: sticky; top: 0; }
+.detail-visual { position: sticky; top: 0; }
+.variants {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-top: 18px; padding: 8px;
+  border: 1px solid var(--line); border-radius: 14px;
+}
+.vtab {
+  flex: 1 1 auto; min-width: 64px;
+  border: 0; border-radius: 9px; background: none; cursor: pointer;
+  font-size: 13px; padding: 8px 12px; color: #666;
+  transition: background .15s, color .15s;
+}
+.vtab:hover { background: var(--soft); color: var(--ink); }
+.vtab.active { background: var(--ink); color: #fff; }
 .detail-info .pill { margin-bottom: 14px; }
 .detail-info h2 { font-size: 20px; font-weight: 500; margin: 0 0 2px; }
 .detail-info .sub { color: var(--muted); font-size: 13px; margin: 0 0 26px; }
@@ -209,6 +222,11 @@ body.admin .adm-badge { display: block; }
 .field .hint { font-size: 11px; color: var(--muted); margin: 5px 0 0; }
 .img-field { display: flex; gap: 14px; align-items: center; }
 .img-field .preview { width: 84px; height: 84px; flex: none; border-radius: 10px; background: var(--soft) center / contain no-repeat; }
+.variant-edit { border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 10px; display: grid; gap: 8px; }
+.variant-top { display: flex; gap: 8px; align-items: center; }
+.variant-top .pill-btn { flex: none; white-space: nowrap; }
+.v-cap { font-size: 11px; color: var(--muted); margin-bottom: -4px; }
+.field .variant-edit textarea { min-height: 80px; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
 .form ol { padding-left: 18px; font-size: 13px; color: #555; }
@@ -228,7 +246,9 @@ body.admin .adm-badge { display: block; }
   .modal { padding: 10px; align-items: flex-end; }
   .modal-box { max-height: 92vh; }
   .detail { grid-template-columns: 1fr; gap: 10px; padding: 36px 20px 24px; }
-  .detail .thumb { position: static; max-width: 300px; margin: 0 auto; width: 100%; }
+  .detail-visual { position: static; }
+  .detail-visual .thumb { max-width: 300px; margin: 0 auto; width: 100%; }
+  .variants { margin-top: 12px; }
   .form { padding: 36px 20px 24px; }
   .two { grid-template-columns: 1fr; gap: 0; }
 }

@@ -8,113 +8,153 @@
       "id": "pair1",
       "title": "SYNDROME X LIA",
       "image": "img/pairs/pair1.webp",
-      "color": "#d9d4ff",
       "male": {
-        "name": "신드롬",
-        "prompt": "handsome male, age up, athletic build, v-shaped face, 2::ash brown hair,wolf cut,messy bangs,curtained bangs, face-framing strands::,  0.7::messy hair::, black eyes, -0.5::tsurime::, 0.5::half-lidded eyes::, expressionless,\n\nblack military uniform, black formal jacket, white collared shirt, black necktie, black leather gloves,"
+        "name": "신드롬"
       },
       "female": {
-        "name": "리아",
-        "prompt": "girl, cute face, large bust, left-side hair intake, sky blue eyes, dark brown hair, long hair,  low side ponytail, white ribbon, straight bangs, voluminous wavy hair, tareme, round eyes, aegyo sal,soft smile, -1::parted bangs::,\n\nwhite military collared shirt with black ribbon tie, a grey belt , mini white High-waisted pleated skirt, white kneehighs, white Mary Jane shoes,"
-      }
+        "name": "리아"
+      },
+      "variants": [
+        {
+          "label": "제복",
+          "image": "",
+          "male": "handsome male, age up, athletic build, v-shaped face, 2::ash brown hair,wolf cut,messy bangs,curtained bangs, face-framing strands::,  0.7::messy hair::, black eyes, -0.5::tsurime::, 0.5::half-lidded eyes::, expressionless,\n\nblack military uniform, black formal jacket, white collared shirt, black necktie, black leather gloves,",
+          "female": "girl, cute face, large bust, left-side hair intake, sky blue eyes, dark brown hair, long hair,  low side ponytail, white ribbon, straight bangs, voluminous wavy hair, tareme, round eyes, aegyo sal,soft smile, -1::parted bangs::,\n\nwhite military collared shirt with black ribbon tie, a grey belt , mini white High-waisted pleated skirt, white kneehighs, white Mary Jane shoes,"
+        }
+      ]
     },
     {
       "id": "pair2",
       "title": "페어 2",
       "image": "img/pairs/pair2.webp",
-      "color": "#c8f1e6",
       "male": {
-        "name": "남캐 이름",
-        "prompt": "남자 캐릭터 프롬프트"
+        "name": "남캐 이름"
       },
       "female": {
-        "name": "여캐 이름",
-        "prompt": "여자 캐릭터 프롬프트"
-      }
+        "name": "여캐 이름"
+      },
+      "variants": [
+        {
+          "label": "제복",
+          "image": "",
+          "male": "남자 캐릭터 프롬프트",
+          "female": "여자 캐릭터 프롬프트"
+        }
+      ]
     },
     {
       "id": "pair3",
       "title": "페어 3",
       "image": "img/pairs/pair3.webp",
-      "color": "#d5dde8",
       "male": {
-        "name": "남캐 이름",
-        "prompt": "남자 캐릭터 프롬프트"
+        "name": "남캐 이름"
       },
       "female": {
-        "name": "여캐 이름",
-        "prompt": "여자 캐릭터 프롬프트"
-      }
+        "name": "여캐 이름"
+      },
+      "variants": [
+        {
+          "label": "제복",
+          "image": "",
+          "male": "남자 캐릭터 프롬프트",
+          "female": "여자 캐릭터 프롬프트"
+        }
+      ]
     },
     {
       "id": "pair4",
       "title": "페어 4",
       "image": "img/pairs/pair4.webp",
-      "color": "#fbe3d6",
       "male": {
-        "name": "남캐 이름",
-        "prompt": "남자 캐릭터 프롬프트"
+        "name": "남캐 이름"
       },
       "female": {
-        "name": "여캐 이름",
-        "prompt": "여자 캐릭터 프롬프트"
-      }
+        "name": "여캐 이름"
+      },
+      "variants": [
+        {
+          "label": "제복",
+          "image": "",
+          "male": "남자 캐릭터 프롬프트",
+          "female": "여자 캐릭터 프롬프트"
+        }
+      ]
     },
     {
       "id": "pair5",
       "title": "페어 5",
       "image": "",
-      "color": "#ffd9e6",
       "male": {
-        "name": "남캐 이름",
-        "prompt": "남자 캐릭터 프롬프트"
+        "name": "남캐 이름"
       },
       "female": {
-        "name": "여캐 이름",
-        "prompt": "여자 캐릭터 프롬프트"
-      }
+        "name": "여캐 이름"
+      },
+      "variants": [
+        {
+          "label": "제복",
+          "image": "",
+          "male": "남자 캐릭터 프롬프트",
+          "female": "여자 캐릭터 프롬프트"
+        }
+      ]
     },
     {
       "id": "pair6",
       "title": "페어 6",
       "image": "",
-      "color": "#e1f0ff",
       "male": {
-        "name": "남캐 이름",
-        "prompt": "남자 캐릭터 프롬프트"
+        "name": "남캐 이름"
       },
       "female": {
-        "name": "여캐 이름",
-        "prompt": "여자 캐릭터 프롬프트"
-      }
+        "name": "여캐 이름"
+      },
+      "variants": [
+        {
+          "label": "제복",
+          "image": "",
+          "male": "남자 캐릭터 프롬프트",
+          "female": "여자 캐릭터 프롬프트"
+        }
+      ]
     },
     {
       "id": "pair7",
       "title": "페어 7",
       "image": "",
-      "color": "#efe6ff",
       "male": {
-        "name": "남캐 이름",
-        "prompt": "남자 캐릭터 프롬프트"
+        "name": "남캐 이름"
       },
       "female": {
-        "name": "여캐 이름",
-        "prompt": "여자 캐릭터 프롬프트"
-      }
+        "name": "여캐 이름"
+      },
+      "variants": [
+        {
+          "label": "제복",
+          "image": "",
+          "male": "남자 캐릭터 프롬프트",
+          "female": "여자 캐릭터 프롬프트"
+        }
+      ]
     },
     {
       "id": "pair8",
       "title": "페어 8",
       "image": "",
-      "color": "#fff1c9",
       "male": {
-        "name": "남캐 이름",
-        "prompt": "남자 캐릭터 프롬프트"
+        "name": "남캐 이름"
       },
       "female": {
-        "name": "여캐 이름",
-        "prompt": "여자 캐릭터 프롬프트"
-      }
+        "name": "여캐 이름"
+      },
+      "variants": [
+        {
+          "label": "제복",
+          "image": "",
+          "male": "남자 캐릭터 프롬프트",
+          "female": "여자 캐릭터 프롬프트"
+        }
+      ]
     }
   ],
   "gallery": [

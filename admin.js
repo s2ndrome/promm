@@ -24,10 +24,12 @@
       fields: [
         { key: "title", label: "페어 이름", type: "text" },
         { key: "image", label: "페어 사진", type: "image", dir: "img/pairs" },
-        ...PERSON("male", "남캐"),
-        ...PERSON("female", "여캐"),
+        { key: "male.name", label: "남캐 이름", type: "text" },
+        { key: "female.name", label: "여캐 이름", type: "text" },
+        { key: "variants", label: "의상별 프롬프트", type: "variants", dir: "img/pairs",
+          hint: "제복 / 사복 처럼 의상마다 프롬프트를 따로 적어요. 의상 사진은 선택이에요 (없으면 페어 사진이 보여요)." },
       ],
-      blank: () => ({ id: `p${Date.now()}`, title: "", image: "", male: { name: "", prompt: "" }, female: { name: "", prompt: "" } }),
+      blank: () => ({ id: `p${Date.now()}`, title: "", image: "", male: { name: "" }, female: { name: "" }, variants: [{ label: "제복", image: "", male: "", female: "" }] }),
     },
     gallery: {
       title: "Gallery",
@@ -145,7 +147,7 @@
   async function loadFresh() {
     const f = await gh(`/contents/${DATA_PATH}?ref=${encodeURIComponent(branch)}`);
     dataSha = f.sha;
-    App.data = JSON.parse(b64decode(f.content));
+    App.data = App.normalize(JSON.parse(b64decode(f.content)));
   }
 
   async function saveData(next, message) {
@@ -243,8 +245,28 @@
   document.getElementById("admin-btn").addEventListener("click", () => (App.admin ? logout() : loginForm()));
 
   // ---------- edit form ----------
+  function variantHtml(v = {}) {
+    return `<div class="variant-edit" data-image="${esc(v.image || "")}">
+      <div class="variant-top">
+        <input type="text" class="v-label" placeholder="의상 이름 (예: 제복, 사복)" value="${esc(v.label)}">
+        <button type="button" class="pill-btn v-remove">삭제</button>
+      </div>
+      <span class="v-cap">남캐 프롬프트</span>
+      <textarea class="v-male">${esc(v.male)}</textarea>
+      <span class="v-cap">여캐 프롬프트</span>
+      <textarea class="v-female">${esc(v.female)}</textarea>
+      <div class="img-field">
+        <div class="preview" style="${v.image ? `background-image:url('${esc(v.image)}')` : ""}"></div>
+        <div><input type="file" class="v-file" accept="image/*"><p class="hint">이 의상 사진 (선택)</p></div>
+      </div>
+    </div>`;
+  }
+
   function fieldHtml(f, val) {
     const name = `f:${f.key}`;
+    if (f.type === "variants")
+      return `<div class="variant-list">${(val || []).map(variantHtml).join("")}</div>
+        <button type="button" class="pill-btn v-add">+ 의상 추가</button>`;
     if (f.type === "textarea")
       return `<textarea name="${name}">${esc(val)}</textarea>`;
     if (f.type === "color")
@@ -287,12 +309,16 @@
     form.querySelector("[data-close]").onclick = App.closeModal;
 
     // 사진 미리보기
-    form.querySelectorAll("input[type=file]").forEach((inp) => {
-      inp.onchange = () => {
-        const file = inp.files[0];
-        const pv = inp.closest(".img-field").querySelector(".preview");
-        if (file) pv.style.backgroundImage = `url('${URL.createObjectURL(file)}')`;
-      };
+    form.addEventListener("change", (e) => {
+      const inp = e.target;
+      if (inp.type !== "file" || !inp.files[0]) return;
+      inp.closest(".img-field").querySelector(".preview").style.backgroundImage = `url('${URL.createObjectURL(inp.files[0])}')`;
+    });
+    // 의상 추가 / 삭제
+    form.addEventListener("click", (e) => {
+      if (e.target.closest(".v-add")) form.querySelector(".variant-list").insertAdjacentHTML("beforeend", variantHtml());
+      const rm = e.target.closest(".v-remove");
+      if (rm && confirm("이 의상을 지울까요?")) rm.closest(".variant-edit").remove();
     });
 
     form.onsubmit = async (e) => {
@@ -300,6 +326,26 @@
       form.classList.add("busy");
       try {
         for (const f of fields) {
+          if (f.type === "variants") {
+            const list = [];
+            for (const box of form.querySelectorAll(".variant-edit")) {
+              const v = {
+                label: box.querySelector(".v-label").value.trim(),
+                image: box.dataset.image || "",
+                male: box.querySelector(".v-male").value,
+                female: box.querySelector(".v-female").value,
+              };
+              const file = box.querySelector(".v-file").files[0];
+              if (file) {
+                const path = `${f.dir}/${Date.now()}.webp`;
+                await putFile(path, await imageToB64(file), `Upload image: ${path}`);
+                v.image = path;
+              }
+              if (v.label || v.male || v.female || v.image) list.push(v);
+            }
+            setPath(item, f.key, list);
+            continue;
+          }
           const el = form.elements[`f:${f.key}`];
           if (f.type === "image") {
             const file = el.files[0];
