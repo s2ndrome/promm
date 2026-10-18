@@ -54,7 +54,7 @@
     const h = w.hero || {};
 
     const toc = [
-      ["01", "각성자"], ["02", "아크"], ["03", "6속성"], ["04", "로스터"],
+      ["01", "각성자"], ["02", "아크"], ["03", "6속성"], ["04", "요원"],
       ["05", "장소"], ["06", "위협"], ["07", "용어"],
     ];
 
@@ -141,12 +141,18 @@
       <div class="w-els">${elements}</div>${addBtn("elements", "속성 추가")}`);
 
     // 04 로스터
+    const agent = (m) => `<figure class="w-agent" style="--el:${attrColor(m.attr)}">
+        <div class="w-agent-photo ${m.photo ? "" : "empty"}">${m.photo
+          ? `<img src="${esc(App.mediaUrl(m.photo))}" alt="${esc(m.name)}" loading="lazy" onerror="this.parentNode.classList.add('empty');this.remove()">`
+          : ""}</div>
+        <figcaption><b>${esc(m.name)}</b><small>${esc(m.attr)}</small></figcaption>
+      </figure>`;
     const teams = (w.teams || []).map((t, i) => `<article class="w-team">
         <header><h3>${esc(t.name)}</h3><span>${esc(t.cls)}</span></header>
-        <ul>${(t.members || []).map((m) => `<li style="--el:${attrColor(m.attr)}"><b>${esc(m.name)}</b><small>${esc(m.attr)}</small></li>`).join("")}</ul>
+        <div class="w-agents">${(t.members || []).map(agent).join("")}</div>
         ${tools("teams", i)}
       </article>`).join("");
-    const ch4 = chapter("04", "ARCH ROSTER", "공개된 캐릭터 목록", `<div class="w-teams">${teams}</div>${addBtn("teams", "팀 추가")}`);
+    const ch4 = chapter("04", "AGENTS", "요원", `<div class="w-teams">${teams}</div>${addBtn("teams", "팀 추가")}`);
 
     // 05 장소
     const places = (w.places || []).map((p, i) => `<article class="w-place">

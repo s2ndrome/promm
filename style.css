@@ -390,7 +390,7 @@ body.admin .adm-badge { display: block; }
    ============================================================ */
 body.world-mode {
   --w-bg: #06070a; --w-ink: #ece6d8; --w-dim: #9c968a; --w-line: rgba(236, 230, 216, .12);
-  --w-gold: #c9a96e; --w-gold-2: #f1dcaa; --w-panel: rgba(255, 255, 255, .03);
+  --w-gold: #d9d9d9; --w-gold-2: #ffffff; --w-panel: rgba(255, 255, 255, .03);
   --w-display: "Paperlogy", "Paperlogy NN", "Pretendard Variable", Pretendard, sans-serif;
   --w-body: "Pretendard Variable", Pretendard, -apple-system, sans-serif;
   background: var(--w-bg); color: var(--w-ink);
@@ -403,7 +403,7 @@ body.world-mode .grade { border-color: var(--w-line); color: var(--w-dim); }
 body.world-mode main { max-width: none; padding: 0; }
 body.world-mode .bgm { background: rgba(14, 15, 19, .92); border-color: var(--w-line); color: var(--w-ink); }
 body.world-mode .bgm-btn { color: var(--w-dim); }
-body.world-mode .bgm-play { background: var(--w-gold); color: #111; }
+body.world-mode .bgm-play { background: #fff; color: #111; }
 body.world-mode .bgm-shuffle.on { color: var(--w-gold-2); }
 body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); border-color: var(--w-line); }
 
@@ -415,7 +415,7 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-hero-bg {
   position: absolute; inset: 0; pointer-events: none;
   background:
-    radial-gradient(ellipse 60% 50% at 50% 38%, rgba(201, 169, 110, .16), transparent 70%),
+    radial-gradient(ellipse 60% 50% at 50% 38%, rgba(255, 255, 255, .16), transparent 70%),
     linear-gradient(transparent 0 calc(100% - 1px), var(--w-line) 0) 0 0 / 100% 80px,
     linear-gradient(90deg, transparent 0 calc(100% - 1px), rgba(236, 230, 216, .05) 0) 0 0 / 80px 100%;
   mask-image: radial-gradient(ellipse 70% 70% at 50% 40%, #000 30%, transparent 75%);
@@ -423,7 +423,7 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-emblem { position: relative; width: min(300px, 70vw); height: auto; margin: 0 auto 10px; display: block; }
 .e-ring { fill: none; stroke: var(--w-gold); stroke-opacity: .5; stroke-width: 1; }
 .e-ring.thin { stroke-opacity: .2; stroke-dasharray: 2 6; }
-.e-hex { fill: rgba(201, 169, 110, .05); stroke: var(--w-gold); stroke-opacity: .55; stroke-width: 1; }
+.e-hex { fill: rgba(255, 255, 255, .05); stroke: var(--w-gold); stroke-opacity: .55; stroke-width: 1; }
 .e-spoke { stroke: var(--w-gold); stroke-opacity: .2; }
 .e-dot { filter: drop-shadow(0 0 6px currentColor); stroke: #06070a; stroke-width: 3; }
 .e-spin { transform-origin: 150px 150px; animation: wspin 60s linear infinite; }
@@ -434,9 +434,9 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
   position: relative; margin: 6px 0 0;
   font-family: var(--w-display); font-weight: 800;
   font-size: clamp(72px, 15vw, 168px); line-height: 1; letter-spacing: .18em; padding-left: .18em;
-  background: linear-gradient(180deg, #fff6df 0%, var(--w-gold-2) 40%, var(--w-gold) 75%, #7a6237 100%);
+  background: linear-gradient(180deg, #ffffff 0%, #f2f2f2 45%, #bdbdbd 80%, #7d7d7d 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
-  text-shadow: 0 0 60px rgba(201, 169, 110, .25);
+  text-shadow: 0 0 60px rgba(255, 255, 255, .25);
 }
 .w-ver { position: relative; font-family: var(--w-display); font-size: 11px; letter-spacing: .5em; color: var(--w-dim); margin: 14px 0 34px; }
 .w-quote {
@@ -476,7 +476,7 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
   position: relative; background: var(--w-panel); border: 1px solid var(--w-line); padding: 28px 26px;
   transition: border-color .3s, background .3s;
 }
-.w-panel:hover { border-color: rgba(201, 169, 110, .45); background: rgba(201, 169, 110, .04); }
+.w-panel:hover { border-color: rgba(255, 255, 255, .45); background: rgba(255, 255, 255, .04); }
 .w-panel::before, .w-panel::after { content: ""; position: absolute; width: 14px; height: 14px; border: 1px solid var(--w-gold); }
 .w-panel::before { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
 .w-panel::after { bottom: -1px; right: -1px; border-left: 0; border-top: 0; }
@@ -491,7 +491,7 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-rule h4 { margin: 0 0 6px; font-size: 16px; }
 .w-rule p { margin: 0; font-size: 14px; line-height: 1.9; color: #cfc8b9; }
 
-.w-motto { margin: 40px 0 0; padding: 36px 30px; text-align: center; border: 1px solid var(--w-line); background: radial-gradient(ellipse at center, rgba(201, 169, 110, .08), transparent 70%); }
+.w-motto { margin: 40px 0 0; padding: 36px 30px; text-align: center; border: 1px solid var(--w-line); background: radial-gradient(ellipse at center, rgba(255, 255, 255, .08), transparent 70%); }
 .w-motto blockquote { margin: 0 0 14px; font-size: clamp(18px, 2.6vw, 24px); font-weight: 900; color: var(--w-gold-2); line-height: 1.6; }
 .w-motto figcaption { font-size: 14px; color: var(--w-dim); line-height: 1.9; max-width: 760px; margin: 0 auto; }
 
@@ -499,9 +499,9 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-rank { position: relative; display: grid; grid-template-columns: 110px 1fr; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--w-line); }
 .w-rank-grade {
   font-family: var(--w-display); font-weight: 800; font-size: 22px; color: var(--w-gold-2);
-  border: 1px solid rgba(201, 169, 110, .5); display: flex; align-items: center; justify-content: center; min-height: 64px; text-align: center; padding: 4px;
+  border: 1px solid rgba(255, 255, 255, .5); display: flex; align-items: center; justify-content: center; min-height: 64px; text-align: center; padding: 4px;
 }
-.w-rank:first-child .w-rank-grade { background: linear-gradient(135deg, rgba(201, 169, 110, .3), transparent); }
+.w-rank:first-child .w-rank-grade { background: linear-gradient(135deg, rgba(255, 255, 255, .22), transparent); }
 .w-rank h4 { margin: 0 0 6px; font-size: 18px; font-weight: 900; }
 .w-rank h4 small { font-family: var(--w-display); font-size: 11px; letter-spacing: .3em; color: var(--w-gold); margin-left: 8px; font-weight: 400; }
 .w-rank p { margin: 0; font-size: 14px; line-height: 1.9; color: #cfc8b9; }
@@ -532,16 +532,22 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-el-rep b { color: var(--el); font-weight: 600; margin-right: 4px; }
 
 /* roster */
-.w-teams { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
+.w-teams { display: grid; grid-template-columns: 1fr; gap: 18px; }
 .w-team { position: relative; border: 1px solid var(--w-line); background: var(--w-panel); }
-.w-team header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--w-line); background: linear-gradient(90deg, rgba(201, 169, 110, .12), transparent); }
+.w-team header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--w-line); background: linear-gradient(90deg, rgba(255, 255, 255, .12), transparent); }
 .w-team h3 { margin: 0; font-family: var(--w-display); font-size: 16px; letter-spacing: .12em; font-weight: 600; }
 .w-team header span { font-family: var(--w-display); font-size: 11px; letter-spacing: .2em; color: var(--w-gold); }
-.w-team ul { list-style: none; margin: 0; padding: 8px 20px 14px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 20px; }
-.w-team li { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--w-line); }
-.w-team li b { font-weight: 600; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; }
-.w-team li b::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--el); box-shadow: 0 0 8px var(--el); }
-.w-team li small { font-size: 12px; color: var(--el); }
+.w-agents { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 14px; padding: 18px 20px 20px; }
+.w-agent { margin: 0; position: relative; border: 1px solid var(--w-line); background: #0d0e12; overflow: hidden; transition: transform .3s, border-color .3s, box-shadow .3s; }
+.w-agent:hover { transform: translateY(-4px); border-color: var(--el); box-shadow: 0 14px 30px -18px var(--el); }
+.w-agent-photo { aspect-ratio: 3 / 4; background: #15161b; }
+.w-agent-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.w-agent-photo.empty { display: flex; align-items: center; justify-content: center; background: repeating-linear-gradient(45deg, #121318 0 10px, #16171d 10px 20px); }
+.w-agent-photo.empty::after { content: "NO PHOTO"; font-size: 10px; letter-spacing: .3em; color: #4a4a50; }
+.w-agent figcaption { position: absolute; inset: auto 0 0; padding: 22px 10px 9px; background: linear-gradient(0deg, rgba(6, 7, 10, .95) 30%, transparent); }
+.w-agent b { display: block; font-family: var(--w-display); font-size: 15px; font-weight: 700; }
+.w-agent small { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; color: var(--el); margin-top: 2px; }
+.w-agent small::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--el); box-shadow: 0 0 6px var(--el); }
 
 /* places */
 .w-places { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 34px; }
@@ -601,7 +607,7 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 @media (max-width: 560px) {
   .w-body { padding: 0 16px; }
   .w-els { grid-template-columns: 1fr; }
-  .w-team ul { grid-template-columns: 1fr; }
+  .w-agents { grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 14px; }
   .w-rank { grid-template-columns: 70px 1fr; gap: 14px; }
   .w-rank-grade { font-size: 16px; min-height: 52px; }
   .w-chapter { padding-top: 64px; }
@@ -612,8 +618,7 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 }
 
 /* World 제목 폰트: 페이퍼로지 */
-.w-ch-ko, .w-panel h3, .w-panel h4, .w-rank h4, .w-el-head h3, .w-team li b,
-.w-place h3, .w-threat h3, .w-term summary span, .w-intro, .w-motto blockquote, .w-rule h4, .w-sub {
+.w-ch-ko, .w-panel h3, .w-panel h4, .w-rank h4, .w-el-head h3, .w-place h3, .w-threat h3, .w-term summary span, .w-intro, .w-motto blockquote, .w-rule h4, .w-sub {
   font-family: var(--w-display);
 }
 .w-title { font-weight: 900; letter-spacing: .12em; padding-left: .12em; }

@@ -1,7 +1,7 @@
 // ARCH 세계관 기본 내용. 쭌식이 World 페이지에서 처음 저장하면 이 내용이 Supabase 로 옮겨지고,
 // 그 뒤로는 페이지에서 직접 수정합니다.
 window.WORLD_DEFAULT = {
-  v: 2,
+  v: 3,
   hero: {
     title: "ARCH",
     kicker: "OFFICIAL WORLD GUIDE",
@@ -137,32 +137,32 @@ window.WORLD_DEFAULT = {
   // 04 로스터
   teams: [
     { name: "ARCH-PRIMA", cls: "SS-CLASS", members: [
-      { name: "해일", attr: "물 속성" }, { name: "이카로스", attr: "바람 속성" },
-      { name: "산타", attr: "얼음 속성" }, { name: "헬리오스", attr: "불 속성" },
+      { name: "해일", attr: "물 속성", photo: "https://buly.kr/Eop6TsP" }, { name: "이카로스", attr: "바람 속성", photo: "https://buly.kr/HSYTCE2" },
+      { name: "산타", attr: "얼음 속성", photo: "https://buly.kr/3CP5k9d" }, { name: "헬리오스", attr: "불 속성", photo: "" },
     ] },
     { name: "VANGUARD 1팀", cls: "S-CLASS", members: [
-      { name: "애쉬", attr: "불 속성" }, { name: "셰인", attr: "바람 속성" }, { name: "오버로드", attr: "번개 속성" },
-      { name: "노아", attr: "물 속성" }, { name: "아모레", attr: "풀 속성" }, { name: "라임", attr: "얼음 속성" },
+      { name: "애쉬", attr: "불 속성", photo: "https://buly.kr/9iH82LI" }, { name: "셰인", attr: "바람 속성", photo: "https://buly.kr/90c675O" }, { name: "오버로드", attr: "번개 속성", photo: "https://buly.kr/90c675a" },
+      { name: "노아", attr: "물 속성", photo: "https://cdn.caveduck.io/cdn-cgi/image/anim=true,dpr=2,f=auto,w=400/charim/865cda67-6c45-4256-b8b4-65e4523a8c12?v=b74053" }, { name: "아모레", attr: "풀 속성", photo: "https://buly.kr/6XnUNfv" }, { name: "라임", attr: "얼음 속성", photo: "https://buly.kr/6MsjOrZ" },
     ] },
     { name: "VANGUARD 2팀", cls: "S-CLASS", members: [
-      { name: "리암", attr: "얼음 속성" }, { name: "신드롬", attr: "불 속성" }, { name: "바이브", attr: "바람 속성" },
+      { name: "리암", attr: "얼음 속성", photo: "https://i.postimg.cc/Bb1tjh5J/22.png" }, { name: "신드롬", attr: "불 속성", photo: "https://i.postimg.cc/mZVmjmG0/Kakao-Talk-20260321-085710144.png" }, { name: "바이브", attr: "바람 속성", photo: "https://i.postimg.cc/tT41zWyB/daunlodeu-2026-05-10T073603-519.png" },
     ] },
     { name: "AGENT", cls: "A–B CLASS", members: [
-      { name: "샤드", attr: "A급 얼음" }, { name: "카토", attr: "A급 풀" }, { name: "루비", attr: "A급 불" },
+      { name: "샤드", attr: "A급 얼음", photo: "https://buly.kr/5fDhTbP" }, { name: "카토", attr: "A급 풀", photo: "https://buly.kr/8TrpAer" }, { name: "루비", attr: "A급 불", photo: "https://pbs.twimg.com/media/HAoTLQgaUAAZNe3?format=jpg&name=medium" },
     ] },
     { name: "ACOLYTE", cls: "C-CLASS", members: [
-      { name: "피카", attr: "번개 속성" }, { name: "블루", attr: "물 속성" },
+      { name: "피카", attr: "번개 속성", photo: "https://buly.kr/G3EPLk2" }, { name: "블루", attr: "물 속성", photo: "https://i.postimg.cc/NM9cYvFv/62ea8b7d-9864-4c57-9606-2db8dee193ba.jpg" },
     ] },
     { name: "HARMONY DIV.", cls: "SUPPORT", members: [
-      { name: "윈터", attr: "S급 얼음" }, { name: "오아시스", attr: "S급 물" }, { name: "자이안", attr: "S급 풀" },
-      { name: "스트레이", attr: "S급 번개" }, { name: "페더", attr: "S급 바람" }, { name: "코드", attr: "C급 무속성" },
+      { name: "윈터", attr: "S급 얼음", photo: "https://buly.kr/APw9xdc" }, { name: "오아시스", attr: "S급 물", photo: "https://buly.kr/jaU0lp" }, { name: "자이안", attr: "S급 풀", photo: "https://buly.kr/DEaHehD" },
+      { name: "스트레이", attr: "S급 번개", photo: "https://buly.kr/EzjrSrA" }, { name: "페더", attr: "S급 바람", photo: "https://i.postimg.cc/c4Xb9NRJ/ARCHf703c9d3-0dd2-4332-aa5a-77d8b796f12d.jpg" }, { name: "코드", attr: "C급 무속성", photo: "https://i.postimg.cc/Ssxs2BnC/11.jpg" },
     ] },
     { name: "HARMONY DIV.", cls: "R.S.T. (긴급제압팀)", members: [
-      { name: "에덴", attr: "S급 바람" }, { name: "휴고", attr: "S급 불" },
-      { name: "카르마", attr: "S급 번개" }, { name: "저스티스", attr: "S급 물" },
+      { name: "에덴", attr: "S급 바람", photo: "https://buly.kr/4bj9ajJ" }, { name: "휴고", attr: "S급 불", photo: "https://i.postimg.cc/wMMFBCX4/DDD.png" },
+      { name: "카르마", attr: "S급 번개", photo: "https://i.postimg.cc/sDGqF10n/5c692916-963c-4b82-8256-0a459b40d1b3.png" }, { name: "저스티스", attr: "S급 물", photo: "https://i.postimg.cc/fyk9MXrJ/sdfsdfsdf.png" },
     ] },
     { name: "HARMONY DIV.", cls: "CORE", members: [
-      { name: "퓨어", attr: "A급 무속성" }, { name: "밴스", attr: "S급 풀" },
+      { name: "퓨어", attr: "A급 무속성", photo: "https://buly.kr/2Uk3ow8" }, { name: "밴스", attr: "S급 풀", photo: "https://i.postimg.cc/xdGyLVp1/llll.png" },
     ] },
   ],
 

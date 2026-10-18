@@ -42,6 +42,7 @@
       for (const v of p.variants || []) out.push(v.image);
     }
     for (const g of d.gallery || []) out.push(g.image);
+    for (const t of d.world?.teams || []) for (const m of t.members || []) out.push(m.photo);
     return out.filter(Boolean);
   }
 
@@ -88,7 +89,7 @@
       const { error: e2 } = await sb.from("site_data").upsert({ id: "main", data: d });
       if (e2) throw new Error(e2.message);
     }
-    const oldWorld = !d.world || d.world.v !== 2;
+    const oldWorld = !d.world || d.world.v !== window.WORLD_DEFAULT.v;
     d = App.normalize(d);
     // 쭌식이 처음 들어오면 ARCH 세계관 기본 내용을 저장
     if (oldWorld && App.role === "owner") {

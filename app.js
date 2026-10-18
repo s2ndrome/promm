@@ -372,7 +372,15 @@
       delete g.female;
     }
     // 예전 세계관 형식이면 ARCH 기본 내용으로 교체 (쭌식이 들어오면 저장됨)
-    if (!d.world || d.world.v !== 2) d.world = structuredClone(window.WORLD_DEFAULT);
+    const W = window.WORLD_DEFAULT;
+    if (!d.world || !(d.world.v >= 2)) d.world = structuredClone(W);
+    if (d.world.v < 3) {
+      // v3: 요원 증명사진 추가 (이름이 같으면 기본 사진을 채워 넣음)
+      const photoOf = {};
+      for (const t of W.teams) for (const m of t.members) photoOf[m.name] = m.photo;
+      for (const t of d.world.teams || []) for (const m of t.members || []) m.photo ??= photoOf[m.name] || "";
+      d.world.v = 3;
+    }
     for (const p of d.pairs || []) {
       p.male ??= {};
       p.female ??= {};

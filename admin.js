@@ -121,7 +121,7 @@
     "world.teams": { title: "Team", fields: [
       { key: "name", label: "팀 이름", type: "text" },
       { key: "cls", label: "등급 (예: S-CLASS)", type: "text" },
-      { key: "members", label: "멤버 (한 줄에 한 명: 이름 | 속성)", type: "members", hint: "예) 신드롬 | 불 속성" },
+      { key: "members", label: "요원", type: "members", hint: "증명사진은 파일을 고르거나 붙여넣기. 비워두면 빈 증명사진으로 보여요." },
     ], blank: () => ({ name: "", cls: "", members: [] }) },
     "world.places": { title: "Location", fields: [
       { key: "name", label: "이름", type: "text" },
@@ -228,6 +228,22 @@
     </div>`;
   }
 
+  function memberHtml(m = {}) {
+    return `<div class="variant-edit member-edit" data-image="${esc(m.photo || "")}">
+      <div class="variant-top">
+        <input type="text" class="m-name" placeholder="이름" value="${esc(m.name)}">
+        <input type="text" class="m-attr" placeholder="속성 (예: 불 속성, S급 물)" value="${esc(m.attr)}">
+        <button type="button" class="pill-btn m-remove">삭제</button>
+      </div>
+      <div class="img-field">
+        <div class="preview" style="${m.photo ? `background-image:url('${esc(App.mediaUrl(m.photo))}')` : ""}"></div>
+        <div><input type="file" class="m-file" accept="image/*">
+          <button type="button" class="pill-btn paste-btn">붙여넣기</button>
+          <p class="hint">증명사진</p></div>
+      </div>
+    </div>`;
+  }
+
   function fieldHtml(f, val) {
     const name = `f:${f.key}`;
     if (f.type === "variants")
@@ -240,7 +256,8 @@
     if (f.type === "list")
       return `<input type="text" name="${name}" value="${esc((val || []).join(", "))}">`;
     if (f.type === "members")
-      return `<textarea name="${name}">${esc((val || []).map((m) => `${m.name} | ${m.attr}`).join("\n"))}</textarea>`;
+      return `<div class="member-edit-list">${(val || []).map(memberHtml).join("")}</div>
+        <button type="button" class="pill-btn m-add">+ 요원 추가</button>`;
     if (f.type === "section") {
       const names = [...new Set(App.data[f.source || "gallery"].map((g) => (g.section || "").trim()).filter(Boolean))];
       return `<input type="text" name="${name}" value="${esc(val)}" list="section-list" autocomplete="off">
@@ -333,6 +350,9 @@
     // 의상 추가 / 삭제
     form.addEventListener("click", (e) => {
       if (e.target.closest(".v-add")) form.querySelector(".variant-list").insertAdjacentHTML("beforeend", variantHtml());
+      if (e.target.closest(".m-add")) form.querySelector(".member-edit-list").insertAdjacentHTML("beforeend", memberHtml());
+      const mr = e.target.closest(".m-remove");
+      if (mr && confirm("이 요원을 지울까요?")) mr.closest(".member-edit").remove();
       const rm = e.target.closest(".v-remove");
       if (rm && confirm("이 의상을 지울까요?")) rm.closest(".variant-edit").remove();
     });
@@ -343,6 +363,17 @@
       try {
         for (const f of fields) {
           if (f.type === "heading") continue;
+          if (f.type === "members") {
+            const list = [];
+            for (const box of form.querySelectorAll(".member-edit")) {
+              const m = { name: box.querySelector(".m-name").value.trim(), attr: box.querySelector(".m-attr").value.trim(), photo: box.dataset.image || "" };
+              const file = box.querySelector(".m-file").files[0];
+              if (file) m.photo = await uploadImage(file);
+              if (m.name) list.push(m);
+            }
+            setPath(item, f.key, list);
+            continue;
+          }
           if (f.type === "variants") {
             const list = [];
             for (const box of form.querySelectorAll(".variant-edit")) {
@@ -369,11 +400,6 @@
             } else if (isNew && !getPath(item, f.key) && col === "gallery") {
               throw new Error("사진 파일을 골라주세요.");
             }
-          } else if (f.type === "members") {
-            setPath(item, f.key, el.value.split("\n").map((line) => {
-              const [name, ...rest] = line.split("|");
-              return { name: (name || "").trim(), attr: rest.join("|").trim() };
-            }).filter((m) => m.name));
           } else if (f.type === "list") {
             setPath(item, f.key, el.value.split(",").map((s) => s.trim()).filter(Boolean));
           } else {
