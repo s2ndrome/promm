@@ -1,0 +1,212 @@
+{
+  "site": {
+    "title": "PROMM",
+    "subtitle": "Character Pair Prompt Archive"
+  },
+  "pairs": [
+    {
+      "id": "pair1",
+      "title": "페어 1",
+      "image": "img/pairs/pair1.webp",
+      "color": "#d9d4ff",
+      "male": {
+        "name": "남캐 이름",
+        "prompt": "남자 캐릭터 프롬프트를 여기에 적어주세요."
+      },
+      "female": {
+        "name": "여캐 이름",
+        "prompt": "여자 캐릭터 프롬프트를 여기에 적어주세요."
+      }
+    },
+    {
+      "id": "pair2",
+      "title": "페어 2",
+      "image": "img/pairs/pair2.webp",
+      "color": "#c8f1e6",
+      "male": {
+        "name": "남캐 이름",
+        "prompt": "남자 캐릭터 프롬프트"
+      },
+      "female": {
+        "name": "여캐 이름",
+        "prompt": "여자 캐릭터 프롬프트"
+      }
+    },
+    {
+      "id": "pair3",
+      "title": "페어 3",
+      "image": "img/pairs/pair3.webp",
+      "color": "#d5dde8",
+      "male": {
+        "name": "남캐 이름",
+        "prompt": "남자 캐릭터 프롬프트"
+      },
+      "female": {
+        "name": "여캐 이름",
+        "prompt": "여자 캐릭터 프롬프트"
+      }
+    },
+    {
+      "id": "pair4",
+      "title": "페어 4",
+      "image": "img/pairs/pair4.webp",
+      "color": "#fbe3d6",
+      "male": {
+        "name": "남캐 이름",
+        "prompt": "남자 캐릭터 프롬프트"
+      },
+      "female": {
+        "name": "여캐 이름",
+        "prompt": "여자 캐릭터 프롬프트"
+      }
+    },
+    {
+      "id": "pair5",
+      "title": "페어 5",
+      "image": "",
+      "color": "#ffd9e6",
+      "male": {
+        "name": "남캐 이름",
+        "prompt": "남자 캐릭터 프롬프트"
+      },
+      "female": {
+        "name": "여캐 이름",
+        "prompt": "여자 캐릭터 프롬프트"
+      }
+    },
+    {
+      "id": "pair6",
+      "title": "페어 6",
+      "image": "",
+      "color": "#e1f0ff",
+      "male": {
+        "name": "남캐 이름",
+        "prompt": "남자 캐릭터 프롬프트"
+      },
+      "female": {
+        "name": "여캐 이름",
+        "prompt": "여자 캐릭터 프롬프트"
+      }
+    },
+    {
+      "id": "pair7",
+      "title": "페어 7",
+      "image": "",
+      "color": "#efe6ff",
+      "male": {
+        "name": "남캐 이름",
+        "prompt": "남자 캐릭터 프롬프트"
+      },
+      "female": {
+        "name": "여캐 이름",
+        "prompt": "여자 캐릭터 프롬프트"
+      }
+    },
+    {
+      "id": "pair8",
+      "title": "페어 8",
+      "image": "",
+      "color": "#fff1c9",
+      "male": {
+        "name": "남캐 이름",
+        "prompt": "남자 캐릭터 프롬프트"
+      },
+      "female": {
+        "name": "여캐 이름",
+        "prompt": "여자 캐릭터 프롬프트"
+      }
+    }
+  ],
+  "gallery": [
+    {
+      "image": "img/pairs/pair1.webp",
+      "pair": "pair1",
+      "caption": "",
+      "id": "g1"
+    },
+    {
+      "image": "img/pairs/pair2.webp",
+      "pair": "pair2",
+      "caption": "",
+      "id": "g2"
+    },
+    {
+      "image": "img/pairs/pair3.webp",
+      "pair": "pair3",
+      "caption": "",
+      "id": "g3"
+    },
+    {
+      "image": "img/pairs/pair4.webp",
+      "pair": "pair4",
+      "caption": "",
+      "id": "g4"
+    }
+  ],
+  "world": {
+    "intro": "세계관 한 줄 소개를 적어주세요.",
+    "sections": [
+      {
+        "icon": "🌍",
+        "title": "세계관 개요",
+        "body": "이 세계는 어떤 곳인지 적어주세요.\n시대, 배경, 분위기 등."
+      },
+      {
+        "icon": "📜",
+        "title": "역사",
+        "body": "주요 사건이나 역사를 적어주세요."
+      },
+      {
+        "icon": "✨",
+        "title": "규칙 / 설정",
+        "body": "마법, 기술, 사회 규칙 등 특별한 설정."
+      }
+    ],
+    "factions": [
+      {
+        "name": "세력 A",
+        "color": "#e3d5f5",
+        "desc": "세력 설명",
+        "members": [
+          "캐릭터1",
+          "캐릭터2"
+        ]
+      },
+      {
+        "name": "세력 B",
+        "color": "#d3e5ef",
+        "desc": "세력 설명",
+        "members": [
+          "캐릭터3",
+          "캐릭터4"
+        ]
+      },
+      {
+        "name": "세력 C",
+        "color": "#fadec9",
+        "desc": "세력 설명",
+        "members": [
+          "캐릭터5",
+          "캐릭터6"
+        ]
+      }
+    ],
+    "relations": [
+      {
+        "from": "캐릭터1",
+        "to": "캐릭터2",
+        "label": "연인"
+      },
+      {
+        "from": "캐릭터1",
+        "to": "캐릭터3",
+        "label": "라이벌"
+      },
+      {
+        "from": "캐릭터4",
+        "to": "캐릭터5",
+        "label": "소꿉친구"
+      }
+    ]
+  }
+}
