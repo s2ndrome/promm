@@ -509,7 +509,8 @@
     App.openModal(`<form class="form" id="import-form">
       <h2>IMPORT OOC</h2>
       <p class="desc">.json 파일이나 노션에서 내보낸 .md 파일을 고르면 OOC 가 한 번에 추가돼요.</p>
-      <div class="field"><label>구분</label><input type="text" name="section" value="TALK"></div>
+      <div class="field"><label>구분</label><input type="text" name="section" placeholder="예: TALK">
+        <p class="hint">파일에 구분이 적혀 있으면 자동으로 채워져요. 노션 .md 파일이면 페이지 제목이 들어가요.</p></div>
       <div class="field"><label>파일</label><input type="file" name="file" accept=".json,.md,.txt,application/json,text/markdown,text/plain">
         <p class="hint" id="import-info">파일을 골라주세요.</p></div>
       <div class="form-actions">
@@ -524,15 +525,21 @@
       const f = form.file.files[0];
       if (!f) return;
       const text = await f.text();
+      let guess = "";
       try {
         if (/\.json$/i.test(f.name) || text.trim().startsWith("[")) {
           parsed = JSON.parse(text).map((x) => ({ title: String(x.title || ""), text: String(x.text || ""), section: x.section }));
+          const secs = [...new Set(parsed.map((x) => x.section).filter(Boolean))];
+          if (secs.length === 1) guess = secs[0];
         } else {
           parsed = parseNotionMd(text);
+          // 노션 페이지 제목 (# 개발새발 TALK 시리즈 → 개발새발 TALK 시리즈)
+          guess = (text.match(/^# (.+)$/m) || [])[1]?.trim() || "";
         }
       } catch {
         parsed = [];
       }
+      if (guess && !form.section.value.trim()) form.section.value = guess;
       document.getElementById("import-info").textContent = parsed.length
         ? `${parsed.length}개 찾았어요: ${parsed.slice(0, 3).map((x) => x.title || "제목 없음").join(", ")}${parsed.length > 3 ? " …" : ""}`
         : "읽을 수 있는 OOC 가 없어요.";
