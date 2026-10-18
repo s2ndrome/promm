@@ -189,18 +189,16 @@
     return path;
   }
 
-  async function saveData(next) {
-    if (App.role !== "owner") {
-      // World·사이트 정보는 쭌식만 바꿀 수 있으니 서버에 저장된 값을 그대로 유지
-      const { data: row } = await App.sb.from("site_data").select("data").eq("id", "main").maybeSingle();
-      if (row?.data) {
-        next.world = row.data.world;
-        next.site = row.data.site;
-      }
-    }
-    const { error } = await App.sb.from("site_data").upsert({ id: "main", data: next, updated_at: new Date().toISOString() });
+  // 저장: 서버의 최신 데이터를 받아서, 이번에 고친 부분(keys)만 바꿔 넣음.
+  // 다른 탭/다른 회원이 그 사이 저장한 내용(예: 링크)을 덮어쓰지 않기 위해서.
+  async function saveData(next, keys) {
+    const { data: row, error: e1 } = await App.sb.from("site_data").select("data").eq("id", "main").maybeSingle();
+    if (e1) throw new Error(e1.message);
+    const merged = row?.data ? App.normalize(row.data) : next;
+    for (const k of keys) merged[k] = next[k];
+    const { error } = await App.sb.from("site_data").upsert({ id: "main", data: merged, updated_at: new Date().toISOString() });
     if (error) throw new Error(error.message);
-    App.data = App.normalize(next);
+    App.data = App.normalize(merged);
     App.render();
     App.toast("저장했어요");
   }
@@ -440,6 +438,7 @@
             setPath(item, f.key, el.value);
           }
         }
+        if (col === "links" && item.url && !/^[a-z][a-z0-9+.-]*:/i.test(item.url.trim())) item.url = `https://${item.url.trim()}`;
         // 갤러리: 비어 있는 개별 프롬프트는 지워서 페어 프롬프트를 쓰게 함
         if (col === "gallery") {
           for (const k of ["male", "female"]) if (item[k] && !item[k].name && !item[k].prompt) delete item[k];
@@ -460,7 +459,7 @@
           const list = getPath(next, col);
           isNew ? list.push(item) : (list[index] = item);
         }
-        await saveData(next);
+        await saveData(next, col === "genres" ? ["genres", "pairs"] : [col.split(".")[0]]);
         App.closeModal();
       } catch (err) {
         form.classList.remove("busy");
@@ -490,7 +489,7 @@
       if (to == null || to.trim() === from) return;
       const next = clone(App.data);
       next.gallery.forEach((g) => { if ((g.section || "").trim() === from) g.section = to.trim(); });
-      try { await saveData(next); } catch (err) { alert(`저장하지 못했어요: ${err.message}`); }
+      try { await saveData(next, ["gallery"]); } catch (err) { alert(`저장하지 못했어요: ${err.message}`); }
       return;
     }
     if (act === "edit") return openEditor(col, i);
@@ -514,7 +513,7 @@
       [list[i], list[j]] = [list[j], list[i]];
     }
     try {
-      await saveData(next);
+      await saveData(next, [col.split(".")[0]]);
     } catch (err) {
       alert(`저장하지 못했어요: ${err.message}`);
     }

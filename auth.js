@@ -219,6 +219,15 @@
     document.dispatchEvent(new CustomEvent("app:ready"));
   }
 
+  // 다른 탭에서 바뀐 내용 반영: 이 탭으로 돌아오면 최신 데이터를 다시 불러옴 (편집 창이 열려 있으면 건너뜀)
+  document.addEventListener("visibilitychange", async () => {
+    if (document.visibilityState !== "visible" || !App.data || !document.getElementById("modal").hidden) return;
+    try {
+      await loadData();
+      App.render();
+    } catch {}
+  });
+
   async function logout() {
     await sb.auth.signOut();
     location.reload();
