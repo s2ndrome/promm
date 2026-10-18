@@ -113,7 +113,7 @@
         <div class="gallery">${idx.map(shot).join("")}</div>
         <div class="adm-bar g-add"><button type="button" class="pill-btn" data-act="add" data-col="gallery" data-section="${esc(name)}">+ 이 줄에 사진 추가</button></div>
       </section>`).join("");
-    return `<div class="page-head"><h1>GALLERY</h1><p>사진을 누르면 프롬프트가 열려요</p></div>
+    return `<div class="page-head"><h1>ASSET</h1><p>사진을 누르면 프롬프트가 열려요</p></div>
       <div class="adm-bar">${addBtn("gallery", "사진 추가")}</div>
       ${sections}`;
   }
@@ -151,7 +151,7 @@
 
   const routes = {
     "/": { title: "Pairs", render: renderHome },
-    "/gallery": { title: "Gallery", render: renderGallery },
+    "/gallery": { title: "Asset", render: renderGallery },
     "/world": { title: "ARCH", render: () => App.renderWorld() },
     "/link": { title: "Link", render: renderLinks },
   };
@@ -160,6 +160,7 @@
     if (!App.data) return;
     let path = location.hash.replace(/^#/, "") || "/";
     if (path === "/arch") path = "/world"; // #/arch 주소로 들어와도 ARCH 페이지
+    if (path === "/asset") path = "/gallery"; // #/asset 주소로 들어와도 ASSET 페이지
     const r = routes[path] || routes["/"];
     document.body.classList.toggle("world-mode", path === "/world");
     content.innerHTML = r.render();

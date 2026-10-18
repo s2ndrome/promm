@@ -50,7 +50,7 @@
       }),
     },
     gallery: {
-      title: "Gallery",
+      title: "Asset",
       fields: [
         { key: "image", label: "사진", type: "image" },
         { key: "section", label: "구분 (예: 웨딩, 제복)", type: "section", hint: "같은 구분끼리 한 줄로 묶이고 구분선으로 나뉘어요." },
