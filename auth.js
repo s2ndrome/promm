@@ -125,7 +125,11 @@
         if (signup) {
           const { data, error } = await sb.auth.signUp({ email, password });
           if (error) throw error;
-          if (!data.session) throw new Error("이메일 인증이 필요해요. 관리자에게 문의해 주세요.");
+          if (!data.session) {
+            // 이미 가입한 이메일이거나 이메일 인증이 켜져 있는 경우: 바로 로그인 시도
+            const { error: e2 } = await sb.auth.signInWithPassword({ email, password });
+            if (e2) throw e2;
+          }
           try {
             await join(form.code.value.trim());
           } catch (err) {
@@ -177,7 +181,7 @@
     if (/invalid invite code/i.test(m)) return "초대 코드가 맞지 않아요.";
     if (/invalid login credentials/i.test(m)) return "이메일 또는 비밀번호가 맞지 않아요.";
     if (/already registered/i.test(m)) return "이미 가입된 이메일이에요. 로그인해 주세요.";
-    if (/email not confirmed/i.test(m)) return "이메일 인증이 안 된 계정이에요. 관리자에게 문의해 주세요.";
+    if (/email not confirmed/i.test(m)) return "이메일 인증이 안 된 계정이에요. (Supabase 에서 Confirm email 을 끄고 계정을 지운 뒤 다시 가입해 주세요)";
     if (/only the owner/i.test(m)) return "World 는 쭌식만 수정할 수 있어요.";
     if (/password/i.test(m) && /6/.test(m)) return "비밀번호는 6자 이상이어야 해요.";
     return m;
