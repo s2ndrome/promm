@@ -75,8 +75,7 @@
       title: "Site",
       single: true,
       fields: [
-        { key: "title", label: "로고 글자 (첫 글자는 필기체로 보여요)", type: "text" },
-        { key: "subtitle", label: "로고 아래 작은 글자", type: "text" },
+        { key: "title", label: "로고 글자", type: "text" },
       ],
     },
   };
