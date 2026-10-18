@@ -149,7 +149,9 @@
       </figure>`;
     const teams = (w.teams || []).map((t, i) => `<article class="w-team">
         <header><h3>${esc(t.name)}</h3><span>${esc(t.cls)}</span></header>
-        <div class="w-agents">${(t.members || []).map(agent).join("")}</div>
+        ${(t.members || []).length
+          ? `<div class="w-agents">${t.members.map(agent).join("")}</div>`
+          : `<p class="w-agents-empty">COMING SOON</p>`}
         ${tools("teams", i)}
       </article>`).join("");
     const ch4 = chapter("04", "AGENTS", "요원", `<div class="w-teams">${teams}</div>${addBtn("teams", "팀 추가")}`);

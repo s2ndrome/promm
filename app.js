@@ -377,6 +377,15 @@
       for (const t of d.world.teams || []) for (const m of t.members || []) m.photo ??= photoOf[m.name] || "";
       d.world.v = 3;
     }
+    if (d.world.v < 4) {
+      // v4: VANGUARD 3팀 줄 추가 (2팀 바로 다음)
+      const teams = (d.world.teams ??= []);
+      if (!teams.some((t) => t.name === "VANGUARD 3팀")) {
+        const at = teams.findIndex((t) => t.name === "VANGUARD 2팀");
+        teams.splice(at < 0 ? teams.length : at + 1, 0, { name: "VANGUARD 3팀", cls: "S-CLASS", members: [] });
+      }
+      d.world.v = 4;
+    }
     for (const p of d.pairs || []) {
       p.male ??= {};
       p.female ??= {};

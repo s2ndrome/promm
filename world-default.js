@@ -1,7 +1,7 @@
 // ARCH 세계관 기본 내용. 쭌식이 World 페이지에서 처음 저장하면 이 내용이 Supabase 로 옮겨지고,
 // 그 뒤로는 페이지에서 직접 수정합니다.
 window.WORLD_DEFAULT = {
-  v: 3,
+  v: 4,
   hero: {
     title: "ARCH",
     kicker: "OFFICIAL WORLD GUIDE",
@@ -147,6 +147,7 @@ window.WORLD_DEFAULT = {
     { name: "VANGUARD 2팀", cls: "S-CLASS", members: [
       { name: "리암", attr: "얼음 속성", photo: "https://i.postimg.cc/Bb1tjh5J/22.png" }, { name: "신드롬", attr: "불 속성", photo: "https://i.postimg.cc/mZVmjmG0/Kakao-Talk-20260321-085710144.png" }, { name: "바이브", attr: "바람 속성", photo: "https://i.postimg.cc/tT41zWyB/daunlodeu-2026-05-10T073603-519.png" },
     ] },
+    { name: "VANGUARD 3팀", cls: "S-CLASS", members: [] },
     { name: "AGENT", cls: "A–B CLASS", members: [
       { name: "샤드", attr: "A급 얼음", photo: "https://buly.kr/5fDhTbP" }, { name: "카토", attr: "A급 풀", photo: "https://buly.kr/8TrpAer" }, { name: "루비", attr: "A급 불", photo: "https://pbs.twimg.com/media/HAoTLQgaUAAZNe3?format=jpg&name=medium" },
     ] },

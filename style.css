@@ -542,6 +542,8 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-team header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--w-line); background: linear-gradient(90deg, rgba(255, 255, 255, .12), transparent); }
 .w-team h3 { margin: 0; font-family: var(--w-display); font-size: 16px; letter-spacing: .12em; font-weight: 600; }
 .w-team header span { font-family: var(--w-display); font-size: 11px; letter-spacing: .2em; color: var(--w-gold); }
+.w-agents-empty { margin: 0; padding: 34px 20px; text-align: center; font-size: 11px; letter-spacing: .4em; color: #4a4a50; }
+body.admin .w-team header { padding-right: 160px; }
 .w-agents { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 14px; padding: 18px 20px 20px; }
 .w-agent { margin: 0; position: relative; border: 1px solid var(--w-line); background: #0d0e12; overflow: hidden; transition: transform .3s, border-color .3s, box-shadow .3s; }
 .w-agent:hover { transform: translateY(-4px); border-color: var(--el); box-shadow: 0 14px 30px -18px var(--el); }
