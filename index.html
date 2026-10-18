@@ -6,16 +6,19 @@
   <title>ZZON</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@300;400;500&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;800&family=Noto+Serif+KR:wght@400;600;900&family=Montserrat:wght@600;700&family=Poppins:wght@300;400;500&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="locked">
   <div id="gate" class="gate"></div>
 
   <header class="top">
-    <a class="nav-link" href="#/gallery" data-route="/gallery">gallery</a>
+    <nav class="nav-side nav-l"><a class="nav-link" href="#/gallery" data-route="/gallery">gallery</a></nav>
     <a class="brand" href="#/" data-route="/">ZZON</a>
-    <a class="nav-link" href="#/world" data-route="/world">world</a>
+    <nav class="nav-side nav-r">
+      <a class="nav-link" href="#/world" data-route="/world">world</a>
+      <a class="nav-link" href="#/link" data-route="/link">link</a>
+    </nav>
   </header>
 
   <main id="content"></main>
@@ -40,7 +43,9 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script src="world-default.js"></script>
   <script src="app.js"></script>
+  <script src="world.js"></script>
   <script src="admin.js"></script>
   <script src="bgm.js"></script>
   <script src="auth.js"></script>

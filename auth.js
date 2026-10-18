@@ -38,7 +38,7 @@
   function imagePaths(d) {
     const out = [];
     for (const p of d.pairs || []) {
-      out.push(p.image);
+      out.push(p.image, p.male?.profile?.photo, p.female?.profile?.photo);
       for (const v of p.variants || []) out.push(v.image);
     }
     for (const g of d.gallery || []) out.push(g.image);
@@ -88,7 +88,13 @@
       const { error: e2 } = await sb.from("site_data").upsert({ id: "main", data: d });
       if (e2) throw new Error(e2.message);
     }
+    const oldWorld = !d.world || d.world.v !== 2;
     d = App.normalize(d);
+    // 쭌식이 처음 들어오면 ARCH 세계관 기본 내용을 저장
+    if (oldWorld && App.role === "owner") {
+      const { error: e3 } = await sb.from("site_data").upsert({ id: "main", data: d });
+      if (e3) console.warn(e3.message);
+    }
     await App.resolveMedia(imagePaths(d));
     App.data = d;
   }

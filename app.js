@@ -38,6 +38,8 @@
     </div>`;
   }
   const addBtn = (col, label) => `<button type="button" class="pill-btn" data-act="add" data-col="${col}">+ ${label}</button>`;
+  App.tools = tools;
+  App.addBtn = addBtn;
 
   // ---------- 즐겨찾기 (이 브라우저에만 저장) ----------
   let favs = new Set();
@@ -60,7 +62,7 @@
         ${thumb(p.image, p.title)}
         <p class="item-name">${esc(p.male?.name)} × ${esc(p.female?.name)}</p>
         <p class="item-sub">${esc(p.title)}</p>
-        <div class="item-foot"><button type="button" class="pill-btn">Prompt</button></div>
+        <div class="item-foot"><button type="button" class="pill-btn" data-info="${i}">Pair Info</button></div>
       </article>`
     ).join("");
     return `<div class="adm-bar">${addBtn("pairs", "페어 추가")}<span class="owner-only">${addBtn("site", "사이트 정보")}</span></div>
@@ -96,58 +98,49 @@
       ${sections}`;
   }
 
-  function renderWorld() {
-    const w = App.data.world;
-    const chapters = (w.sections || []).map(
-      (s, i) => `<div class="chapter">
-        <span class="chapter-no">${num(i)}</span>
-        <div><h3>${esc(s.icon)} ${esc(s.title)}</h3><p>${esc(s.body)}</p></div>
-        ${tools("world.sections", i)}
-      </div>`
-    ).join("");
-    const factions = (w.factions || []).map(
-      (f, i) => `<div class="faction">
-        <h3><span class="faction-dot" style="background:${esc(f.color || "#ddd")}"></span>${esc(f.name)}</h3>
-        <p>${esc(f.desc)}</p>
-        <div class="tags">${(f.members || []).map((m) => `<span class="pill">${esc(m)}</span>`).join("")}</div>
-        ${tools("world.factions", i)}
-      </div>`
-    ).join("");
-    const relations = (w.relations || []).map(
-      (r, i) => `<div class="relation">
-        <span class="who">${esc(r.from)}</span>
-        <span class="pill">${esc(r.label)}</span>
-        <span class="who">${esc(r.to)}</span>
-        ${tools("world.relations", i, false)}
-      </div>`
-    ).join("");
-    return `<div class="page-head"><h1>WORLD</h1></div>
-      <div class="world owner-edit">
-        <p class="world-intro">${esc(w.intro)}</p>
-        <div class="adm-bar">${addBtn("world", "소개 수정")}</div>
-        <div class="block-title">STORY</div>
-        ${chapters}
-        <div class="adm-bar" style="margin-top:18px">${addBtn("world.sections", "항목 추가")}</div>
-        <div class="block-title">FACTIONS</div>
-        <div class="factions">${factions}</div>
-        <div class="adm-bar" style="margin-top:18px">${addBtn("world.factions", "세력 추가")}</div>
-        <div class="block-title">RELATIONS</div>
-        ${relations}
-        <div class="adm-bar" style="margin-top:18px">${addBtn("world.relations", "관계 추가")}</div>
+  function renderLinks() {
+    const links = App.data.links || [];
+    const groups = new Map();
+    links.forEach((l, i) => {
+      const key = (l.section || "").trim();
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(i);
+    });
+    const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } };
+    const row = (i) => {
+      const l = links[i];
+      return `<div class="link-row">
+        <a class="link-main" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
+          <span class="link-title">${esc(l.title || l.url)}</span>
+          ${l.desc ? `<span class="link-desc">${esc(l.desc)}</span>` : ""}
+          <span class="link-host">${esc(host(l.url))} ↗</span>
+        </a>
+        ${tools("links", i)}
       </div>`;
+    };
+    const sections = [...groups].map(([name, idx]) => `<section class="g-section">
+        ${name || groups.size > 1 ? `<div class="block-title">${esc(name || "ETC")}</div>` : ""}
+        <div class="link-list">${idx.map(row).join("")}</div>
+      </section>`).join("");
+    return `<div class="page-head"><h1>LINK</h1><p>모아둔 링크</p></div>
+      <div class="adm-bar">${addBtn("links", "링크 추가")}</div>
+      ${sections || `<p class="link-empty">아직 링크가 없어요.</p>`}`;
   }
 
   const routes = {
     "/": { title: "Pairs", render: renderHome },
     "/gallery": { title: "Gallery", render: renderGallery },
-    "/world": { title: "World", render: renderWorld },
+    "/world": { title: "World", render: () => App.renderWorld() },
+    "/link": { title: "Link", render: renderLinks },
   };
 
   function route() {
     if (!App.data) return;
     const path = location.hash.replace(/^#/, "") || "/";
     const r = routes[path] || routes["/"];
+    document.body.classList.toggle("world-mode", path === "/world");
     content.innerHTML = r.render();
+    if (path === "/world") App.afterWorld();
     const site = App.data.site || {};
     const brand = site.title || "ZZON";
     $(".brand").textContent = brand;
@@ -201,17 +194,11 @@
       tag = p.tag;
     } else {
       const g = App.data.gallery[i];
-      const p = pairById(g.pair) || {};
+      const p = pairById(g.pair);
+      if (!p) return showSinglePrompt(g); // 기본: 프롬프트 한 단락
+      // 선택: 페어 프롬프트 (외형 + 의상)
       people = fromPair(p);
       variants = p.variants || [];
-      if (g.male || g.female) {
-        // 사진에만 따로 적은 프롬프트
-        people = [
-          { name: g.male?.name || people[0].name, base: g.male?.prompt || "" },
-          { name: g.female?.name || people[1].name, base: g.female?.prompt || "" },
-        ];
-        variants = [];
-      }
       image = g.image;
       tag = p.tag;
       title = g.caption || p.title || "";
@@ -239,6 +226,52 @@
       </div>
     </div>`);
     renderDetail();
+  }
+
+  // PAIR INFO: 페어 프로필 팝업
+  function showInfo(i) {
+    const p = App.data.pairs[i];
+    const info = p.info || {};
+    const card = (who) => {
+      const pr = who?.profile || {};
+      const rows = [["이름", pr.realname], ["소속", pr.team], ["등급", pr.grade], ["속성", pr.element], ["나이", pr.age]];
+      const block = (label, text) => (text ? `<div class="id-block"><h4>${label}</h4><p>${esc(text)}</p></div>` : "");
+      return `<article class="id-card">
+        <div class="id-photo">${thumb(pr.photo, pr.codename || who?.name)}</div>
+        <p class="id-code">${esc(pr.codename || who?.name || "")}</p>
+        <dl class="id-rows">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v || "—")}</dd>`).join("")}</dl>
+        ${block("성격", pr.personality)}
+        ${pr.secret ? `<details class="id-block id-secret"><summary>비밀 설정</summary><p>${esc(pr.secret)}</p></details>` : ""}
+        ${block("TMI", pr.tmi)}
+      </article>`;
+    };
+    openModal(`<div class="pinfo">
+      <header class="pinfo-head">
+        ${p.tag ? `<span class="pill">${esc(p.tag)}</span>` : ""}
+        <p class="pinfo-kicker">PAIR INFO</p>
+        <h2>${esc(p.title)}</h2>
+        ${info.intro ? `<p class="pinfo-intro">${esc(info.intro)}</p>` : ""}
+      </header>
+      <div class="pinfo-people">${card(p.male)}${card(p.female)}</div>
+    </div>`);
+  }
+
+  function showSinglePrompt(g) {
+    detail = null;
+    openModal(`<div class="detail">
+      <div class="detail-visual">${thumb(g.image, g.caption)}</div>
+      <div class="detail-info">
+        ${g.section ? `<span class="pill">${esc(g.section)}</span>` : ""}
+        <h2>${esc(g.caption || "")}</h2>
+        <p class="sub"></p>
+        ${g.prompt ? `<div class="prompt">
+          <div class="prompt-head"><b>Prompt</b>
+            <span class="copy-btns"><button type="button" class="pill-btn dark" data-copy="${esc(g.prompt)}">Copy</button></span>
+          </div>
+          <div class="prompt-text"><p>${esc(g.prompt)}</p></div>
+        </div>` : `<p class="sub">아직 프롬프트가 없어요.</p>`}
+      </div>
+    </div>`);
   }
 
   function renderDetail() {
@@ -313,6 +346,8 @@
     }
     const cp = e.target.closest("[data-copy]");
     if (cp) return copy(cp.dataset.copy);
+    const info = e.target.closest("[data-info]");
+    if (info) return showInfo(Number(info.dataset.info));
     const open = e.target.closest("[data-open]");
     if (open) showPrompt(open.dataset.open, Number(open.dataset.i));
   });
@@ -327,6 +362,17 @@
   // 지금 형식: male/female.base = 외형 프롬프트
   //           variants[].male/female = { top, bottom, shoes } 의상 프롬프트
   App.normalize = (d) => {
+    d.links ??= [];
+    // 갤러리: 예전의 남/여 개별 프롬프트는 한 단락으로 합침
+    for (const g of d.gallery || []) {
+      if (g.prompt === undefined && (g.male || g.female)) {
+        g.prompt = [g.male?.prompt, g.female?.prompt].filter(Boolean).join("\n\n");
+      }
+      delete g.male;
+      delete g.female;
+    }
+    // 예전 세계관 형식이면 ARCH 기본 내용으로 교체 (쭌식이 들어오면 저장됨)
+    if (!d.world || d.world.v !== 2) d.world = structuredClone(window.WORLD_DEFAULT);
     for (const p of d.pairs || []) {
       p.male ??= {};
       p.female ??= {};

@@ -4,10 +4,6 @@
   const esc = App.esc;
 
   // ---------- 편집 폼 정의 ----------
-  const PERSON = (key, label) => [
-    { key: `${key}.name`, label: `${label} 이름`, type: "text" },
-    { key: `${key}.prompt`, label: `${label} 프롬프트`, type: "textarea" },
-  ];
   const SCHEMAS = {
     pairs: {
       title: "Pair",
@@ -19,6 +15,30 @@
         { key: "male.base", label: "남캐 외형 프롬프트 (첫 단락)", type: "textarea" },
         { key: "female.name", label: "여캐 이름", type: "text" },
         { key: "female.base", label: "여캐 외형 프롬프트 (첫 단락)", type: "textarea" },
+        { key: "_h_info", label: "PAIR INFO", type: "heading" },
+        { key: "info.intro", label: "페어 설명", type: "textarea" },
+        { key: "_h_male", label: "남캐 프로필", type: "heading" },
+        { key: "male.profile.photo", label: "증명사진", type: "image" },
+        { key: "male.profile.codename", label: "코드네임", type: "text" },
+        { key: "male.profile.realname", label: "이름", type: "text" },
+        { key: "male.profile.team", label: "소속", type: "text" },
+        { key: "male.profile.grade", label: "등급", type: "text" },
+        { key: "male.profile.element", label: "속성", type: "text" },
+        { key: "male.profile.age", label: "나이", type: "text" },
+        { key: "male.profile.personality", label: "성격", type: "textarea" },
+        { key: "male.profile.secret", label: "비밀 설정", type: "textarea" },
+        { key: "male.profile.tmi", label: "TMI", type: "textarea" },
+        { key: "_h_female", label: "여캐 프로필", type: "heading" },
+        { key: "female.profile.photo", label: "증명사진", type: "image" },
+        { key: "female.profile.codename", label: "코드네임", type: "text" },
+        { key: "female.profile.realname", label: "이름", type: "text" },
+        { key: "female.profile.team", label: "소속", type: "text" },
+        { key: "female.profile.grade", label: "등급", type: "text" },
+        { key: "female.profile.element", label: "속성", type: "text" },
+        { key: "female.profile.age", label: "나이", type: "text" },
+        { key: "female.profile.personality", label: "성격", type: "textarea" },
+        { key: "female.profile.secret", label: "비밀 설정", type: "textarea" },
+        { key: "female.profile.tmi", label: "TMI", type: "textarea" },
         { key: "variants", label: "의상 (둘째 단락)", type: "variants",
           hint: "의상 칩을 누르면 둘째 단락에 나와요. 상의/하의/신발을 나눠 적으면 '상반신만', '신발 없이' 체크로 빼고 복사할 수 있어요. 의상 사진은 선택이에요." },
       ],
@@ -33,44 +53,92 @@
       fields: [
         { key: "image", label: "사진", type: "image" },
         { key: "section", label: "구분 (예: 웨딩, 제복)", type: "section", hint: "같은 구분끼리 한 줄로 묶이고 구분선으로 나뉘어요." },
-        { key: "caption", label: "설명 (선택)", type: "text" },
-        { key: "pair", label: "어떤 페어의 사진인가요?", type: "pair", hint: "페어를 고르면 그 페어의 프롬프트가 팝업에 떠요." },
-        ...PERSON("male", "남캐"),
-        ...PERSON("female", "여캐"),
+        { key: "caption", label: "제목 (선택)", type: "text" },
+        { key: "prompt", label: "프롬프트", type: "textarea" },
+        { key: "pair", label: "페어 프롬프트 사용 (선택)", type: "pair", hint: "페어를 고르면 위 프롬프트 대신 그 페어의 외형 + 의상 프롬프트가 팝업에 떠요." },
       ],
-      hint: "이 사진만의 프롬프트가 따로 있으면 아래에 적어주세요. 비워두면 선택한 페어의 프롬프트가 쓰여요.",
-      blank: () => ({ id: `g${Date.now()}`, image: "", section: "", caption: "", pair: "" }),
+      blank: () => ({ id: `g${Date.now()}`, image: "", section: "", caption: "", prompt: "", pair: "" }),
     },
-    "world.sections": {
-      title: "Story",
+    links: {
+      title: "Link",
       fields: [
-        { key: "icon", label: "아이콘 (이모지, 선택)", type: "text" },
-        { key: "title", label: "제목", type: "text" },
-        { key: "body", label: "내용", type: "textarea" },
+        { key: "title", label: "이름", type: "text" },
+        { key: "url", label: "주소 (https://...)", type: "text" },
+        { key: "desc", label: "설명 (선택)", type: "text" },
+        { key: "section", label: "구분 (선택)", type: "section", source: "links", hint: "같은 구분끼리 묶여요." },
       ],
-      blank: () => ({ icon: "", title: "", body: "" }),
+      blank: () => ({ title: "", url: "", desc: "", section: "" }),
     },
-    "world.factions": {
-      title: "Faction",
-      fields: [
-        { key: "name", label: "세력 이름", type: "text" },
-        { key: "color", label: "색", type: "color" },
-        { key: "desc", label: "설명", type: "textarea" },
-        { key: "members", label: "소속 캐릭터 (쉼표로 구분)", type: "list" },
-      ],
-      blank: () => ({ name: "", color: "#c9a4b4", desc: "", members: [] }),
-    },
-    "world.relations": {
-      title: "Relation",
-      fields: [
-        { key: "from", label: "캐릭터 A", type: "text" },
-        { key: "label", label: "관계 (예: 연인, 라이벌)", type: "text" },
-        { key: "to", label: "캐릭터 B", type: "text" },
-      ],
-      blank: () => ({ from: "", label: "", to: "" }),
-    },
-    // 목록이 아니라 객체 하나를 수정하는 폼
-    world: { title: "World", single: true, fields: [{ key: "intro", label: "세계관 소개", type: "textarea" }] },
+
+    // ---------- ARCH World (쭌식 전용) ----------
+    "world.hero": { title: "Cover", single: true, fields: [
+      { key: "title", label: "타이틀", type: "text" },
+      { key: "kicker", label: "작은 제목", type: "text" },
+      { key: "ver", label: "버전 문구", type: "text" },
+      { key: "quote", label: "인용문", type: "textarea" },
+      { key: "intro", label: "소개", type: "textarea" },
+    ] },
+    "world.awakened": { title: "Awakened", fields: [
+      { key: "title", label: "이름", type: "text" },
+      { key: "en", label: "영문", type: "text" },
+      { key: "body", label: "설명", type: "textarea" },
+    ], blank: () => ({ title: "", en: "", body: "" }) },
+    "world.guiding": { title: "Guiding Rule", fields: [
+      { key: "title", label: "제목", type: "text" },
+      { key: "body", label: "내용", type: "textarea" },
+    ], blank: () => ({ title: "", body: "" }) },
+    "world.arch": { title: "ARCH", single: true, fields: [
+      { key: "intro", label: "기관 소개", type: "textarea" },
+      { key: "identityQuote", label: "요원 자기인식 (인용)", type: "text" },
+      { key: "identity", label: "요원 자기인식 (설명)", type: "textarea" },
+    ] },
+    "world.ranks": { title: "Rank", fields: [
+      { key: "name", label: "직급", type: "text" },
+      { key: "en", label: "영문", type: "text" },
+      { key: "grade", label: "등급 (예: S, A–B)", type: "text" },
+      { key: "desc", label: "설명", type: "textarea" },
+      { key: "rep", label: "기관 내 이미지 (선택)", type: "textarea" },
+    ], blank: () => ({ name: "", en: "", grade: "", desc: "", rep: "" }) },
+    "world.partnerRules": { title: "Partner Rule", fields: [
+      { key: "title", label: "제목", type: "text" },
+      { key: "body", label: "내용", type: "textarea" },
+    ], blank: () => ({ title: "", body: "" }) },
+    "world.elementsIntro": { title: "Elements", single: true, fields: [
+      { key: "sentinel", label: "속성 센티넬 설명", type: "textarea" },
+      { key: "guide", label: "속성 가이드 설명", type: "textarea" },
+    ] },
+    "world.elements": { title: "Element", fields: [
+      { key: "icon", label: "아이콘 (이모지)", type: "text" },
+      { key: "ko", label: "이름", type: "text" },
+      { key: "en", label: "영문", type: "text" },
+      { key: "color", label: "색", type: "color" },
+      { key: "power", label: "힘의 특징", type: "textarea" },
+      { key: "rampage", label: "폭주 징후", type: "textarea" },
+      { key: "guide", label: "속성 가이드 능력", type: "textarea" },
+      { key: "sentinelRep", label: "평판 · 센티넬", type: "textarea" },
+      { key: "guideRep", label: "평판 · 가이드", type: "textarea" },
+    ], blank: () => ({ icon: "", ko: "", en: "", color: "#c9a96e", power: "", rampage: "", guide: "", sentinelRep: "", guideRep: "" }) },
+    "world.teams": { title: "Team", fields: [
+      { key: "name", label: "팀 이름", type: "text" },
+      { key: "cls", label: "등급 (예: S-CLASS)", type: "text" },
+      { key: "members", label: "멤버 (한 줄에 한 명: 이름 | 속성)", type: "members", hint: "예) 신드롬 | 불 속성" },
+    ], blank: () => ({ name: "", cls: "", members: [] }) },
+    "world.places": { title: "Location", fields: [
+      { key: "name", label: "이름", type: "text" },
+      { key: "en", label: "영문 / 부제", type: "text" },
+      { key: "body", label: "설명", type: "textarea" },
+    ], blank: () => ({ name: "", en: "", body: "" }) },
+    "world.threats": { title: "Threat", fields: [
+      { key: "name", label: "이름", type: "text" },
+      { key: "en", label: "영문", type: "text" },
+      { key: "body", label: "설명", type: "textarea" },
+    ], blank: () => ({ name: "", en: "", body: "" }) },
+    "world.codeRed": { title: "Code Red", single: true, fields: [{ key: "body", label: "코드 레드 설명", type: "textarea" }] },
+    "world.terms": { title: "Term", fields: [
+      { key: "term", label: "용어", type: "text" },
+      { key: "en", label: "영문", type: "text" },
+      { key: "body", label: "설명", type: "textarea" },
+    ], blank: () => ({ term: "", en: "", body: "" }) },
     site: {
       title: "Site",
       single: true,
@@ -115,9 +183,17 @@
   }
 
   async function saveData(next) {
+    if (App.role !== "owner") {
+      // World·사이트 정보는 쭌식만 바꿀 수 있으니 서버에 저장된 값을 그대로 유지
+      const { data: row } = await App.sb.from("site_data").select("data").eq("id", "main").maybeSingle();
+      if (row?.data) {
+        next.world = row.data.world;
+        next.site = row.data.site;
+      }
+    }
     const { error } = await App.sb.from("site_data").upsert({ id: "main", data: next, updated_at: new Date().toISOString() });
     if (error) throw new Error(error.message);
-    App.data = next;
+    App.data = App.normalize(next);
     App.render();
     App.toast("저장했어요");
   }
@@ -145,7 +221,9 @@
       ${person("female", "여캐 의상")}
       <div class="img-field">
         <div class="preview" style="${v.image ? `background-image:url('${esc(App.mediaUrl(v.image))}')` : ""}"></div>
-        <div><input type="file" class="v-file" accept="image/*"><p class="hint">이 의상 사진 (선택)</p></div>
+        <div><input type="file" class="v-file" accept="image/*">
+          <button type="button" class="pill-btn paste-btn">붙여넣기</button>
+          <p class="hint">이 의상 사진 (선택)</p></div>
       </div>
     </div>`;
   }
@@ -161,8 +239,10 @@
       return `<input type="color" name="${name}" value="${esc(val || "#c9a4b4")}">`;
     if (f.type === "list")
       return `<input type="text" name="${name}" value="${esc((val || []).join(", "))}">`;
+    if (f.type === "members")
+      return `<textarea name="${name}">${esc((val || []).map((m) => `${m.name} | ${m.attr}`).join("\n"))}</textarea>`;
     if (f.type === "section") {
-      const names = [...new Set(App.data.gallery.map((g) => (g.section || "").trim()).filter(Boolean))];
+      const names = [...new Set(App.data[f.source || "gallery"].map((g) => (g.section || "").trim()).filter(Boolean))];
       return `<input type="text" name="${name}" value="${esc(val)}" list="section-list" autocomplete="off">
         <datalist id="section-list">${names.map((n) => `<option value="${esc(n)}">`).join("")}</datalist>`;
     }
@@ -173,7 +253,9 @@
     if (f.type === "image")
       return `<div class="img-field">
         <div class="preview" style="${val ? `background-image:url('${esc(App.mediaUrl(val))}')` : ""}"></div>
-        <div><input type="file" name="${name}" accept="image/*"><p class="hint">${val ? "새 파일을 고르면 교체돼요." : "사진 파일을 골라주세요."}</p></div>
+        <div><input type="file" name="${name}" accept="image/*">
+          <button type="button" class="pill-btn paste-btn">붙여넣기</button>
+          <p class="hint">${val ? "새 사진을 고르거나 붙여넣으면 교체돼요." : "파일을 고르거나, 복사한 이미지를 Ctrl+V / ⌘V 로 붙여넣어도 돼요."}</p></div>
       </div>`;
     return `<input type="text" name="${name}" value="${esc(val)}">`;
   }
@@ -184,8 +266,9 @@
     const item = schema.single ? clone(getPath(App.data, col) || {}) : isNew ? { ...schema.blank(), ...preset } : clone(getPath(App.data, col)[index]);
 
     const fields = schema.fields;
-    const parts = fields.map(
-      (f) => `<div class="field"><label>${esc(f.label)}</label>${fieldHtml(f, getPath(item, f.key))}${f.hint ? `<p class="hint">${esc(f.hint)}</p>` : ""}</div>`
+    const parts = fields.map((f) => f.type === "heading"
+      ? `<h3 class="form-sec">${esc(f.label)}</h3>`
+      : `<div class="field"><label>${esc(f.label)}</label>${fieldHtml(f, getPath(item, f.key))}${f.hint ? `<p class="hint">${esc(f.hint)}</p>` : ""}</div>`
     );
 
     App.openModal(`<form class="form" id="edit-form">
@@ -207,6 +290,46 @@
       if (inp.type !== "file" || !inp.files[0]) return;
       inp.closest(".img-field").querySelector(".preview").style.backgroundImage = `url('${URL.createObjectURL(inp.files[0])}')`;
     });
+    // 이미지 붙여넣기: 마지막으로 누른 사진 칸(없으면 첫 사진 칸)에 넣음
+    let pasteTarget = null;
+    const putImage = (input, file) => {
+      const dt = new DataTransfer();
+      dt.items.add(new File([file], file.name || `pasted.${(file.type.split("/")[1] || "png")}`, { type: file.type }));
+      input.files = dt.files;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+      App.toast("이미지를 넣었어요");
+    };
+    form.addEventListener("pointerdown", (e) => {
+      const f = e.target.closest(".img-field");
+      if (f) pasteTarget = f.querySelector("input[type=file]");
+    });
+    const onPaste = (e) => {
+      const file = [...(e.clipboardData?.files || [])].find((f) => f.type.startsWith("image/"));
+      if (!file) return;
+      e.preventDefault();
+      putImage(pasteTarget || form.querySelector(".img-field input[type=file]"), file);
+    };
+    document.addEventListener("paste", onPaste);
+    // 폼이 닫히면 붙여넣기 감지 해제
+    new MutationObserver((_, obs) => {
+      if (!document.body.contains(form)) { document.removeEventListener("paste", onPaste); obs.disconnect(); }
+    }).observe(document.getElementById("modal-body"), { childList: true });
+    form.addEventListener("click", async (e) => {
+      const pb = e.target.closest(".paste-btn");
+      if (!pb) return;
+      const input = pb.closest(".img-field").querySelector("input[type=file]");
+      try {
+        for (const item of await navigator.clipboard.read()) {
+          const type = item.types.find((t) => t.startsWith("image/"));
+          if (type) return putImage(input, await item.getType(type));
+        }
+        App.toast("복사된 이미지가 없어요");
+      } catch {
+        pasteTarget = input;
+        App.toast("이 칸을 누른 상태에서 Ctrl+V / ⌘V 로 붙여넣어 주세요");
+      }
+    });
+
     // 의상 추가 / 삭제
     form.addEventListener("click", (e) => {
       if (e.target.closest(".v-add")) form.querySelector(".variant-list").insertAdjacentHTML("beforeend", variantHtml());
@@ -219,6 +342,7 @@
       form.classList.add("busy");
       try {
         for (const f of fields) {
+          if (f.type === "heading") continue;
           if (f.type === "variants") {
             const list = [];
             for (const box of form.querySelectorAll(".variant-edit")) {
@@ -245,6 +369,11 @@
             } else if (isNew && !getPath(item, f.key) && col === "gallery") {
               throw new Error("사진 파일을 골라주세요.");
             }
+          } else if (f.type === "members") {
+            setPath(item, f.key, el.value.split("\n").map((line) => {
+              const [name, ...rest] = line.split("|");
+              return { name: (name || "").trim(), attr: rest.join("|").trim() };
+            }).filter((m) => m.name));
           } else if (f.type === "list") {
             setPath(item, f.key, el.value.split(",").map((s) => s.trim()).filter(Boolean));
           } else {
