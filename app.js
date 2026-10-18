@@ -128,23 +128,49 @@
   }
 
   // OOC: 사진 없이 글만. 에셋처럼 구분별 줄로 묶음
-  function renderOOC() {
+  // OOC 검색어 (다시 그려도 유지)
+  let oocQuery = "";
+
+  // 검색어를 형광펜으로 표시 (글은 먼저 이스케이프)
+  function mark(text, q) {
+    const safe = esc(text);
+    const words = String(q || "").trim().split(/\s+/).filter(Boolean);
+    if (!words.length) return safe;
+    const re = new RegExp(words.map((w) => esc(w).replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("|"), "gi");
+    return safe.replace(re, (m) => `<mark>${m}</mark>`);
+  }
+
+  function oocCard(i, q = "") {
+    const o = App.data.ooc[i];
+    return `<article class="ooc-card" data-open="ooc" data-i="${i}">
+      ${tools("ooc", i)}
+      ${q && o.section ? `<span class="pill ooc-sec">${mark(o.section, q)}</span>` : ""}
+      ${o.title ? `<h3 class="ooc-title">${mark(o.title, q)}</h3>` : ""}
+      <p class="ooc-text">${mark(o.text, q)}</p>
+      <div class="ooc-foot"><button type="button" class="pill-btn dark" data-copy="${esc(o.text)}">Copy</button></div>
+    </article>`;
+  }
+
+  // 검색어가 있으면 결과만, 없으면 구분별 토글
+  function oocListHtml() {
     const list = App.data.ooc || [];
+    const q = oocQuery.trim();
+    if (q) {
+      const words = q.toLowerCase().split(/\s+/);
+      const hits = list.map((o, i) => i).filter((i) => {
+        const o = list[i];
+        const hay = `${o.title || ""} ${o.text || ""} ${o.section || ""}`.toLowerCase();
+        return words.every((w) => hay.includes(w));
+      });
+      return `<p class="ooc-count">'${esc(q)}' 검색 결과 ${hits.length}개</p>
+        ${hits.length ? `<div class="ooc-grid">${hits.map((i) => oocCard(i, q)).join("")}</div>` : `<p class="link-empty">찾는 OOC 가 없어요.</p>`}`;
+    }
     const groups = new Map();
     list.forEach((o, i) => {
       const key = (o.section || "").trim();
       if (!groups.has(key)) groups.set(key, []);
       groups.get(key).push(i);
     });
-    const card = (i) => {
-      const o = list[i];
-      return `<article class="ooc-card" data-open="ooc" data-i="${i}">
-        ${tools("ooc", i)}
-        ${o.title ? `<h3 class="ooc-title">${esc(o.title)}</h3>` : ""}
-        <p class="ooc-text">${esc(o.text)}</p>
-        <div class="ooc-foot"><button type="button" class="pill-btn dark" data-copy="${esc(o.text)}">Copy</button></div>
-      </article>`;
-    };
     // 구분 없는 글은 위에 그대로, 구분마다 토글
     const loose = groups.get("") || [];
     const toggles = [...groups].filter(([name]) => name).map(([name, idx]) => {
@@ -152,7 +178,7 @@
       return `<details class="genre" data-genre-box="${esc(key)}" ${openGenres.has(key) ? "open" : ""}>
         <summary><span class="genre-name">${esc(name)}</span><span class="genre-count">${idx.length}</span></summary>
         <div class="genre-body">
-          <div class="ooc-grid">${idx.map(card).join("")}</div>
+          <div class="ooc-grid">${idx.map((i) => oocCard(i)).join("")}</div>
           <div class="adm-bar genre-add">
             <button type="button" class="pill-btn" data-act="add" data-col="ooc" data-section="${esc(name)}">+ 이 구분에 OOC 추가</button>
             <button type="button" class="pill-btn" data-act="rename-section" data-col="ooc" data-section="${esc(name)}">구분 이름 변경</button>
@@ -160,12 +186,38 @@
         </div>
       </details>`;
     }).join("");
-    return `<div class="page-head"><h1>OOC</h1><p>누르면 전체 글이 열려요</p></div>
-      <div class="adm-bar">${addBtn("ooc", "OOC 추가")}<button type="button" class="pill-btn" data-act="import" data-col="ooc">파일로 가져오기</button></div>
-      ${loose.length ? `<div class="ooc-grid">${loose.map(card).join("")}</div>` : ""}
+    return `${loose.length ? `<div class="ooc-grid">${loose.map((i) => oocCard(i)).join("")}</div>` : ""}
       ${toggles ? `<div class="genres ooc-genres">${toggles}</div>` : ""}
       ${list.length ? "" : `<p class="link-empty">아직 OOC 가 없어요.</p>`}`;
   }
+
+  function renderOOC() {
+    return `<div class="page-head"><h1>OOC</h1><p>누르면 전체 글이 열려요</p></div>
+      <div class="ooc-search">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 4a6 6 0 1 0 3.87 10.59l4.27 4.27 1.41-1.41-4.27-4.27A6 6 0 0 0 10 4zm0 2a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg>
+        <input type="search" id="ooc-q" placeholder="키워드로 OOC 검색" value="${esc(oocQuery)}" autocomplete="off" enterkeyhint="search">
+        <button type="button" class="ooc-clear" aria-label="검색어 지우기" ${oocQuery ? "" : "hidden"}>✕</button>
+      </div>
+      <div class="adm-bar">${addBtn("ooc", "OOC 추가")}<button type="button" class="pill-btn" data-act="import" data-col="ooc">파일로 가져오기</button></div>
+      <div id="ooc-list">${oocListHtml()}</div>`;
+  }
+
+  // 입력할 때마다 목록만 다시 그림 (검색창 포커스 유지)
+  document.addEventListener("input", (e) => {
+    if (e.target.id !== "ooc-q") return;
+    oocQuery = e.target.value;
+    document.getElementById("ooc-list").innerHTML = oocListHtml();
+    document.querySelector(".ooc-clear").hidden = !oocQuery;
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".ooc-clear")) return;
+    oocQuery = "";
+    const q = document.getElementById("ooc-q");
+    q.value = "";
+    q.focus();
+    document.getElementById("ooc-list").innerHTML = oocListHtml();
+    e.target.closest(".ooc-clear").hidden = true;
+  });
 
   function showOoc(o) {
     detail = null;
