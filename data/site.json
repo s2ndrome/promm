@@ -19,6 +19,7 @@
       "variants": [
         {
           "label": "제복",
+          "sub": "",
           "image": "",
           "male": {
             "top": "black military uniform, black formal jacket, white collared shirt, black necktie, black leather gloves,",
@@ -29,10 +30,10 @@
             "top": "white military collared shirt with black ribbon tie, a grey belt ,",
             "bottom": "mini white High-waisted pleated skirt, white kneehighs,",
             "shoes": "white Mary Jane shoes,"
-          },
-          "sub": ""
+          }
         }
-      ]
+      ],
+      "tag": "ARCH"
     },
     {
       "id": "pair2",
