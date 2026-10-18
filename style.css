@@ -234,8 +234,8 @@ h2 { font-size: 22px; margin: 36px 0 12px; }
   .pair-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 720px) {
-  .sidebar { transform: translateX(-100%); box-shadow: 0 0 30px rgba(0, 0, 0, .15); }
-  body.nav-open .sidebar { transform: none; }
+  .sidebar { transform: translateX(-100%); }
+  body.nav-open .sidebar { transform: none; box-shadow: 0 0 30px rgba(0, 0, 0, .15); }
   body.nav-open .backdrop {
     display: block; position: fixed; inset: 0; z-index: 20;
     background: rgba(0, 0, 0, .2);
