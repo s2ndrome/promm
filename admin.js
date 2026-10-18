@@ -9,6 +9,7 @@
       title: "Pair",
       fields: [
         { key: "title", label: "페어 이름", type: "text" },
+        { key: "genre", label: "장르", type: "genre", hint: "비워두면 메인에 보여요. 장르를 고르면 메인 아래 그 장르 토글 안에 들어가요." },
         { key: "tag", label: "태그 (예: ARCH, 月とナイフ, calltaku)", type: "text", hint: "카드 왼쪽 위 작은 태그에 보여요. 비워두면 안 보여요." },
         { key: "image", label: "페어 사진", type: "image" },
         { key: "male.name", label: "남캐 이름", type: "text" },
@@ -60,6 +61,10 @@
         { key: "promptB", label: "B 프롬프트", type: "textarea", showIf: "pairMode" },
       ],
       blank: () => ({ id: `g${Date.now()}`, image: "", section: "", caption: "", pairMode: false, prompt: "", promptA: "", promptB: "" }),
+    },
+    genres: {
+      title: "Genres", single: true,
+      fields: [{ key: "list", label: "장르 (한 줄에 하나, 위에서부터 순서대로)", type: "lines", hint: "장르 이름을 바꾸면 그 장르의 페어도 같이 옮겨져요. 지운 장르의 페어는 메인으로 돌아와요." }],
     },
     links: {
       title: "Link",
@@ -257,6 +262,12 @@
       return `<input type="color" name="${name}" value="${esc(val || "#c9a4b4")}">`;
     if (f.type === "list")
       return `<input type="text" name="${name}" value="${esc((val || []).join(", "))}">`;
+    if (f.type === "genre") {
+      const gs = App.data.genres || [];
+      return `<select name="${name}"><option value="">메인 (장르 없음)</option>${gs.map((g) => `<option value="${esc(g)}" ${g === val ? "selected" : ""}>${esc(g)}</option>`).join("")}</select>`;
+    }
+    if (f.type === "lines")
+      return `<textarea name="${name}">${esc((val || []).join("\n"))}</textarea>`;
     if (f.type === "checkbox")
       return `<label class="check"><input type="checkbox" name="${name}" ${val ? "checked" : ""}> ${esc(f.label)}</label>`;
     if (f.type === "members")
@@ -284,7 +295,9 @@
   function openEditor(col, index, preset = {}) {
     const schema = SCHEMAS[col];
     const isNew = !schema.single && index == null;
-    const item = schema.single ? clone(getPath(App.data, col) || {}) : isNew ? { ...schema.blank(), ...preset } : clone(getPath(App.data, col)[index]);
+    const item = col === "genres" ? { list: clone(App.data.genres || []) }
+      : schema.single ? clone(getPath(App.data, col) || {})
+      : isNew ? { ...schema.blank(), ...preset } : clone(getPath(App.data, col)[index]);
 
     const fields = schema.fields;
     const parts = fields.map((f) => f.type === "heading"
@@ -417,6 +430,8 @@
             } else if (isNew && !getPath(item, f.key) && col === "gallery") {
               throw new Error("사진 파일을 골라주세요.");
             }
+          } else if (f.type === "lines") {
+            setPath(item, f.key, [...new Set(el.value.split("\n").map((x) => x.trim()).filter(Boolean))]);
           } else if (f.type === "checkbox") {
             setPath(item, f.key, el.checked);
           } else if (f.type === "list") {
@@ -431,7 +446,16 @@
         }
 
         const next = clone(App.data);
-        if (schema.single) setPath(next, col, item);
+        if (col === "genres") {
+          // 같은 자리의 이름이 바뀌었으면 그 장르의 페어도 새 이름으로 옮김
+          const before = App.data.genres || [];
+          before.forEach((old, k) => {
+            const now = item.list[k];
+            if (now && old !== now && !item.list.includes(old) && !before.includes(now))
+              next.pairs.forEach((p) => { if (p.genre === old) p.genre = now; });
+          });
+          next.genres = item.list;
+        } else if (schema.single) setPath(next, col, item);
         else {
           const list = getPath(next, col);
           isNew ? list.push(item) : (list[index] = item);
@@ -454,7 +478,12 @@
     const { act, col } = btn.dataset;
     const i = btn.dataset.i == null ? null : Number(btn.dataset.i);
 
-    if (act === "add") return openEditor(col, SCHEMAS[col].single ? 0 : null, btn.dataset.section ? { section: btn.dataset.section } : {});
+    if (act === "add") {
+      const preset = {};
+      if (btn.dataset.section) preset.section = btn.dataset.section;
+      if (btn.dataset.genre) preset.genre = btn.dataset.genre;
+      return openEditor(col, SCHEMAS[col].single ? 0 : null, preset);
+    }
     if (act === "rename-section") {
       const from = btn.dataset.section;
       const to = prompt("새 구분 이름", from);
@@ -473,10 +502,13 @@
       list.splice(i, 1);
     } else if (act === "move") {
       let j = i + Number(btn.dataset.dir);
-      // 갤러리는 같은 구분 안에서만 순서 이동
-      if (col === "gallery") {
-        const sec = (list[i].section || "").trim();
-        while (j >= 0 && j < list.length && (list[j].section || "").trim() !== sec) j += Number(btn.dataset.dir);
+      // 갤러리는 같은 구분, 페어는 같은 장르 안에서만 순서 이동
+      const groupKey = col === "gallery" ? (x) => (x.section || "").trim()
+        : col === "pairs" ? (x) => ((App.data.genres || []).includes(x.genre) ? x.genre : "")
+        : null;
+      if (groupKey) {
+        const g = groupKey(list[i]);
+        while (j >= 0 && j < list.length && groupKey(list[j]) !== g) j += Number(btn.dataset.dir);
       }
       if (j < 0 || j >= list.length) return;
       [list[i], list[j]] = [list[j], list[i]];

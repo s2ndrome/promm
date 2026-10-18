@@ -50,10 +50,16 @@
   }
 
   // ---------- pages ----------
+  // 장르 토글 열림 상태 (다시 그려도 유지)
+  const openGenres = new Set();
+  document.addEventListener("toggle", (e) => {
+    const d = e.target.closest?.("[data-genre-box]");
+    if (d) d.open ? openGenres.add(d.dataset.genreBox) : openGenres.delete(d.dataset.genreBox);
+  }, true);
+
   function renderHome() {
-    const { pairs } = App.data;
-    const items = pairs.map(
-      (p, i) => `<article class="item" data-open="pairs" data-i="${i}">
+    const { pairs, genres = [] } = App.data;
+    const card = (p, i) => `<article class="item" data-open="pairs" data-i="${i}">
         <div class="item-head">
           ${p.tag ? `<span class="pill">${esc(p.tag)}</span>` : "<span></span>"}
           <button type="button" class="star ${favs.has(p.id) ? "on" : ""}" data-fav="${esc(p.id)}" aria-label="즐겨찾기">${favs.has(p.id) ? "★" : "☆"}</button>
@@ -63,10 +69,24 @@
         <p class="item-name">${esc(p.male?.name)} × ${esc(p.female?.name)}</p>
         <p class="item-sub">${esc(p.title)}</p>
         <div class="item-foot"><button type="button" class="pill-btn" data-info="${i}">Pair Info</button></div>
-      </article>`
-    ).join("");
-    return `<div class="adm-bar">${addBtn("pairs", "페어 추가")}<span class="owner-only">${addBtn("site", "사이트 정보")}</span></div>
-      <section class="grid">${items}</section>`;
+      </article>`;
+    // 장르가 없거나 목록에 없는 장르면 메인에
+    const genreOf = (p) => (genres.includes(p.genre) ? p.genre : "");
+    const cards = (g) => pairs.map((p, i) => (genreOf(p) === g ? card(p, i) : "")).join("");
+    const main = cards("");
+    const boxes = genres.map((g) => {
+      const n = pairs.filter((p) => genreOf(p) === g).length;
+      return `<details class="genre" data-genre-box="${esc(g)}" ${openGenres.has(g) ? "open" : ""}>
+        <summary><span class="genre-name">${esc(g)}</span><span class="genre-count">${n}</span></summary>
+        <div class="genre-body">
+          ${n ? `<section class="grid">${cards(g)}</section>` : `<p class="genre-empty">아직 페어가 없어요.</p>`}
+          <div class="adm-bar genre-add"><button type="button" class="pill-btn" data-act="add" data-col="pairs" data-genre="${esc(g)}">+ 이 장르에 페어 추가</button></div>
+        </div>
+      </details>`;
+    }).join("");
+    return `<div class="adm-bar">${addBtn("pairs", "페어 추가")}${addBtn("genres", "장르 관리")}<span class="owner-only">${addBtn("site", "사이트 정보")}</span></div>
+      ${main ? `<section class="grid">${main}</section>` : ""}
+      ${boxes ? `<div class="genres">${boxes}</div>` : ""}`;
   }
 
   function renderGallery() {
@@ -362,6 +382,7 @@
   //           variants[].male/female = { top, bottom, shoes } 의상 프롬프트
   App.normalize = (d) => {
     d.links ??= [];
+    d.genres ??= ["MO1", "月とナイフ", "ETC"];
     // 갤러리: 예전의 남/여 개별 프롬프트는 한 단락으로 합침
     for (const g of d.gallery || []) {
       if (g.prompt === undefined && (g.male || g.female)) {
