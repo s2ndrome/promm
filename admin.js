@@ -314,7 +314,7 @@
 
     App.openModal(`<form class="form" id="edit-form">
       <h2>${isNew ? "ADD" : "EDIT"} ${esc(schema.title).toUpperCase()}</h2>
-      <p class="desc">${esc(schema.hint || "저장하면 저장소에 바로 커밋돼요.")}</p>
+      <p class="desc">${esc(schema.hint || "저장하면 바로 반영돼요.")}</p>
       ${parts.join("")}
       <div class="form-actions">
         <button type="button" class="pill-btn" data-close>Cancel</button>

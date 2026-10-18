@@ -20,12 +20,22 @@
   audio.volume = volume;
 
   // ---------- 화면 ----------
+  // 아이콘은 SVG 로 (⏮ 같은 문자는 아이폰에서 이모지로 바뀜)
+  const svg = (d) => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+  const ICON = {
+    prev: svg('<path d="M6 5h2v14H6zM20 5v14L9 12z"/>'),
+    next: svg('<path d="M16 5h2v14h-2zM4 5v14l11-7z"/>'),
+    play: svg('<path d="M7 4.5v15l13-7.5z"/>'),
+    pause: svg('<path d="M6 4.5h4v15H6zM14 4.5h4v15h-4z"/>'),
+    shuffle: svg('<path d="M10.59 9.17 5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"/>'),
+    list: svg('<path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17 6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3V8h3V6h-5z"/>'),
+  };
   bar.innerHTML = `
     <div class="bgm-left">
-      <button type="button" class="bgm-btn" data-bgm="prev" aria-label="이전 곡">⏮</button>
-      <button type="button" class="bgm-btn bgm-play" data-bgm="toggle" aria-label="재생">▶</button>
-      <button type="button" class="bgm-btn" data-bgm="next" aria-label="다음 곡">⏭</button>
-      <button type="button" class="bgm-btn bgm-shuffle" data-bgm="shuffle" aria-label="셔플" title="셔플">⇄</button>
+      <button type="button" class="bgm-btn bgm-prev" data-bgm="prev" aria-label="이전 곡">${ICON.prev}</button>
+      <button type="button" class="bgm-btn bgm-play" data-bgm="toggle" aria-label="재생">${ICON.play}</button>
+      <button type="button" class="bgm-btn" data-bgm="next" aria-label="다음 곡">${ICON.next}</button>
+      <button type="button" class="bgm-btn bgm-shuffle" data-bgm="shuffle" aria-label="셔플" title="셔플">${ICON.shuffle}</button>
     </div>
     <div class="bgm-mid">
       <div class="bgm-yt"><div id="bgm-yt"></div></div>
@@ -33,7 +43,7 @@
     </div>
     <div class="bgm-right">
       <input type="range" class="bgm-vol" min="0" max="1" step="0.01" aria-label="볼륨">
-      <button type="button" class="pill-btn" data-bgm="list">List</button>
+      <button type="button" class="pill-btn bgm-list-btn" data-bgm="list" aria-label="곡 목록"><span class="bgm-list-ico">${ICON.list}</span><span class="bgm-list-txt">List</span></button>
     </div>`;
   const $ = (s) => bar.querySelector(s);
   $(".bgm-vol").value = volume;
@@ -41,7 +51,7 @@
   function paint() {
     const t = tracks[cur];
     $(".bgm-title").textContent = t ? t.title : tracks.length ? "재생할 곡을 골라주세요" : "아직 곡이 없어요 · List 에서 추가";
-    $(".bgm-play").textContent = playing ? "❚❚" : "▶";
+    $(".bgm-play").innerHTML = playing ? ICON.pause : ICON.play;
     $(".bgm-shuffle").classList.toggle("on", shuffle);
     $(".bgm-yt").classList.toggle("show", t?.kind === "youtube");
     const list = document.getElementById("bgm-list");
@@ -150,7 +160,7 @@
     if (!tracks.length) return `<p class="bgm-empty">아직 곡이 없어요. 아래에서 추가해 주세요.</p>`;
     return tracks.map((t, i) => `<div class="bgm-row ${i === cur ? "on" : ""}">
       <button type="button" class="bgm-row-play" data-bgm-play="${i}">
-        <span class="bgm-row-icon">${i === cur && playing ? "❚❚" : "▶"}</span>
+        <span class="bgm-row-icon">${i === cur && playing ? ICON.pause : ICON.play}</span>
         <span class="bgm-row-title">${esc(t.title)}</span>
       </button>
       <span class="pill">${t.kind === "youtube" ? "YouTube" : "File"}</span>
