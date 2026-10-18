@@ -250,9 +250,10 @@
   "gallery": [
     {
       "image": "img/pairs/pair1.webp",
-      "pair": "pair1",
+      "pair": "",
       "caption": "",
-      "id": "g1"
+      "id": "g1",
+      "section": ""
     },
     {
       "image": "img/pairs/pair2.webp",
