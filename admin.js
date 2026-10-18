@@ -54,10 +54,12 @@
         { key: "image", label: "사진", type: "image" },
         { key: "section", label: "구분 (예: 웨딩, 제복)", type: "section", hint: "같은 구분끼리 한 줄로 묶이고 구분선으로 나뉘어요." },
         { key: "caption", label: "제목 (선택)", type: "text" },
-        { key: "prompt", label: "프롬프트", type: "textarea" },
-        { key: "pair", label: "페어 프롬프트 사용 (선택)", type: "pair", hint: "페어를 고르면 위 프롬프트 대신 그 페어의 외형 + 의상 프롬프트가 팝업에 떠요." },
+        { key: "pairMode", label: "페어 프롬프트 사용", type: "checkbox", hint: "체크하면 A / B 프롬프트를 따로 적을 수 있어요." },
+        { key: "prompt", label: "프롬프트", type: "textarea", hideIf: "pairMode" },
+        { key: "promptA", label: "A 프롬프트", type: "textarea", showIf: "pairMode" },
+        { key: "promptB", label: "B 프롬프트", type: "textarea", showIf: "pairMode" },
       ],
-      blank: () => ({ id: `g${Date.now()}`, image: "", section: "", caption: "", prompt: "", pair: "" }),
+      blank: () => ({ id: `g${Date.now()}`, image: "", section: "", caption: "", pairMode: false, prompt: "", promptA: "", promptB: "" }),
     },
     links: {
       title: "Link",
@@ -255,6 +257,8 @@
       return `<input type="color" name="${name}" value="${esc(val || "#c9a4b4")}">`;
     if (f.type === "list")
       return `<input type="text" name="${name}" value="${esc((val || []).join(", "))}">`;
+    if (f.type === "checkbox")
+      return `<label class="check"><input type="checkbox" name="${name}" ${val ? "checked" : ""}> ${esc(f.label)}</label>`;
     if (f.type === "members")
       return `<div class="member-edit-list">${(val || []).map(memberHtml).join("")}</div>
         <button type="button" class="pill-btn m-add">+ 요원 추가</button>`;
@@ -285,7 +289,9 @@
     const fields = schema.fields;
     const parts = fields.map((f) => f.type === "heading"
       ? `<h3 class="form-sec">${esc(f.label)}</h3>`
-      : `<div class="field"><label>${esc(f.label)}</label>${fieldHtml(f, getPath(item, f.key))}${f.hint ? `<p class="hint">${esc(f.hint)}</p>` : ""}</div>`
+      : f.type === "checkbox"
+      ? `<div class="field">${fieldHtml(f, getPath(item, f.key))}${f.hint ? `<p class="hint">${esc(f.hint)}</p>` : ""}</div>`
+      : `<div class="field" ${f.showIf ? `data-show-if="${f.showIf}"` : ""} ${f.hideIf ? `data-hide-if="${f.hideIf}"` : ""}><label>${esc(f.label)}</label>${fieldHtml(f, getPath(item, f.key))}${f.hint ? `<p class="hint">${esc(f.hint)}</p>` : ""}</div>`
     );
 
     App.openModal(`<form class="form" id="edit-form">
@@ -300,6 +306,17 @@
 
     const form = document.getElementById("edit-form");
     form.querySelector("[data-close]").onclick = App.closeModal;
+
+    // 체크박스에 따라 보이는 칸 바꾸기 (예: 페어 프롬프트 사용 → A/B 칸)
+    const syncShow = () => {
+      form.querySelectorAll("[data-show-if], [data-hide-if]").forEach((el) => {
+        const key = el.dataset.showIf || el.dataset.hideIf;
+        const on = form.elements[`f:${key}`]?.checked;
+        el.hidden = el.dataset.showIf ? !on : on;
+      });
+    };
+    form.addEventListener("change", (e) => { if (e.target.type === "checkbox") syncShow(); });
+    syncShow();
 
     // 사진 미리보기
     form.addEventListener("change", (e) => {
@@ -400,6 +417,8 @@
             } else if (isNew && !getPath(item, f.key) && col === "gallery") {
               throw new Error("사진 파일을 골라주세요.");
             }
+          } else if (f.type === "checkbox") {
+            setPath(item, f.key, el.checked);
           } else if (f.type === "list") {
             setPath(item, f.key, el.value.split(",").map((s) => s.trim()).filter(Boolean));
           } else {

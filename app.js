@@ -193,16 +193,7 @@
       title = p.title;
       tag = p.tag;
     } else {
-      const g = App.data.gallery[i];
-      const p = pairById(g.pair);
-      if (!p) return showSinglePrompt(g); // 기본: 프롬프트 한 단락
-      // 선택: 페어 프롬프트 (외형 + 의상)
-      people = fromPair(p);
-      variants = p.variants || [];
-      image = g.image;
-      tag = p.tag;
-      title = g.caption || p.title || "";
-      sub = p.title && g.caption ? p.title : "";
+      return showGalleryPrompt(App.data.gallery[i]);
     }
     sub ||= `${people[0].name || ""} × ${people[1].name || ""}`;
     detail = { people, variants, image, title, sel: -1, opt: { upper: false, noShoes: false } };
@@ -256,20 +247,25 @@
     </div>`);
   }
 
-  function showSinglePrompt(g) {
+  // 갤러리: 기본은 프롬프트 한 단락, '페어 프롬프트 사용'이면 A / B 두 단락
+  function showGalleryPrompt(g) {
     detail = null;
+    const block = (label, text) => `<div class="prompt">
+      <div class="prompt-head"><b>${label}</b>
+        <span class="copy-btns"><button type="button" class="pill-btn dark" data-copy="${esc(text)}">Copy</button></span>
+      </div>
+      <div class="prompt-text"><p>${esc(text)}</p></div>
+    </div>`;
+    const body = g.pairMode
+      ? [g.promptA && block("A", g.promptA), g.promptB && block("B", g.promptB)].filter(Boolean).join("")
+      : g.prompt ? block("Prompt", g.prompt) : "";
     openModal(`<div class="detail">
       <div class="detail-visual">${thumb(g.image, g.caption)}</div>
       <div class="detail-info">
         ${g.section ? `<span class="pill">${esc(g.section)}</span>` : ""}
         <h2>${esc(g.caption || "")}</h2>
         <p class="sub"></p>
-        ${g.prompt ? `<div class="prompt">
-          <div class="prompt-head"><b>Prompt</b>
-            <span class="copy-btns"><button type="button" class="pill-btn dark" data-copy="${esc(g.prompt)}">Copy</button></span>
-          </div>
-          <div class="prompt-text"><p>${esc(g.prompt)}</p></div>
-        </div>` : `<p class="sub">아직 프롬프트가 없어요.</p>`}
+        ${body || `<p class="sub">아직 프롬프트가 없어요.</p>`}
       </div>
     </div>`);
   }
