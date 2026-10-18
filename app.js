@@ -89,8 +89,15 @@
       ${boxes ? `<div class="genres">${boxes}</div>` : ""}`;
   }
 
-  function renderGallery() {
-    const { gallery } = App.data;
+  // asset 하위 페이지들 (같은 형태). col 은 데이터 이름
+  const ASSET_PAGES = [
+    { col: "gallery", route: "/gallery", title: "ASSET" },
+    { col: "jaktae", route: "/jaktae", title: "작태" },
+  ];
+
+  function renderGallery(col = "gallery") {
+    const gallery = App.data[col] || [];
+    const page = ASSET_PAGES.find((x) => x.col === col);
     // section 이름별로 묶기 (처음 나온 순서대로)
     const groups = new Map();
     gallery.forEach((g, i) => {
@@ -101,21 +108,23 @@
     const shot = (i) => {
       const g = gallery[i];
       const p = pairById(g.pair);
-      return `<figure class="shot" data-open="gallery" data-i="${i}">
-        ${tools("gallery", i)}
+      return `<figure class="shot" data-open="${col}" data-i="${i}">
+        ${tools(col, i)}
         ${thumb(g.image, g.caption)}
         <figcaption class="shot-cap"><span>${esc(g.caption || p?.title || "")}</span>${p?.tag ? `<span class="pill">${esc(p.tag)}</span>` : ""}</figcaption>
       </figure>`;
     };
     const sections = [...groups].map(([name, idx]) => `<section class="g-section">
         ${name || groups.size > 1 ? `<div class="block-title">${esc(name || "ETC")}
-          ${name ? `<span class="adm-inline"><button type="button" class="pill-btn" data-act="rename-section" data-section="${esc(name)}">이름 변경</button></span>` : ""}</div>` : ""}
+          ${name ? `<span class="adm-inline"><button type="button" class="pill-btn" data-act="rename-section" data-col="${col}" data-section="${esc(name)}">이름 변경</button></span>` : ""}</div>` : ""}
         <div class="gallery">${idx.map(shot).join("")}</div>
-        <div class="adm-bar g-add"><button type="button" class="pill-btn" data-act="add" data-col="gallery" data-section="${esc(name)}">+ 이 줄에 사진 추가</button></div>
+        <div class="adm-bar g-add"><button type="button" class="pill-btn" data-act="add" data-col="${col}" data-section="${esc(name)}">+ 이 줄에 사진 추가</button></div>
       </section>`).join("");
-    return `<div class="page-head"><h1>ASSET</h1><p>사진을 누르면 프롬프트가 열려요</p></div>
-      <div class="adm-bar">${addBtn("gallery", "사진 추가")}</div>
-      ${sections}`;
+    const tabs = ASSET_PAGES.map((x) => `<a href="#${x.route}" class="${x.col === col ? "on" : ""}">${esc(x.title)}</a>`).join("");
+    return `<div class="page-head"><h1>${esc(page.title)}</h1><p>사진을 누르면 프롬프트가 열려요</p>
+        <nav class="sub-tabs">${tabs}</nav></div>
+      <div class="adm-bar">${addBtn(col, "사진 추가")}</div>
+      ${sections || `<p class="link-empty">아직 사진이 없어요.</p>`}`;
   }
 
   function renderLinks() {
@@ -151,7 +160,8 @@
 
   const routes = {
     "/": { title: "Pairs", render: renderHome },
-    "/gallery": { title: "Asset", render: renderGallery },
+    "/gallery": { title: "Asset", render: () => renderGallery("gallery") },
+    "/jaktae": { title: "작태", render: () => renderGallery("jaktae") },
     "/world": { title: "ARCH", render: () => App.renderWorld() },
     "/link": { title: "Link", render: renderLinks },
   };
@@ -169,7 +179,9 @@
     const brand = site.title || "ZZON";
     $(".brand").textContent = brand;
     document.title = `${r.title} · ${brand}`;
-    document.querySelectorAll("[data-route]").forEach((a) => a.classList.toggle("active", a.dataset.route === path));
+    document.querySelectorAll("[data-route]").forEach((a) =>
+      a.classList.toggle("active", a.dataset.route === path || (a.dataset.route === "/gallery" && path === "/jaktae")));
+    document.querySelector(".nav-drop")?.classList.remove("open");
   }
 
   // ---------- prompt popup ----------
@@ -217,7 +229,7 @@
       title = p.title;
       tag = p.tag;
     } else {
-      return showGalleryPrompt(App.data.gallery[i]);
+      return showGalleryPrompt(App.data[col][i]);
     }
     sub ||= `${people[0].name || ""} × ${people[1].name || ""}`;
     detail = { people, variants, image, title, sel: -1, opt: { upper: false, noShoes: false } };
@@ -371,6 +383,13 @@
     const open = e.target.closest("[data-open]");
     if (open) showPrompt(open.dataset.open, Number(open.dataset.i));
   });
+  // asset 하위 메뉴: ▾ 를 누르면 열고, 바깥을 누르면 닫음
+  document.addEventListener("click", (e) => {
+    const drop = document.querySelector(".nav-drop");
+    if (!drop) return;
+    if (e.target.closest(".drop-btn")) drop.classList.toggle("open");
+    else if (!e.target.closest(".nav-drop")) drop.classList.remove("open");
+  });
   modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
   $("#modal-close").addEventListener("click", closeModal);
   document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !modal.hidden) closeModal(); });
@@ -383,6 +402,7 @@
   //           variants[].male/female = { top, bottom, shoes } 의상 프롬프트
   App.normalize = (d) => {
     d.links ??= [];
+    d.jaktae ??= [];
     d.genres ??= ["MO1", "月とナイフ", "ETC"];
     // 갤러리: 예전의 남/여 개별 프롬프트는 한 단락으로 합침
     for (const g of d.gallery || []) {

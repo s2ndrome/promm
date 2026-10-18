@@ -155,6 +155,13 @@
     },
   };
 
+  // 작태: asset 과 같은 형태 (구분 자동완성만 작태 사진 기준)
+  SCHEMAS.jaktae = {
+    ...SCHEMAS.gallery,
+    title: "작태",
+    fields: SCHEMAS.gallery.fields.map((f) => (f.type === "section" ? { ...f, source: "jaktae" } : f)),
+  };
+
   // ---------- helpers ----------
   const getPath = (obj, path) => path.split(".").reduce((o, k) => (o == null ? undefined : o[k]), obj);
   function setPath(obj, path, val) {
@@ -425,7 +432,7 @@
             const file = el.files[0];
             if (file) {
               setPath(item, f.key, await uploadImage(file));
-            } else if (isNew && !getPath(item, f.key) && col === "gallery") {
+            } else if (isNew && !getPath(item, f.key) && (col === "gallery" || col === "jaktae")) {
               throw new Error("사진 파일을 골라주세요.");
             }
           } else if (f.type === "lines") {
@@ -440,7 +447,7 @@
         }
         if (col === "links" && item.url && !/^[a-z][a-z0-9+.-]*:/i.test(item.url.trim())) item.url = `https://${item.url.trim()}`;
         // 갤러리: 비어 있는 개별 프롬프트는 지워서 페어 프롬프트를 쓰게 함
-        if (col === "gallery") {
+        if (col === "gallery" || col === "jaktae") {
           for (const k of ["male", "female"]) if (item[k] && !item[k].name && !item[k].prompt) delete item[k];
         }
 
@@ -488,8 +495,9 @@
       const to = prompt("새 구분 이름", from);
       if (to == null || to.trim() === from) return;
       const next = clone(App.data);
-      next.gallery.forEach((g) => { if ((g.section || "").trim() === from) g.section = to.trim(); });
-      try { await saveData(next, ["gallery"]); } catch (err) { alert(`저장하지 못했어요: ${err.message}`); }
+      const gcol = btn.dataset.col || "gallery";
+      next[gcol].forEach((g) => { if ((g.section || "").trim() === from) g.section = to.trim(); });
+      try { await saveData(next, [gcol]); } catch (err) { alert(`저장하지 못했어요: ${err.message}`); }
       return;
     }
     if (act === "edit") return openEditor(col, i);
@@ -502,7 +510,7 @@
     } else if (act === "move") {
       let j = i + Number(btn.dataset.dir);
       // 갤러리는 같은 구분, 페어는 같은 장르 안에서만 순서 이동
-      const groupKey = col === "gallery" ? (x) => (x.section || "").trim()
+      const groupKey = col === "gallery" || col === "jaktae" ? (x) => (x.section || "").trim()
         : col === "pairs" ? (x) => ((App.data.genres || []).includes(x.genre) ? x.genre : "")
         : null;
       if (groupKey) {

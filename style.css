@@ -38,6 +38,26 @@ main { flex: 1; width: 100%; max-width: 1040px; margin: 0 auto; padding: 0 24px 
 }
 .nav-side { display: flex; gap: 28px; align-items: baseline; }
 .nav-l { justify-content: flex-end; }
+.nav-drop { position: relative; display: inline-flex; align-items: baseline; gap: 2px; }
+.drop-btn { border: 0; background: none; cursor: pointer; font-size: 11px; color: #888; padding: 2px 4px; }
+.drop-btn:hover { color: var(--ink); }
+.drop-menu {
+  position: absolute; top: calc(100% + 8px); left: 50%; transform: translateX(-50%); z-index: 30;
+  min-width: 120px; display: none; flex-direction: column; padding: 6px;
+  background: #fff; border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 12px 30px rgba(0, 0, 0, .1);
+}
+.drop-menu::before { content: ""; position: absolute; inset: -10px 0 auto; height: 10px; } /* 마우스가 메뉴로 넘어가는 틈 */
+.nav-drop:hover .drop-menu, .nav-drop.open .drop-menu { display: flex; }
+.drop-menu a { padding: 8px 12px; border-radius: 8px; font-size: 13px; white-space: nowrap; }
+.drop-menu a:hover { background: var(--soft); }
+.drop-menu a.active { font-weight: 500; }
+body.world-mode .drop-menu { background: #121318; border-color: var(--w-line); }
+body.world-mode .drop-menu a:hover { background: rgba(255, 255, 255, .06); }
+body.world-mode .drop-btn { color: var(--w-dim); }
+.sub-tabs { display: flex; justify-content: center; gap: 6px; margin-top: 18px; }
+.sub-tabs a { border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; font-size: 12px; color: #666; }
+.sub-tabs a:hover { border-color: var(--ink); color: var(--ink); }
+.sub-tabs a.on { background: var(--ink); border-color: var(--ink); color: #fff; }
 .nav-r { justify-content: flex-start; }
 .nav-link { font-weight: 300; font-size: 15px; color: #444; }
 .nav-link:hover, .nav-link.active { color: var(--ink); text-decoration: underline; text-underline-offset: 5px; }
