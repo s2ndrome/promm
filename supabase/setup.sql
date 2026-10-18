@@ -28,6 +28,7 @@ alter table public.members enable row level security;
 -- 초대 코드는 API 로 볼 수 없는 private 스키마에 보관
 create schema if not exists private;
 create table if not exists private.invite (code text not null);
+alter table private.invite enable row level security;
 
 create or replace function public.my_role()
 returns text language sql stable security definer set search_path = public as $$
