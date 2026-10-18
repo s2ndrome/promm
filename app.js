@@ -69,17 +69,31 @@
 
   function renderGallery() {
     const { gallery } = App.data;
-    const shots = gallery.map((g, i) => {
+    // section 이름별로 묶기 (처음 나온 순서대로)
+    const groups = new Map();
+    gallery.forEach((g, i) => {
+      const key = (g.section || "").trim();
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(i);
+    });
+    const shot = (i) => {
+      const g = gallery[i];
       const p = pairById(g.pair);
       return `<figure class="shot" data-open="gallery" data-i="${i}">
         ${tools("gallery", i)}
         ${thumb(g.image, g.caption)}
         <figcaption class="shot-cap"><span>${esc(g.caption || p?.title || "")}</span>${p?.tag ? `<span class="pill">${esc(p.tag)}</span>` : ""}</figcaption>
       </figure>`;
-    }).join("");
+    };
+    const sections = [...groups].map(([name, idx]) => `<section class="g-section">
+        ${name || groups.size > 1 ? `<div class="block-title">${esc(name || "ETC")}
+          ${name ? `<span class="adm-inline"><button type="button" class="pill-btn" data-act="rename-section" data-section="${esc(name)}">이름 변경</button></span>` : ""}</div>` : ""}
+        <div class="gallery">${idx.map(shot).join("")}</div>
+        <div class="adm-bar g-add"><button type="button" class="pill-btn" data-act="add" data-col="gallery" data-section="${esc(name)}">+ 이 줄에 사진 추가</button></div>
+      </section>`).join("");
     return `<div class="page-head"><h1>GALLERY</h1><p>사진을 누르면 프롬프트가 열려요</p></div>
       <div class="adm-bar">${addBtn("gallery", "사진 추가")}</div>
-      <section class="gallery">${shots}</section>`;
+      ${sections}`;
   }
 
   function renderWorld() {

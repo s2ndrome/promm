@@ -42,13 +42,14 @@
       title: "Gallery",
       fields: [
         { key: "image", label: "사진", type: "image", dir: "img/gallery" },
+        { key: "section", label: "구분 (예: 웨딩, 제복)", type: "section", hint: "같은 구분끼리 한 줄로 묶이고 구분선으로 나뉘어요." },
         { key: "caption", label: "설명 (선택)", type: "text" },
         { key: "pair", label: "어떤 페어의 사진인가요?", type: "pair", hint: "페어를 고르면 그 페어의 프롬프트가 팝업에 떠요." },
         ...PERSON("male", "남캐"),
         ...PERSON("female", "여캐"),
       ],
       hint: "이 사진만의 프롬프트가 따로 있으면 아래에 적어주세요. 비워두면 선택한 페어의 프롬프트가 쓰여요.",
-      blank: () => ({ id: `g${Date.now()}`, image: "", caption: "", pair: "" }),
+      blank: () => ({ id: `g${Date.now()}`, image: "", section: "", caption: "", pair: "" }),
     },
     "world.sections": {
       title: "Story",
@@ -283,6 +284,11 @@
       return `<input type="color" name="${name}" value="${esc(val || "#c9a4b4")}">`;
     if (f.type === "list")
       return `<input type="text" name="${name}" value="${esc((val || []).join(", "))}">`;
+    if (f.type === "section") {
+      const names = [...new Set(App.data.gallery.map((g) => (g.section || "").trim()).filter(Boolean))];
+      return `<input type="text" name="${name}" value="${esc(val)}" list="section-list" autocomplete="off">
+        <datalist id="section-list">${names.map((n) => `<option value="${esc(n)}">`).join("")}</datalist>`;
+    }
     if (f.type === "pair") {
       const opts = App.data.pairs.map((p, i) => `<option value="${esc(p.id)}" ${p.id === val ? "selected" : ""}>#${String(i + 1).padStart(2, "0")} ${esc(p.title)}</option>`).join("");
       return `<select name="${name}"><option value="">선택 안 함</option>${opts}</select>`;
@@ -295,10 +301,10 @@
     return `<input type="text" name="${name}" value="${esc(val)}">`;
   }
 
-  function openEditor(col, index) {
+  function openEditor(col, index, preset = {}) {
     const schema = SCHEMAS[col];
     const isNew = !schema.single && index == null;
-    const item = schema.single ? clone(getPath(App.data, col) || {}) : isNew ? schema.blank() : clone(getPath(App.data, col)[index]);
+    const item = schema.single ? clone(getPath(App.data, col) || {}) : isNew ? { ...schema.blank(), ...preset } : clone(getPath(App.data, col)[index]);
 
     const fields = schema.fields;
     const parts = fields.map(
@@ -403,7 +409,16 @@
     const { act, col } = btn.dataset;
     const i = btn.dataset.i == null ? null : Number(btn.dataset.i);
 
-    if (act === "add") return openEditor(col, SCHEMAS[col].single ? 0 : null);
+    if (act === "add") return openEditor(col, SCHEMAS[col].single ? 0 : null, btn.dataset.section ? { section: btn.dataset.section } : {});
+    if (act === "rename-section") {
+      const from = btn.dataset.section;
+      const to = prompt("새 구분 이름", from);
+      if (to == null || to.trim() === from) return;
+      const next = clone(App.data);
+      next.gallery.forEach((g) => { if ((g.section || "").trim() === from) g.section = to.trim(); });
+      try { await saveData(next, `Rename gallery section: ${from} → ${to.trim()}`); } catch (err) { alert(`저장하지 못했어요: ${err.message}`); }
+      return;
+    }
     if (act === "edit") return openEditor(col, i);
 
     const next = clone(App.data);
@@ -412,7 +427,12 @@
       if (!confirm("정말 삭제할까요?")) return;
       list.splice(i, 1);
     } else if (act === "move") {
-      const j = i + Number(btn.dataset.dir);
+      let j = i + Number(btn.dataset.dir);
+      // 갤러리는 같은 구분 안에서만 순서 이동
+      if (col === "gallery") {
+        const sec = (list[i].section || "").trim();
+        while (j >= 0 && j < list.length && (list[j].section || "").trim() !== sec) j += Number(btn.dataset.dir);
+      }
       if (j < 0 || j >= list.length) return;
       [list[i], list[j]] = [list[j], list[i]];
     }
