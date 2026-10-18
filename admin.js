@@ -75,8 +75,8 @@
       title: "Site",
       single: true,
       fields: [
-        { key: "title", label: "사이트 이름 (상단 로고)", type: "text" },
-        { key: "subtitle", label: "부제", type: "text" },
+        { key: "title", label: "로고 글자 (첫 글자는 필기체로 보여요)", type: "text" },
+        { key: "subtitle", label: "로고 아래 작은 글자", type: "text" },
       ],
     },
   };

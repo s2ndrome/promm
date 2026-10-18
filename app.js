@@ -134,8 +134,12 @@
     const path = location.hash.replace(/^#/, "") || "/";
     const r = routes[path] || routes["/"];
     content.innerHTML = r.render();
-    const brand = App.data.site?.title || "PROMM";
-    $(".brand").textContent = brand;
+    const site = App.data.site || {};
+    const brand = site.title || "ZZON";
+    // 첫 글자는 필기체, 나머지는 세리프
+    $(".b-script").textContent = brand.charAt(0);
+    $(".b-serif").textContent = brand.slice(1);
+    $(".b-sub").textContent = site.subtitle || "";
     document.title = `${r.title} · ${brand}`;
     document.querySelectorAll("[data-route]").forEach((a) => a.classList.toggle("active", a.dataset.route === path));
   }
