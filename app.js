@@ -109,18 +109,20 @@
     const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } };
     const row = (i) => {
       const l = links[i];
-      return `<div class="link-row">
-        <a class="link-main" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
-          <span class="link-title">${esc(l.title || l.url)}</span>
+      const name = l.title || host(l.url) || l.url;
+      return `<div class="link-card">
+        <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
+          <span class="link-mono">${esc([...name][0] || "·")}</span>
+          <span class="link-title">${esc(name)}</span>
           ${l.desc ? `<span class="link-desc">${esc(l.desc)}</span>` : ""}
-          <span class="link-host">${esc(host(l.url))} ↗</span>
+          <span class="link-host">${esc(host(l.url))}<span class="link-arrow">↗</span></span>
         </a>
         ${tools("links", i)}
       </div>`;
     };
     const sections = [...groups].map(([name, idx]) => `<section class="g-section">
         ${name || groups.size > 1 ? `<div class="block-title">${esc(name || "ETC")}</div>` : ""}
-        <div class="link-list">${idx.map(row).join("")}</div>
+        <div class="link-grid">${idx.map(row).join("")}</div>
       </section>`).join("");
     return `<div class="page-head"><h1>LINK</h1><p>모아둔 링크</p></div>
       <div class="adm-bar">${addBtn("links", "링크 추가")}</div>
