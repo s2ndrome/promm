@@ -1,12 +1,13 @@
-# PROMM
+# ZZON
 
-캐릭터 페어 프롬프트 모음 사이트 (https://zzon.64bit.kr)
+캐릭터 페어 프롬프트 모음 사이트 (https://zzon.64bit.kr) · 회원 전용
 
-- 메인: 페어 사진 그리드, 누르면 남/여 프롬프트 팝업
-- gallery: 사진을 누르면 프롬프트 팝업
-- world: 세계관, 세력 구도, 캐릭터 관계
+- 회원가입은 초대 코드가 있어야 해요 (Supabase)
+- 회원은 footer 의 `edit` 로 페어/갤러리/세계관을 추가·수정
+- 페이지 아래 BGM 플레이어: 회원은 곡 추가, 삭제는 owner 만
 
-## 내용 수정
+## 설정
 
-- 페이지 맨 아래 `admin` → GitHub 토큰 입력 → 페이지에서 바로 추가/수정/삭제/순서 변경
-- 또는 `data/site.json` 을 직접 수정
+1. Supabase → SQL Editor 에서 `supabase/setup.sql` 실행 (맨 아래 초대 코드만 바꿔서)
+2. Supabase → Authentication → Sign In / Providers → Email → **Confirm email 끄기**
+3. 사이트에서 가장 먼저 가입한 계정이 owner 가 됨

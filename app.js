@@ -24,7 +24,7 @@
 
   function thumb(src, alt) {
     if (!src) return `<div class="thumb empty"></div>`;
-    return `<div class="thumb"><img src="${esc(src)}" alt="${esc(alt)}" loading="lazy"
+    return `<div class="thumb"><img src="${esc(App.mediaUrl(src))}" alt="${esc(alt)}" loading="lazy"
       onerror="this.parentNode.classList.add('empty');this.remove()"></div>`;
   }
 
@@ -351,9 +351,5 @@
     return d;
   };
 
-  // ---------- load ----------
-  App.ready = fetch(`data/site.json?v=${Date.now()}`, { cache: "no-store" })
-    .then((r) => r.json())
-    .then((d) => { App.data = App.normalize(d); route(); })
-    .catch(() => { content.innerHTML = `<p style="text-align:center;color:#999">데이터를 불러오지 못했어요.</p>`; });
+  // 데이터는 로그인 후 auth.js 가 불러와서 App.render() 를 호출함
 })();

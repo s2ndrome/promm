@@ -128,7 +128,70 @@ body.admin .adm-inline { display: inline-flex; }
 }
 .admin-btn { border: 0; background: none; cursor: pointer; color: #c4c4c4; font-size: 11px; padding: 0; }
 .admin-btn:hover { color: var(--ink); }
-body.admin .admin-btn { color: var(--accent); }
+body.admin #edit-btn { color: var(--ink); text-decoration: underline; }
+
+/* ---------- login gate ---------- */
+body.locked > :not(.gate):not(.modal):not(script) { display: none !important; }
+.gate { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.gate[hidden] { display: none; }
+.gate-box { width: min(340px, 100%); text-align: center; }
+.gate-logo { font-family: var(--brand); font-weight: 700; font-size: 28px; letter-spacing: .04em; margin-bottom: 34px; }
+.gate-tabs { display: flex; justify-content: center; gap: 22px; margin-bottom: 22px; }
+.gate-tabs button { border: 0; background: none; cursor: pointer; font-size: 14px; color: #999; padding: 2px 0; }
+.gate-tabs button.on { color: var(--ink); text-decoration: underline; text-underline-offset: 6px; }
+.gate-form { display: grid; gap: 10px; }
+.gate-form input {
+  width: 100%; border: 1px solid var(--line); border-radius: 10px;
+  font-family: var(--sans); font-size: 14px; padding: 11px 14px; outline: none;
+}
+.gate-form input:focus { border-color: var(--ink); }
+.gate-form .pill-btn { padding: 10px; font-size: 11px; margin-top: 4px; }
+.gate-msg { min-height: 18px; margin: 0; font-size: 12px; color: #c0392b; }
+.gate-desc { font-size: 13px; color: #666; margin: 0 0 16px; }
+.gate-link { border: 0; background: none; cursor: pointer; font-size: 12px; color: #999; text-decoration: underline; }
+
+/* ---------- bgm ---------- */
+body.has-bgm { padding-bottom: 64px; }
+.bgm {
+  position: fixed; left: 50%; bottom: 12px; z-index: 45;
+  transform: translateX(-50%);
+  width: min(720px, calc(100% - 24px));
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255, 255, 255, .96); backdrop-filter: blur(8px);
+  border: 1px solid var(--line); border-radius: 999px;
+  padding: 6px 10px 6px 12px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .08);
+}
+.bgm[hidden] { display: none; }
+.bgm-left, .bgm-right { display: flex; align-items: center; gap: 2px; flex: none; }
+.bgm-right { gap: 10px; }
+.bgm-btn {
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 0; background: none; cursor: pointer; font-size: 13px; color: #444;
+}
+.bgm-btn:hover { background: var(--soft); color: var(--ink); }
+.bgm-play { background: var(--ink); color: #fff; font-size: 12px; }
+.bgm-play:hover { background: #444; color: #fff; }
+.bgm-shuffle { font-size: 15px; color: #bbb; }
+.bgm-shuffle.on { color: var(--ink); }
+.bgm-mid { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
+.bgm-yt { display: none; width: 64px; height: 36px; border-radius: 6px; overflow: hidden; flex: none; background: #000; }
+.bgm-yt.show { display: block; }
+.bgm-yt iframe { width: 64px; height: 36px; display: block; }
+.bgm-title { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bgm-vol { width: 80px; accent-color: var(--ink); }
+
+.bgm-pop h2 { margin-bottom: 4px; }
+.bgm-list { border-top: 1px solid #eee; margin-bottom: 22px; max-height: 46vh; overflow: auto; }
+.bgm-row { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid #eee; padding: 4px 0; }
+.bgm-row.on .bgm-row-title { font-weight: 500; }
+.bgm-row-play { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; border: 0; background: none; cursor: pointer; padding: 10px 4px; text-align: left; font-size: 14px; }
+.bgm-row-icon { width: 14px; font-size: 10px; color: #888; flex: none; }
+.bgm-row-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bgm-del { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: #fff; cursor: pointer; font-size: 11px; flex: none; }
+.bgm-del:hover { background: var(--ink); color: #fff; }
+.bgm-empty { color: #999; font-size: 13px; padding: 16px 0; margin: 0; }
+.bgm-add-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
 
 /* ---------- modal ---------- */
 .modal {
@@ -245,6 +308,9 @@ body.admin .adm-badge { display: block; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 760px) {
+  .bgm { gap: 6px; padding: 5px 8px; }
+  .bgm-vol { display: none; }
+  .bgm-btn { width: 28px; height: 28px; }
   main { padding: 0 16px 60px; }
   .top { gap: 22px; padding: 30px 16px 38px; }
   .brand { font-size: 19px; }

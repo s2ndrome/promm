@@ -1,17 +1,7 @@
-// 토큰이 있는 사람만 쓰는 편집 기능.
-// GitHub API 로 data/site.json 과 이미지를 저장소에 직접 커밋합니다.
+// 회원용 편집 기능. 내용은 Supabase(site_data 테이블)에, 사진은 media 저장소에 저장합니다.
 (function () {
-  const OWNER = "s2ndrome";
-  const REPO = "promm";
-  const DATA_PATH = "data/site.json";
-  const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
-  const TOKEN_KEY = "promm_token";
-
   const App = window.App;
   const esc = App.esc;
-  let token = "";
-  let branch = "";
-  let dataSha = "";
 
   // ---------- 편집 폼 정의 ----------
   const PERSON = (key, label) => [
@@ -24,12 +14,12 @@
       fields: [
         { key: "title", label: "페어 이름", type: "text" },
         { key: "tag", label: "태그 (예: ARCH, 月とナイフ, calltaku)", type: "text", hint: "카드 왼쪽 위 작은 태그에 보여요. 비워두면 안 보여요." },
-        { key: "image", label: "페어 사진", type: "image", dir: "img/pairs" },
+        { key: "image", label: "페어 사진", type: "image" },
         { key: "male.name", label: "남캐 이름", type: "text" },
         { key: "male.base", label: "남캐 외형 프롬프트 (첫 단락)", type: "textarea" },
         { key: "female.name", label: "여캐 이름", type: "text" },
         { key: "female.base", label: "여캐 외형 프롬프트 (첫 단락)", type: "textarea" },
-        { key: "variants", label: "의상 (둘째 단락)", type: "variants", dir: "img/pairs",
+        { key: "variants", label: "의상 (둘째 단락)", type: "variants",
           hint: "의상 칩을 누르면 둘째 단락에 나와요. 상의/하의/신발을 나눠 적으면 '상반신만', '신발 없이' 체크로 빼고 복사할 수 있어요. 의상 사진은 선택이에요." },
       ],
       blank: () => ({
@@ -41,7 +31,7 @@
     gallery: {
       title: "Gallery",
       fields: [
-        { key: "image", label: "사진", type: "image", dir: "img/gallery" },
+        { key: "image", label: "사진", type: "image" },
         { key: "section", label: "구분 (예: 웨딩, 제복)", type: "section", hint: "같은 구분끼리 한 줄로 묶이고 구분선으로 나뉘어요." },
         { key: "caption", label: "설명 (선택)", type: "text" },
         { key: "pair", label: "어떤 페어의 사진인가요?", type: "pair", hint: "페어를 고르면 그 페어의 프롬프트가 팝업에 떠요." },
@@ -100,36 +90,8 @@
   }
   const clone = (o) => JSON.parse(JSON.stringify(o));
 
-  const b64encode = (str) => {
-    const bytes = new TextEncoder().encode(str);
-    let bin = "";
-    bytes.forEach((b) => (bin += String.fromCharCode(b)));
-    return btoa(bin);
-  };
-  const b64decode = (b64) => new TextDecoder().decode(Uint8Array.from(atob(b64.replace(/\n/g, "")), (c) => c.charCodeAt(0)));
-
-  async function gh(path, opts = {}) {
-    const res = await fetch(`${API}${path}`, {
-      ...opts,
-      cache: "no-store",
-      headers: { Authorization: `Bearer ${token}`, Accept: "application/vnd.github+json", ...(opts.headers || {}) },
-    });
-    if (!res.ok) {
-      const err = new Error(`GitHub ${res.status}`);
-      err.status = res.status;
-      throw err;
-    }
-    return res.status === 204 ? null : res.json();
-  }
-
-  async function putFile(path, contentB64, message, sha) {
-    const body = { message, content: contentB64, branch };
-    if (sha) body.sha = sha;
-    return gh(`/contents/${path.split("/").map(encodeURIComponent).join("/")}`, { method: "PUT", body: JSON.stringify(body) });
-  }
-
   // 큰 사진은 줄이고 webp 로 변환 (투명 배경 유지)
-  function imageToB64(file, max = 1600) {
+  function imageToBlob(file, max = 1600) {
     return new Promise((resolve, reject) => {
       const img = new Image();
       img.onload = () => {
@@ -139,118 +101,33 @@
         c.height = Math.round(img.height * scale);
         c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
         URL.revokeObjectURL(img.src);
-        c.toBlob((blob) => {
-          if (!blob) return reject(new Error("이미지 변환 실패"));
-          const fr = new FileReader();
-          fr.onload = () => resolve(fr.result.split(",")[1]);
-          fr.readAsDataURL(blob);
-        }, "image/webp", 0.92);
+        c.toBlob((blob) => (blob ? resolve(blob) : reject(new Error("이미지 변환 실패"))), "image/webp", 0.92);
       };
       img.onerror = () => reject(new Error("이미지를 읽을 수 없어요"));
       img.src = URL.createObjectURL(file);
     });
   }
 
-  // ---------- data load / save ----------
-  async function loadFresh() {
-    const f = await gh(`/contents/${DATA_PATH}?ref=${encodeURIComponent(branch)}`);
-    dataSha = f.sha;
-    App.data = App.normalize(JSON.parse(b64decode(f.content)));
+  async function uploadImage(file) {
+    const path = `images/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.webp`;
+    await App.uploadMedia(path, await imageToBlob(file), "image/webp");
+    return path;
   }
 
-  async function saveData(next, message) {
-    const content = b64encode(JSON.stringify(next, null, 2) + "\n");
-    try {
-      const r = await putFile(DATA_PATH, content, message, dataSha);
-      dataSha = r.content.sha;
-    } catch (e) {
-      if (e.status !== 409 && e.status !== 422) throw e;
-      // 다른 곳에서 먼저 저장된 경우: 최신 sha 로 한 번 더 시도
-      const f = await gh(`/contents/${DATA_PATH}?ref=${encodeURIComponent(branch)}`);
-      const r = await putFile(DATA_PATH, content, message, f.sha);
-      dataSha = r.content.sha;
-    }
+  async function saveData(next) {
+    const { error } = await App.sb.from("site_data").upsert({ id: "main", data: next, updated_at: new Date().toISOString() });
+    if (error) throw new Error(error.message);
     App.data = next;
     App.render();
-    App.toast("저장했어요 · 사이트 반영까지 1~2분 걸려요", 2600);
+    App.toast("저장했어요");
   }
 
-  // ---------- login ----------
-  function loginForm() {
-    App.openModal(`<form class="form" id="login-form">
-      <h2>ADMIN</h2>
-      <p class="desc">GitHub 토큰이 있으면 이 페이지에서 바로 사진과 글을 추가·수정할 수 있어요.</p>
-      <div class="field">
-        <label>GitHub 토큰</label>
-        <input type="password" name="token" placeholder="github_pat_..." autocomplete="off" required>
-        <p class="hint">토큰은 이 브라우저에만 저장돼요.</p>
-      </div>
-      <details>
-        <summary style="cursor:pointer;font-size:12px;color:#666">토큰 만드는 법</summary>
-        <ol>
-          <li><code>github.com/settings/personal-access-tokens/new</code> 접속</li>
-          <li>Repository access → <b>Only select repositories</b> → <code>${OWNER}/${REPO}</code></li>
-          <li>Permissions → Repository permissions → <b>Contents: Read and write</b><br>(선택) <b>Pages: Read-only</b></li>
-          <li>Generate token → 생성된 <code>github_pat_...</code> 복사해서 위에 붙여넣기</li>
-        </ol>
-      </details>
-      <div class="form-actions">
-        <button type="button" class="pill-btn" data-close>Cancel</button>
-        <button type="submit" class="pill-btn dark">Login</button>
-      </div>
-    </form>`);
-    const form = document.getElementById("login-form");
-    form.querySelector("[data-close]").onclick = App.closeModal;
-    form.onsubmit = async (e) => {
-      e.preventDefault();
-      form.classList.add("busy");
-      try {
-        await login(form.token.value.trim());
-        App.closeModal();
-        App.toast("편집 모드가 켜졌어요");
-      } catch (err) {
-        form.classList.remove("busy");
-        alert(err.message);
-      }
-    };
-  }
-
-  async function login(t) {
-    token = t;
-    let repo;
-    try {
-      repo = await gh("");
-    } catch (e) {
-      token = "";
-      throw new Error(e.status === 401 ? "토큰이 올바르지 않아요." : "저장소에 접근할 수 없어요. 토큰 권한을 확인해 주세요.");
-    }
-    if (!repo.permissions?.push) {
-      token = "";
-      throw new Error("이 토큰에는 쓰기 권한(Contents: Read and write)이 없어요.");
-    }
-    // 사이트가 실제로 배포되는 브랜치에 저장
-    branch = repo.default_branch;
-    try {
-      const pages = await gh("/pages");
-      if (pages?.source?.branch) branch = pages.source.branch;
-    } catch {}
-    await loadFresh();
-    try { localStorage.setItem(TOKEN_KEY, token); } catch {}
-    App.admin = true;
-    document.body.classList.add("admin");
+  // ---------- 편집 모드 켜기/끄기 ----------
+  document.getElementById("edit-btn").addEventListener("click", () => {
+    App.admin = !App.admin;
+    document.body.classList.toggle("admin", App.admin);
     App.render();
-  }
-
-  function logout() {
-    if (!confirm("편집 모드를 끌까요? (이 브라우저에 저장된 토큰이 지워져요)")) return;
-    token = "";
-    try { localStorage.removeItem(TOKEN_KEY); } catch {}
-    App.admin = false;
-    document.body.classList.remove("admin");
-    App.render();
-  }
-
-  document.getElementById("admin-btn").addEventListener("click", () => (App.admin ? logout() : loginForm()));
+  });
 
   // ---------- edit form ----------
   const PARTS = [["top", "상의"], ["bottom", "하의"], ["shoes", "신발"]];
@@ -267,7 +144,7 @@
       ${person("male", "남캐 의상")}
       ${person("female", "여캐 의상")}
       <div class="img-field">
-        <div class="preview" style="${v.image ? `background-image:url('${esc(v.image)}')` : ""}"></div>
+        <div class="preview" style="${v.image ? `background-image:url('${esc(App.mediaUrl(v.image))}')` : ""}"></div>
         <div><input type="file" class="v-file" accept="image/*"><p class="hint">이 의상 사진 (선택)</p></div>
       </div>
     </div>`;
@@ -295,7 +172,7 @@
     }
     if (f.type === "image")
       return `<div class="img-field">
-        <div class="preview" style="${val ? `background-image:url('${esc(val)}')` : ""}"></div>
+        <div class="preview" style="${val ? `background-image:url('${esc(App.mediaUrl(val))}')` : ""}"></div>
         <div><input type="file" name="${name}" accept="image/*"><p class="hint">${val ? "새 파일을 고르면 교체돼요." : "사진 파일을 골라주세요."}</p></div>
       </div>`;
     return `<input type="text" name="${name}" value="${esc(val)}">`;
@@ -353,11 +230,7 @@
               for (const k of ["male", "female"])
                 v[k] = Object.fromEntries(PARTS.map(([part]) => [part, box.querySelector(`.v-${k}-${part}`).value.trim()]));
               const file = box.querySelector(".v-file").files[0];
-              if (file) {
-                const path = `${f.dir}/${Date.now()}.webp`;
-                await putFile(path, await imageToB64(file), `Upload image: ${path}`);
-                v.image = path;
-              }
+              if (file) v.image = await uploadImage(file);
               const hasText = ["male", "female"].some((k) => Object.values(v[k]).some(Boolean));
               if (v.label || v.image || hasText) list.push(v);
             }
@@ -368,9 +241,7 @@
           if (f.type === "image") {
             const file = el.files[0];
             if (file) {
-              const path = `${f.dir}/${Date.now()}.webp`;
-              await putFile(path, await imageToB64(file), `Upload image: ${path}`);
-              setPath(item, f.key, path);
+              setPath(item, f.key, await uploadImage(file));
             } else if (isNew && !getPath(item, f.key) && col === "gallery") {
               throw new Error("사진 파일을 골라주세요.");
             }
@@ -391,7 +262,7 @@
           const list = getPath(next, col);
           isNew ? list.push(item) : (list[index] = item);
         }
-        await saveData(next, `${isNew ? "Add" : "Update"} ${col}: ${item.title || item.name || item.caption || item.from || ""}`.trim());
+        await saveData(next);
         App.closeModal();
       } catch (err) {
         form.classList.remove("busy");
@@ -416,7 +287,7 @@
       if (to == null || to.trim() === from) return;
       const next = clone(App.data);
       next.gallery.forEach((g) => { if ((g.section || "").trim() === from) g.section = to.trim(); });
-      try { await saveData(next, `Rename gallery section: ${from} → ${to.trim()}`); } catch (err) { alert(`저장하지 못했어요: ${err.message}`); }
+      try { await saveData(next); } catch (err) { alert(`저장하지 못했어요: ${err.message}`); }
       return;
     }
     if (act === "edit") return openEditor(col, i);
@@ -437,18 +308,10 @@
       [list[i], list[j]] = [list[j], list[i]];
     }
     try {
-      await saveData(next, `${act === "del" ? "Delete" : "Reorder"} ${col}`);
+      await saveData(next);
     } catch (err) {
       alert(`저장하지 못했어요: ${err.message}`);
     }
   });
 
-  // ---------- 자동 로그인 ----------
-  let saved = "";
-  try { saved = localStorage.getItem(TOKEN_KEY) || ""; } catch {}
-  if (saved) {
-    App.ready.then(() => login(saved)).catch(() => {
-      try { localStorage.removeItem(TOKEN_KEY); } catch {}
-    });
-  }
 })();
