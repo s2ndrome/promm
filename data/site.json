@@ -40,30 +40,31 @@
       "title": "페어 2",
       "image": "img/pairs/pair2.webp",
       "male": {
-        "name": "남캐 이름",
-        "base": "남자 캐릭터 프롬프트"
+        "name": "코드",
+        "base": "boy, handsome male, 2::black hair, curtained bangs, center parted bangs, short hair::, 0.5::messy hair::, mole under eye, black eyes, sharp eyes, broad shoulders,"
       },
       "female": {
-        "name": "여캐 이름",
-        "base": "여자 캐릭터 프롬프트"
+        "name": "캔디",
+        "base": "girl, beautiful girl, long straight hair, hair behind ears, (1::pale blue hair, mint hair::), straight bangs, 2::soft bangs::, gray eyes, -1::tsurime::, round eyes, clear pale skin, -1::short bangs, parted bangs::,"
       },
       "variants": [
         {
           "label": "제복",
+          "sub": "",
           "image": "",
           "male": {
-            "top": "",
-            "bottom": "",
-            "shoes": ""
+            "top": "layered clothes, black hoodie, 2::opend white military jacket::,",
+            "bottom": "white pants,",
+            "shoes": "white sneakers,"
           },
           "female": {
-            "top": "",
-            "bottom": "",
-            "shoes": ""
-          },
-          "sub": ""
+            "top": "black long sleeve dress shirt, gray harness,",
+            "bottom": "black shorts, gray belt,",
+            "shoes": "black combat boots,"
+          }
         }
-      ]
+      ],
+      "tag": "ARCH"
     },
     {
       "id": "pair3",
