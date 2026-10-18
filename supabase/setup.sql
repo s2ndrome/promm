@@ -112,4 +112,4 @@ create policy "owner deletes media" on storage.objects for delete to authenticat
 -- ---------- 초대 코드 ----------
 -- 아래 '여기에-초대코드' 를 원하는 코드로 바꾸세요. (나중에 바꿀 때도 이 두 줄만 다시 실행)
 delete from private.invite;
-insert into private.invite (code) values ('여기에-초대코드');
+insert into private.invite (code) values ('zzunsiklovesrom');
