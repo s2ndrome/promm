@@ -174,7 +174,6 @@ body.admin .adm-inline { display: inline-flex; }
 .admin-btn { border: 0; background: none; cursor: pointer; color: #c4c4c4; font-size: 11px; padding: 0; }
 .admin-btn:hover { color: var(--ink); }
 body:not(.owner) .owner-only, body:not(.can-edit) .edit-only { display: none !important; }
-body:not(.owner) .owner-edit .adm-tools, body:not(.owner) .owner-edit .adm-bar { display: none !important; }
 .grade { border: 1px solid var(--line); border-radius: 999px; padding: 1px 9px; font-size: 10px; letter-spacing: .06em; color: #666; }
 .member-list { border-top: 1px solid #eee; }
 .member-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #eee; }

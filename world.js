@@ -1,4 +1,4 @@
-// ARCH World 페이지. 쭌식(owner)만 편집 도구가 보임
+// ARCH World 페이지. ARCH PRIMA 이상이면 edit 모드에서 편집 도구가 보임
 (function () {
   const App = window.App;
   const esc = App.esc;
@@ -183,7 +183,7 @@
       </details>`).join("");
     const ch7 = chapter("07", "GLOSSARY", "기타 용어", `<div class="w-terms">${terms}</div>${addBtn("terms", "용어 추가")}`);
 
-    return `<div class="world-page owner-edit">${hero}<div class="w-body">${ch1}${ch2}${ch3}${ch4}${ch5}${ch6}${ch7}</div>
+    return `<div class="world-page">${hero}<div class="w-body">${ch1}${ch2}${ch3}${ch4}${ch5}${ch6}${ch7}</div>
       <p class="w-end">— END OF DOCUMENT —</p></div>`;
   };
 

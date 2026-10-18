@@ -7,8 +7,8 @@
 --  등급: owner(쭌식) > prima(ARCH PRIMA) > vanguard(Vanguard) > acolyte(Acolyte)
 --    acolyte  : 보기만
 --    vanguard : + BGM 추가
---    prima    : + 페어 / 갤러리 편집
---    owner    : + World·사이트 정보 편집, BGM 삭제, 회원 등급 변경
+--    prima    : + 페어 / 에셋 / 링크 / ARCH(World) 편집
+--    owner    : + 사이트 정보(로고) 편집, BGM 삭제, 회원 등급 변경
 -- ============================================================
 
 -- ---------- 회원 ----------
@@ -129,7 +129,7 @@ create policy "members insert site" on public.site_data for insert to authentica
 drop policy if exists "members update site" on public.site_data;
 create policy "members update site" on public.site_data for update to authenticated using (public.my_rank() >= 3) with check (public.my_rank() >= 3);
 
--- World 와 사이트 정보는 owner 만 바꿀 수 있음
+-- 사이트 정보(로고)는 owner 만 바꿀 수 있음. World 는 ARCH PRIMA 이상(위 update 정책)
 create or replace function public.guard_site_data()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
@@ -137,11 +137,8 @@ begin
     -- 첫 저장(예전 데이터 옮기기)은 회원 누구나 가능. 이미 있으면 막힘(primary key)
     return new;
   end if;
-  if not public.is_owner() and (
-    new.data -> 'world' is distinct from old.data -> 'world'
-    or new.data -> 'site' is distinct from old.data -> 'site'
-  ) then
-    raise exception 'only the owner can edit world';
+  if not public.is_owner() and new.data -> 'site' is distinct from old.data -> 'site' then
+    raise exception 'only the owner can edit site info';
   end if;
   new.updated_at := now();
   new.updated_by := auth.uid();
