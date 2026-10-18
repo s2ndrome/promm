@@ -1,3 +1,9 @@
+@font-face { font-family: "Paperlogy NN"; src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-4Regular.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Paperlogy NN"; src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-6SemiBold.woff2") format("woff2"); font-weight: 600; font-display: swap; }
+@font-face { font-family: "Paperlogy NN"; src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-7Bold.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "Paperlogy NN"; src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-8ExtraBold.woff2") format("woff2"); font-weight: 800; font-display: swap; }
+@font-face { font-family: "Paperlogy NN"; src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2408-3@1.0/Paperlogy-9Black.woff2") format("woff2"); font-weight: 900; font-display: swap; }
+
 :root {
   --bg: #ffffff;
   --ink: #1a1a1a;
@@ -385,6 +391,8 @@ body.admin .adm-badge { display: block; }
 body.world-mode {
   --w-bg: #06070a; --w-ink: #ece6d8; --w-dim: #9c968a; --w-line: rgba(236, 230, 216, .12);
   --w-gold: #c9a96e; --w-gold-2: #f1dcaa; --w-panel: rgba(255, 255, 255, .03);
+  --w-display: "Paperlogy", "Paperlogy NN", "Pretendard Variable", Pretendard, sans-serif;
+  --w-body: "Pretendard Variable", Pretendard, -apple-system, sans-serif;
   background: var(--w-bg); color: var(--w-ink);
 }
 body.world-mode .top .nav-link { color: var(--w-dim); }
@@ -399,7 +407,7 @@ body.world-mode .bgm-play { background: var(--w-gold); color: #111; }
 body.world-mode .bgm-shuffle.on { color: var(--w-gold-2); }
 body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); border-color: var(--w-line); }
 
-.world-page { font-family: "Noto Serif KR", "Gowun Batang", serif; }
+.world-page { font-family: var(--w-body); }
 .world-page .adm-bar { margin: 18px 0 0; }
 
 /* hero */
@@ -419,18 +427,18 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .e-spoke { stroke: var(--w-gold); stroke-opacity: .2; }
 .e-dot { filter: drop-shadow(0 0 6px currentColor); stroke: #06070a; stroke-width: 3; }
 .e-spin { transform-origin: 150px 150px; animation: wspin 60s linear infinite; }
-.e-core { font-family: "Cinzel", serif; font-size: 34px; font-weight: 800; fill: var(--w-gold-2); }
+.e-core { font-family: var(--w-display); font-size: 34px; font-weight: 900; fill: var(--w-gold-2); }
 @keyframes wspin { to { transform: rotate(360deg); } }
-.w-kicker { position: relative; font-family: "Cinzel", serif; font-size: 12px; letter-spacing: .45em; color: var(--w-gold); margin: 0; }
+.w-kicker { position: relative; font-family: var(--w-display); font-size: 12px; letter-spacing: .45em; color: var(--w-gold); margin: 0; }
 .w-title {
   position: relative; margin: 6px 0 0;
-  font-family: "Cinzel", serif; font-weight: 800;
+  font-family: var(--w-display); font-weight: 800;
   font-size: clamp(72px, 15vw, 168px); line-height: 1; letter-spacing: .18em; padding-left: .18em;
   background: linear-gradient(180deg, #fff6df 0%, var(--w-gold-2) 40%, var(--w-gold) 75%, #7a6237 100%);
   -webkit-background-clip: text; background-clip: text; color: transparent;
   text-shadow: 0 0 60px rgba(201, 169, 110, .25);
 }
-.w-ver { position: relative; font-family: "Cinzel", serif; font-size: 11px; letter-spacing: .5em; color: var(--w-dim); margin: 14px 0 34px; }
+.w-ver { position: relative; font-family: var(--w-display); font-size: 11px; letter-spacing: .5em; color: var(--w-dim); margin: 14px 0 34px; }
 .w-quote {
   position: relative; max-width: 640px; margin: 0 auto 26px; padding: 18px 24px;
   border-top: 1px solid var(--w-line); border-bottom: 1px solid var(--w-line);
@@ -440,10 +448,10 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-toc { position: relative; display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 46px; }
 .w-toc button {
   border: 1px solid var(--w-line); background: rgba(0, 0, 0, .3); color: var(--w-ink); cursor: pointer;
-  font-family: "Noto Serif KR", serif; font-size: 12px; padding: 7px 14px; display: inline-flex; gap: 8px; align-items: baseline;
+  font-family: var(--w-body); font-size: 12px; padding: 7px 14px; display: inline-flex; gap: 8px; align-items: baseline;
   transition: border-color .2s, color .2s;
 }
-.w-toc button b { font-family: "Cinzel", serif; color: var(--w-gold); font-size: 11px; }
+.w-toc button b { font-family: var(--w-display); color: var(--w-gold); font-size: 11px; }
 .w-toc button:hover { border-color: var(--w-gold); }
 
 /* chapters */
@@ -451,10 +459,10 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-chapter { padding: 90px 0 30px; border-top: 1px solid var(--w-line); }
 .w-ch-head { display: flex; align-items: flex-end; gap: 22px; margin-bottom: 36px; }
 .w-ch-no {
-  font-family: "Cinzel", serif; font-weight: 800; font-size: clamp(64px, 10vw, 110px); line-height: .8;
+  font-family: var(--w-display); font-weight: 800; font-size: clamp(64px, 10vw, 110px); line-height: .8;
   color: transparent; -webkit-text-stroke: 1px var(--w-gold);
 }
-.w-ch-en { font-family: "Cinzel", serif; font-size: 12px; letter-spacing: .4em; color: var(--w-gold); margin: 0 0 6px; }
+.w-ch-en { font-family: var(--w-display); font-size: 12px; letter-spacing: .4em; color: var(--w-gold); margin: 0 0 6px; }
 .w-ch-ko { font-size: clamp(22px, 3.4vw, 34px); font-weight: 900; margin: 0; letter-spacing: -.01em; }
 .w-sub {
   display: flex; align-items: center; gap: 14px; margin: 54px 0 20px;
@@ -475,11 +483,11 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-panel h3 { font-size: 22px; font-weight: 900; margin: 0 0 12px; }
 .w-panel h4 { font-size: 16px; font-weight: 600; margin: 0 0 8px; color: var(--w-gold-2); }
 .w-panel p { margin: 0; font-size: 14px; line-height: 1.95; color: #cfc8b9; white-space: normal; }
-.w-role-en { font-family: "Cinzel", serif; font-size: 11px; letter-spacing: .35em; color: var(--w-gold) !important; margin: 0 0 6px !important; }
+.w-role-en { font-family: var(--w-display); font-size: 11px; letter-spacing: .35em; color: var(--w-gold) !important; margin: 0 0 6px !important; }
 
 .w-rules { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 30px; }
 .w-rule { position: relative; display: grid; grid-template-columns: 46px 1fr; gap: 10px; padding: 20px 0; border-bottom: 1px solid var(--w-line); }
-.w-rule-no { font-family: "Cinzel", serif; font-size: 20px; color: var(--w-gold); }
+.w-rule-no { font-family: var(--w-display); font-size: 20px; color: var(--w-gold); }
 .w-rule h4 { margin: 0 0 6px; font-size: 16px; }
 .w-rule p { margin: 0; font-size: 14px; line-height: 1.9; color: #cfc8b9; }
 
@@ -490,12 +498,12 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-ranks { border-top: 1px solid var(--w-line); }
 .w-rank { position: relative; display: grid; grid-template-columns: 110px 1fr; gap: 20px; padding: 24px 0; border-bottom: 1px solid var(--w-line); }
 .w-rank-grade {
-  font-family: "Cinzel", serif; font-weight: 800; font-size: 22px; color: var(--w-gold-2);
+  font-family: var(--w-display); font-weight: 800; font-size: 22px; color: var(--w-gold-2);
   border: 1px solid rgba(201, 169, 110, .5); display: flex; align-items: center; justify-content: center; min-height: 64px; text-align: center; padding: 4px;
 }
 .w-rank:first-child .w-rank-grade { background: linear-gradient(135deg, rgba(201, 169, 110, .3), transparent); }
 .w-rank h4 { margin: 0 0 6px; font-size: 18px; font-weight: 900; }
-.w-rank h4 small { font-family: "Cinzel", serif; font-size: 11px; letter-spacing: .3em; color: var(--w-gold); margin-left: 8px; font-weight: 400; }
+.w-rank h4 small { font-family: var(--w-display); font-size: 11px; letter-spacing: .3em; color: var(--w-gold); margin-left: 8px; font-weight: 400; }
 .w-rank p { margin: 0; font-size: 14px; line-height: 1.9; color: #cfc8b9; }
 .w-rank-rep { margin-top: 8px !important; color: var(--w-dim) !important; font-style: italic; }
 
@@ -512,9 +520,9 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-el-head { position: relative; display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
 .w-el-icon { font-size: 34px; filter: drop-shadow(0 0 12px var(--el)); }
 .w-el-head h3 { margin: 0; font-size: 24px; font-weight: 900; }
-.w-el-head p { margin: 0; font-family: "Cinzel", serif; font-size: 12px; letter-spacing: .3em; color: var(--el); }
+.w-el-head p { margin: 0; font-family: var(--w-display); font-size: 12px; letter-spacing: .3em; color: var(--el); }
 .w-el dl { position: relative; margin: 0; }
-.w-el dt { font-family: "Cinzel", "Noto Serif KR", serif; font-size: 11px; letter-spacing: .15em; color: var(--el); margin-top: 12px; }
+.w-el dt { font-family: var(--w-display); font-size: 11px; letter-spacing: .15em; color: var(--el); margin-top: 12px; }
 .w-el dd { margin: 4px 0 0; font-size: 13px; line-height: 1.8; color: #d6d0c3; }
 .w-el-rep { position: relative; margin-top: 16px; border-top: 1px solid var(--w-line); padding-top: 10px; }
 .w-el-rep summary { cursor: pointer; font-size: 12px; color: var(--w-dim); list-style: none; }
@@ -527,8 +535,8 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-teams { display: grid; grid-template-columns: repeat(2, 1fr); gap: 18px; }
 .w-team { position: relative; border: 1px solid var(--w-line); background: var(--w-panel); }
 .w-team header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 16px 20px; border-bottom: 1px solid var(--w-line); background: linear-gradient(90deg, rgba(201, 169, 110, .12), transparent); }
-.w-team h3 { margin: 0; font-family: "Cinzel", "Noto Serif KR", serif; font-size: 16px; letter-spacing: .12em; font-weight: 600; }
-.w-team header span { font-family: "Cinzel", "Noto Serif KR", serif; font-size: 11px; letter-spacing: .2em; color: var(--w-gold); }
+.w-team h3 { margin: 0; font-family: var(--w-display); font-size: 16px; letter-spacing: .12em; font-weight: 600; }
+.w-team header span { font-family: var(--w-display); font-size: 11px; letter-spacing: .2em; color: var(--w-gold); }
 .w-team ul { list-style: none; margin: 0; padding: 8px 20px 14px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 20px; }
 .w-team li { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 9px 0; border-bottom: 1px dashed var(--w-line); }
 .w-team li b { font-weight: 600; font-size: 15px; display: inline-flex; align-items: center; gap: 8px; }
@@ -538,8 +546,8 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 /* places */
 .w-places { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0 34px; }
 .w-place { position: relative; padding: 26px 0 26px 60px; border-bottom: 1px solid var(--w-line); }
-.w-place-no { position: absolute; left: 0; top: 26px; font-family: "Cinzel", serif; font-size: 24px; color: var(--w-gold); opacity: .8; }
-.w-place-en { font-family: "Cinzel", "Noto Serif KR", serif; font-size: 10px; letter-spacing: .25em; color: var(--w-gold); margin: 0 0 4px; }
+.w-place-no { position: absolute; left: 0; top: 26px; font-family: var(--w-display); font-size: 24px; color: var(--w-gold); opacity: .8; }
+.w-place-en { font-family: var(--w-display); font-size: 10px; letter-spacing: .25em; color: var(--w-gold); margin: 0 0 4px; }
 .w-place h3 { margin: 0 0 8px; font-size: 20px; font-weight: 900; }
 .w-place p:last-of-type { margin: 0; font-size: 13.5px; line-height: 1.9; color: #cfc8b9; }
 .w-places .w-place:first-child { grid-column: 1 / -1; padding: 34px 0 34px 60px; }
@@ -555,7 +563,7 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
   display: flex; gap: 20px; align-items: center; margin-top: 22px; padding: 24px 26px;
   border: 1px solid rgba(255, 60, 60, .55); background: repeating-linear-gradient(-45deg, rgba(255, 50, 50, .08) 0 14px, transparent 14px 28px);
 }
-.w-codered h3 { margin: 0 0 6px; font-family: "Cinzel", "Noto Serif KR", serif; letter-spacing: .15em; color: #ff6b5e; font-size: 17px; }
+.w-codered h3 { margin: 0 0 6px; font-family: var(--w-display); letter-spacing: .15em; color: #ff6b5e; font-size: 17px; }
 .w-codered p { margin: 0; font-size: 14px; line-height: 1.9; }
 .w-siren { flex: none; width: 16px; height: 16px; border-radius: 50%; background: #ff3b30; box-shadow: 0 0 0 0 rgba(255, 59, 48, .7); animation: siren 1.4s infinite; }
 @keyframes siren { 70% { box-shadow: 0 0 0 18px rgba(255, 59, 48, 0); } 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); } }
@@ -566,12 +574,12 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-term summary { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 20px 4px; cursor: pointer; list-style: none; }
 .w-term summary::-webkit-details-marker { display: none; }
 .w-term summary span { font-size: 18px; font-weight: 600; }
-.w-term summary span::before { content: "+"; display: inline-block; width: 22px; color: var(--w-gold); font-family: "Cinzel", serif; transition: transform .2s; }
+.w-term summary span::before { content: "+"; display: inline-block; width: 22px; color: var(--w-gold); font-family: var(--w-display); transition: transform .2s; }
 .w-term[open] summary span::before { content: "−"; }
-.w-term summary small { font-family: "Cinzel", serif; font-size: 11px; letter-spacing: .3em; color: var(--w-gold); }
+.w-term summary small { font-family: var(--w-display); font-size: 11px; letter-spacing: .3em; color: var(--w-gold); }
 .w-term > p { margin: 0 0 24px 26px; font-size: 14px; line-height: 2; color: #cfc8b9; }
 
-.w-end { text-align: center; font-family: "Cinzel", serif; font-size: 11px; letter-spacing: .5em; color: #5f5a52; padding: 80px 0 20px; }
+.w-end { text-align: center; font-family: var(--w-display); font-size: 11px; letter-spacing: .5em; color: #5f5a52; padding: 80px 0 20px; }
 
 /* 등장 효과 */
 .reveal { opacity: 0; transform: translateY(28px); transition: opacity .9s ease, transform .9s ease; }
@@ -602,3 +610,13 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
   .w-places .w-place:first-child { padding-left: 46px; }
   .link-row .adm-tools { right: 4px; }
 }
+
+/* World 제목 폰트: 페이퍼로지 */
+.w-ch-ko, .w-panel h3, .w-panel h4, .w-rank h4, .w-el-head h3, .w-team li b,
+.w-place h3, .w-threat h3, .w-term summary span, .w-intro, .w-motto blockquote, .w-rule h4, .w-sub {
+  font-family: var(--w-display);
+}
+.w-title { font-weight: 900; letter-spacing: .12em; padding-left: .12em; }
+.w-ch-no { font-weight: 900; }
+.w-quote { font-style: normal; }
+.w-rank-rep { font-style: normal !important; }
