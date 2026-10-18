@@ -90,7 +90,7 @@
     // 02 아크
     const a = w.arch || {};
     const ranks = (w.ranks || []).map((r, i) => `<div class="w-rank">
-        <span class="w-rank-grade">${esc(r.grade)}</span>
+        <span class="w-rank-grade ${String(r.grade || "").length > 4 ? "long" : String(r.grade || "").length > 2 ? "mid" : ""}">${esc(r.grade)}</span>
         <div class="w-rank-body">
           <h4>${esc(r.name)} <small>${esc(r.en)}</small></h4>
           <p>${nl(r.desc)}</p>
