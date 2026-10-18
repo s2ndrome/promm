@@ -145,15 +145,26 @@
         <div class="ooc-foot"><button type="button" class="pill-btn dark" data-copy="${esc(o.text)}">Copy</button></div>
       </article>`;
     };
-    const sections = [...groups].map(([name, idx]) => `<section class="g-section">
-        ${name || groups.size > 1 ? `<div class="block-title">${esc(name || "ETC")}
-          ${name ? `<span class="adm-inline"><button type="button" class="pill-btn" data-act="rename-section" data-col="ooc" data-section="${esc(name)}">이름 변경</button></span>` : ""}</div>` : ""}
-        <div class="ooc-grid">${idx.map(card).join("")}</div>
-        <div class="adm-bar g-add"><button type="button" class="pill-btn" data-act="add" data-col="ooc" data-section="${esc(name)}">+ 이 줄에 OOC 추가</button></div>
-      </section>`).join("");
+    // 구분 없는 글은 위에 그대로, 구분마다 토글
+    const loose = groups.get("") || [];
+    const toggles = [...groups].filter(([name]) => name).map(([name, idx]) => {
+      const key = `ooc:${name}`;
+      return `<details class="genre" data-genre-box="${esc(key)}" ${openGenres.has(key) ? "open" : ""}>
+        <summary><span class="genre-name">${esc(name)}</span><span class="genre-count">${idx.length}</span></summary>
+        <div class="genre-body">
+          <div class="ooc-grid">${idx.map(card).join("")}</div>
+          <div class="adm-bar genre-add">
+            <button type="button" class="pill-btn" data-act="add" data-col="ooc" data-section="${esc(name)}">+ 이 구분에 OOC 추가</button>
+            <button type="button" class="pill-btn" data-act="rename-section" data-col="ooc" data-section="${esc(name)}">구분 이름 변경</button>
+          </div>
+        </div>
+      </details>`;
+    }).join("");
     return `<div class="page-head"><h1>OOC</h1><p>누르면 전체 글이 열려요</p></div>
-      <div class="adm-bar">${addBtn("ooc", "OOC 추가")}</div>
-      ${sections || `<p class="link-empty">아직 OOC 가 없어요.</p>`}`;
+      <div class="adm-bar">${addBtn("ooc", "OOC 추가")}<button type="button" class="pill-btn" data-act="import" data-col="ooc">파일로 가져오기</button></div>
+      ${loose.length ? `<div class="ooc-grid">${loose.map(card).join("")}</div>` : ""}
+      ${toggles ? `<div class="genres ooc-genres">${toggles}</div>` : ""}
+      ${list.length ? "" : `<p class="link-empty">아직 OOC 가 없어요.</p>`}`;
   }
 
   function showOoc(o) {

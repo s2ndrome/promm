@@ -486,6 +486,76 @@
     };
   }
 
+  // ---------- OOC 파일로 가져오기 (.json 또는 노션 .md 내보내기) ----------
+  // 노션 토글 형식: "- 제목" 다음 줄부터 4칸 들여쓴 내용
+  function parseNotionMd(md) {
+    const items = [];
+    let cur = null;
+    for (const ln of md.replace(/\r/g, "").split("\n")) {
+      if (/^- \S/.test(ln)) {
+        cur = { title: ln.slice(2).trim(), body: [] };
+        items.push(cur);
+      } else if (cur) {
+        cur.body.push(ln.startsWith("    ") ? ln.slice(4) : ln);
+      }
+    }
+    return items.map((it) => ({
+      title: it.title.replace(/\*\*(.+?)\*\*/g, "$1").trim(),
+      text: it.body.join("\n").replace(/[ \t]+\n/g, "\n").replace(/^```[a-z]*\s*\n?|\n?```\s*$/gm, "").replace(/\n{3,}/g, "\n\n").trim(),
+    })).filter((x) => x.text);
+  }
+
+  function openImport() {
+    App.openModal(`<form class="form" id="import-form">
+      <h2>IMPORT OOC</h2>
+      <p class="desc">.json 파일이나 노션에서 내보낸 .md 파일을 고르면 OOC 가 한 번에 추가돼요.</p>
+      <div class="field"><label>구분</label><input type="text" name="section" value="TALK"></div>
+      <div class="field"><label>파일</label><input type="file" name="file" accept=".json,.md,.txt,application/json,text/markdown,text/plain">
+        <p class="hint" id="import-info">파일을 골라주세요.</p></div>
+      <div class="form-actions">
+        <button type="button" class="pill-btn" data-close>Cancel</button>
+        <button type="submit" class="pill-btn dark">가져오기</button>
+      </div>
+    </form>`);
+    const form = document.getElementById("import-form");
+    form.querySelector("[data-close]").onclick = App.closeModal;
+    let parsed = [];
+    form.file.onchange = async () => {
+      const f = form.file.files[0];
+      if (!f) return;
+      const text = await f.text();
+      try {
+        if (/\.json$/i.test(f.name) || text.trim().startsWith("[")) {
+          parsed = JSON.parse(text).map((x) => ({ title: String(x.title || ""), text: String(x.text || ""), section: x.section }));
+        } else {
+          parsed = parseNotionMd(text);
+        }
+      } catch {
+        parsed = [];
+      }
+      document.getElementById("import-info").textContent = parsed.length
+        ? `${parsed.length}개 찾았어요: ${parsed.slice(0, 3).map((x) => x.title || "제목 없음").join(", ")}${parsed.length > 3 ? " …" : ""}`
+        : "읽을 수 있는 OOC 가 없어요.";
+    };
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      if (!parsed.length) return alert("가져올 OOC 가 없어요.");
+      form.classList.add("busy");
+      const section = form.section.value.trim();
+      const next = clone(App.data);
+      const t = Date.now();
+      parsed.forEach((x, k) => next.ooc.push({ id: `o${t}-${k}`, section: section || x.section || "", title: x.title, text: x.text }));
+      try {
+        await saveData(next, ["ooc"]);
+        App.closeModal();
+        App.toast(`${parsed.length}개를 가져왔어요`);
+      } catch (err) {
+        form.classList.remove("busy");
+        alert(`저장하지 못했어요: ${err.message}`);
+      }
+    };
+  }
+
   // ---------- admin buttons ----------
   document.addEventListener("click", async (e) => {
     const btn = e.target.closest("[data-act]");
@@ -495,6 +565,7 @@
     const { act, col } = btn.dataset;
     const i = btn.dataset.i == null ? null : Number(btn.dataset.i);
 
+    if (act === "import") return openImport();
     if (act === "add") {
       const preset = {};
       if (btn.dataset.section) preset.section = btn.dataset.section;

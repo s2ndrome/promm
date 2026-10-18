@@ -140,6 +140,8 @@ body.world-mode .drop-btn { color: var(--w-dim); }
 }
 .ooc-foot { margin-top: auto; display: flex; justify-content: flex-end; padding-top: 6px; }
 .ooc-card .adm-tools { top: 10px; right: 10px; }
+.ooc-genres { margin-top: 30px; }
+.ooc-grid + .ooc-genres { margin-top: 50px; }
 .ooc-pop h2 { margin: 10px 0 18px; }
 .ooc-pop .prompt-text { max-height: 60vh; }
 
