@@ -11,7 +11,7 @@
       "color": "#d9d4ff",
       "male": {
         "name": "신드롬",
-        "prompt": "남자 캐릭터 프롬프트를 여기에 적어주세요.handsome male, age up, athletic build, v-shaped face, 2::ash brown hair,wolf cut,messy bangs,curtained bangs, face-framing strands::,  0.7::messy hair::, black eyes, -0.5::tsurime::, 0.5::half-lidded eyes::, expressionless,\n\nblack military uniform, black formal jacket, white collared shirt, black necktie, black leather gloves,"
+        "prompt": "handsome male, age up, athletic build, v-shaped face, 2::ash brown hair,wolf cut,messy bangs,curtained bangs, face-framing strands::,  0.7::messy hair::, black eyes, -0.5::tsurime::, 0.5::half-lidded eyes::, expressionless,\n\nblack military uniform, black formal jacket, white collared shirt, black necktie, black leather gloves,"
       },
       "female": {
         "name": "리아",
