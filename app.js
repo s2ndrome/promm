@@ -53,7 +53,7 @@
     const items = pairs.map(
       (p, i) => `<article class="item" data-open="pairs" data-i="${i}">
         <div class="item-head">
-          <span class="pill">#${num(i)}</span>
+          ${p.tag ? `<span class="pill">${esc(p.tag)}</span>` : "<span></span>"}
           <button type="button" class="star ${favs.has(p.id) ? "on" : ""}" data-fav="${esc(p.id)}" aria-label="즐겨찾기">${favs.has(p.id) ? "★" : "☆"}</button>
         </div>
         ${tools("pairs", i)}
@@ -74,7 +74,7 @@
       return `<figure class="shot" data-open="gallery" data-i="${i}">
         ${tools("gallery", i)}
         ${thumb(g.image, g.caption)}
-        <figcaption class="shot-cap"><span>${esc(g.caption || p?.title || "")}</span><span class="pill">#${num(i)}</span></figcaption>
+        <figcaption class="shot-cap"><span>${esc(g.caption || p?.title || "")}</span>${p?.tag ? `<span class="pill">${esc(p.tag)}</span>` : ""}</figcaption>
       </figure>`;
     }).join("");
     return `<div class="page-head"><h1>GALLERY</h1><p>사진을 누르면 프롬프트가 열려요</p></div>
@@ -142,47 +142,75 @@
   }
 
   // ---------- prompt popup ----------
-  function promptBlock(name, prompt) {
-    if (!name && !prompt) return "";
+  // 첫 단락(외형) + 둘째 단락(의상). 의상은 칩을 눌러야 나옴
+  function promptBlock(name, base, outfit) {
+    if (!name && !base && !outfit) return "";
+    const full = [base, outfit].filter(Boolean).join("\n\n");
     return `<div class="prompt">
       <div class="prompt-head">
         <b>${esc(name)}</b>
-        <button type="button" class="pill-btn" data-copy="${esc(prompt)}">Copy</button>
+        <span class="copy-btns">
+          <button type="button" class="pill-btn" data-copy="${esc(base)}">Copy</button>
+          <button type="button" class="pill-btn dark" data-copy="${esc(full)}">Full Copy</button>
+        </span>
       </div>
-      <p class="prompt-text">${esc(prompt)}</p>
+      <div class="prompt-text">${base ? `<p>${esc(base)}</p>` : ""}${outfit ? `<p class="outfit">${esc(outfit)}</p>` : ""}</div>
     </div>`;
   }
 
-  // 지금 열려 있는 팝업 (의상 탭 전환용)
+  // 상의/하의/신발을 체크박스 설정에 맞춰 합침
+  function outfitText(o, opt) {
+    if (!o) return "";
+    const parts = [o.top];
+    if (!opt.upper) {
+      parts.push(o.bottom);
+      if (!opt.noShoes) parts.push(o.shoes);
+    }
+    return parts.map((t) => (t || "").trim()).filter(Boolean).join(" ");
+  }
+
+  // 지금 열려 있는 팝업 상태
   let detail = null;
 
   function showPrompt(col, i) {
-    let names, variants, image, title, sub;
+    let people, variants, image, title, sub, tag;
+    const fromPair = (p) => [
+      { name: p.male?.name, base: p.male?.base || "" },
+      { name: p.female?.name, base: p.female?.base || "" },
+    ];
     if (col === "pairs") {
       const p = App.data.pairs[i];
-      names = [p.male?.name, p.female?.name];
+      people = fromPair(p);
       variants = p.variants || [];
       image = p.image;
       title = p.title;
-      sub = `${names[0] || ""} × ${names[1] || ""}`;
+      tag = p.tag;
     } else {
       const g = App.data.gallery[i];
       const p = pairById(g.pair) || {};
+      people = fromPair(p);
+      variants = p.variants || [];
       if (g.male || g.female) {
         // 사진에만 따로 적은 프롬프트
-        names = [g.male?.name || p.male?.name, g.female?.name || p.female?.name];
-        variants = [{ label: "", male: g.male?.prompt || "", female: g.female?.prompt || "" }];
-      } else {
-        names = [p.male?.name, p.female?.name];
-        variants = p.variants || [];
+        people = [
+          { name: g.male?.name || people[0].name, base: g.male?.prompt || "" },
+          { name: g.female?.name || people[1].name, base: g.female?.prompt || "" },
+        ];
+        variants = [];
       }
       image = g.image;
+      tag = p.tag;
       title = g.caption || p.title || "";
-      sub = p.title && g.caption ? p.title : `${names[0] || ""} × ${names[1] || ""}`;
+      sub = p.title && g.caption ? p.title : "";
     }
-    detail = { names, variants, image, title };
-    const tabs = variants.length > 1 || variants[0]?.label
-      ? `<div class="variants">${variants.map((v, k) => `<button type="button" class="vtab" data-variant="${k}">${esc(v.label || `#${k + 1}`)}</button>`).join("")}</div>`
+    sub ||= `${people[0].name || ""} × ${people[1].name || ""}`;
+    detail = { people, variants, image, title, sel: -1, opt: { upper: false, noShoes: false } };
+    const tabs = variants.length
+      ? `<div class="variants">${variants.map((v, k) => `<button type="button" class="vtab" data-variant="${k}">${esc(v.label || "의상")}${v.sub ? ` <em>${esc(v.sub)}</em>` : ""}</button>`).join("")}</div>
+        <div class="outfit-opts" hidden>
+          <label><input type="checkbox" data-opt="upper"> 상반신만</label>
+          <label><input type="checkbox" data-opt="noShoes"> 신발 없이</label>
+        </div>`
       : "";
     openModal(`<div class="detail">
       <div class="detail-visual">
@@ -190,21 +218,34 @@
         ${tabs}
       </div>
       <div class="detail-info">
-        <span class="pill">#${num(i)}</span>
+        ${tag ? `<span class="pill">${esc(tag)}</span>` : ""}
         <h2>${esc(title)}</h2>
         <p class="sub">${esc(sub)}</p>
         <div id="detail-prompts"></div>
       </div>
     </div>`);
-    selectVariant(0);
+    renderDetail();
+  }
+
+  function renderDetail() {
+    const { variants, sel, opt, people } = detail;
+    const v = variants[sel];
+    const [m, f] = people;
+    document.getElementById("detail-img").innerHTML = thumb(v?.image || detail.image, detail.title);
+    document.getElementById("detail-prompts").innerHTML =
+      promptBlock(m.name, m.base, outfitText(v?.male, opt)) + promptBlock(f.name, f.base, outfitText(v?.female, opt));
+    document.querySelectorAll(".vtab").forEach((b) => b.classList.toggle("active", Number(b.dataset.variant) === sel));
+    const opts = document.querySelector(".outfit-opts");
+    if (opts) {
+      opts.hidden = !v;
+      const shoes = opts.querySelector('[data-opt="noShoes"]');
+      shoes.disabled = opt.upper; // 상반신만이면 신발은 이미 빠짐
+    }
   }
 
   function selectVariant(k) {
-    const v = detail.variants[k] || {};
-    document.getElementById("detail-img").innerHTML = thumb(v.image || detail.image, detail.title);
-    document.getElementById("detail-prompts").innerHTML =
-      promptBlock(detail.names[0], v.male || "") + promptBlock(detail.names[1], v.female || "");
-    document.querySelectorAll(".vtab").forEach((b) => b.classList.toggle("active", Number(b.dataset.variant) === k));
+    detail.sel = detail.sel === k ? -1 : k; // 같은 칩을 다시 누르면 의상 끄기
+    renderDetail();
   }
 
   function openModal(html) {
@@ -251,6 +292,11 @@
     }
     const vt = e.target.closest("[data-variant]");
     if (vt) return selectVariant(Number(vt.dataset.variant));
+    const op = e.target.closest("[data-opt]");
+    if (op) {
+      detail.opt[op.dataset.opt] = op.checked;
+      return renderDetail();
+    }
     const cp = e.target.closest("[data-copy]");
     if (cp) return copy(cp.dataset.copy);
     const open = e.target.closest("[data-open]");
@@ -263,14 +309,30 @@
 
   $("#year").textContent = new Date().getFullYear();
 
-  // 예전 형식(male.prompt)을 의상 목록(variants)으로 변환
+  // 예전 형식을 지금 형식으로 변환
+  // 지금 형식: male/female.base = 외형 프롬프트
+  //           variants[].male/female = { top, bottom, shoes } 의상 프롬프트
   App.normalize = (d) => {
     for (const p of d.pairs || []) {
-      if (Array.isArray(p.variants)) continue;
-      const male = p.male?.prompt || "", female = p.female?.prompt || "";
-      p.variants = male || female ? [{ label: "제복", image: "", male, female }] : [];
-      if (p.male) delete p.male.prompt;
-      if (p.female) delete p.female.prompt;
+      p.male ??= {};
+      p.female ??= {};
+      if (!Array.isArray(p.variants)) {
+        p.variants = [];
+        if (p.male.prompt || p.female.prompt)
+          p.variants.push({ label: "제복", sub: "", image: "", male: p.male.prompt || "", female: p.female.prompt || "" });
+      }
+      for (const k of ["male", "female"]) {
+        delete p[k].prompt;
+        if (p[k].base === undefined) {
+          const first = p.variants[0]?.[k];
+          const base = typeof first === "string" ? first.split(/\n\s*\n/)[0].trim() : "";
+          p[k].base = base;
+          for (const v of p.variants)
+            if (typeof v[k] === "string" && v[k].startsWith(base)) v[k] = v[k].slice(base.length).trim();
+        }
+        for (const v of p.variants)
+          if (typeof v[k] !== "object" || !v[k]) v[k] = { top: v[k] || "", bottom: "", shoes: "" };
+      }
     }
     return d;
   };

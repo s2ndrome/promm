@@ -149,25 +149,31 @@ body.admin .admin-btn { color: var(--accent); }
 }
 .detail { display: grid; grid-template-columns: 1fr 1fr; gap: 36px; padding: 44px 44px 40px; align-items: start; }
 .detail-visual { position: sticky; top: 0; }
-.variants {
-  display: flex; flex-wrap: wrap; gap: 6px;
-  margin-top: 18px; padding: 8px;
-  border: 1px solid var(--line); border-radius: 14px;
-}
+.variants { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
 .vtab {
-  flex: 1 1 auto; min-width: 64px;
-  border: 0; border-radius: 9px; background: none; cursor: pointer;
-  font-size: 13px; padding: 8px 12px; color: #666;
-  transition: background .15s, color .15s;
+  border: 1px solid #d6dde2; background: #fff; cursor: pointer;
+  font-size: 13px; padding: 7px 13px; color: #333;
+  transition: background .15s, color .15s, border-color .15s;
 }
-.vtab:hover { background: var(--soft); color: var(--ink); }
-.vtab.active { background: var(--ink); color: #fff; }
+.vtab em { font-style: normal; font-size: 11px; color: #4f9bd4; margin-left: 4px; font-weight: 400; }
+.vtab:hover { border-color: #8cc4ea; }
+.vtab.active { background: #74b3e3; border-color: #74b3e3; color: #fff; font-weight: 500; }
+.vtab.active em { color: #fff; }
+.outfit-opts { display: flex; gap: 16px; margin-top: 12px; font-size: 13px; color: #444; }
+.outfit-opts[hidden] { display: none; }
+.outfit-opts label { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+.outfit-opts input { accent-color: #74b3e3; width: 15px; height: 15px; margin: 0; }
+.outfit-opts label:has(input:disabled) { opacity: .45; cursor: default; }
 .detail-info .pill { margin-bottom: 14px; }
 .detail-info h2 { font-size: 20px; font-weight: 500; margin: 0 0 2px; }
 .detail-info .sub { color: var(--muted); font-size: 13px; margin: 0 0 26px; }
 .prompt { border-top: 1px solid #eee; padding: 16px 0 6px; }
 .prompt-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .prompt-head b { font-weight: 500; font-size: 14px; }
+.copy-btns { display: flex; gap: 6px; }
+.prompt-text { white-space: normal; }
+.prompt-text p { margin: 0; white-space: pre-wrap; }
+.prompt-text p + p { margin-top: 1.1em; }
 .prompt-text {
   margin: 0; white-space: pre-wrap; word-break: break-word;
   font-size: 13px; font-weight: 300; line-height: 1.75;
@@ -225,8 +231,9 @@ body.admin .adm-badge { display: block; }
 .variant-edit { border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 10px; display: grid; gap: 8px; }
 .variant-top { display: flex; gap: 8px; align-items: center; }
 .variant-top .pill-btn { flex: none; white-space: nowrap; }
-.v-cap { font-size: 11px; color: var(--muted); margin-bottom: -4px; }
-.field .variant-edit textarea { min-height: 80px; }
+.v-cap { font-size: 11px; font-weight: 500; color: var(--ink); margin-top: 6px; }
+.v-part { display: grid; grid-template-columns: 40px 1fr; align-items: center; gap: 8px; }
+.v-part span { font-size: 12px; color: #666; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 .form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
 .form ol { padding-left: 18px; font-size: 13px; color: #555; }

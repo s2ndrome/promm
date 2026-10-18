@@ -23,13 +23,20 @@
       title: "Pair",
       fields: [
         { key: "title", label: "페어 이름", type: "text" },
+        { key: "tag", label: "태그 (예: ARCH, 月とナイフ, calltaku)", type: "text", hint: "카드 왼쪽 위 작은 태그에 보여요. 비워두면 안 보여요." },
         { key: "image", label: "페어 사진", type: "image", dir: "img/pairs" },
         { key: "male.name", label: "남캐 이름", type: "text" },
+        { key: "male.base", label: "남캐 외형 프롬프트 (첫 단락)", type: "textarea" },
         { key: "female.name", label: "여캐 이름", type: "text" },
-        { key: "variants", label: "의상별 프롬프트", type: "variants", dir: "img/pairs",
-          hint: "제복 / 사복 처럼 의상마다 프롬프트를 따로 적어요. 의상 사진은 선택이에요 (없으면 페어 사진이 보여요)." },
+        { key: "female.base", label: "여캐 외형 프롬프트 (첫 단락)", type: "textarea" },
+        { key: "variants", label: "의상 (둘째 단락)", type: "variants", dir: "img/pairs",
+          hint: "의상 칩을 누르면 둘째 단락에 나와요. 상의/하의/신발을 나눠 적으면 '상반신만', '신발 없이' 체크로 빼고 복사할 수 있어요. 의상 사진은 선택이에요." },
       ],
-      blank: () => ({ id: `p${Date.now()}`, title: "", image: "", male: { name: "" }, female: { name: "" }, variants: [{ label: "제복", image: "", male: "", female: "" }] }),
+      blank: () => ({
+        id: `p${Date.now()}`, title: "", tag: "", image: "",
+        male: { name: "", base: "" }, female: { name: "", base: "" },
+        variants: [{ label: "제복", sub: "", image: "", male: { top: "", bottom: "", shoes: "" }, female: { top: "", bottom: "", shoes: "" } }],
+      }),
     },
     gallery: {
       title: "Gallery",
@@ -245,16 +252,19 @@
   document.getElementById("admin-btn").addEventListener("click", () => (App.admin ? logout() : loginForm()));
 
   // ---------- edit form ----------
+  const PARTS = [["top", "상의"], ["bottom", "하의"], ["shoes", "신발"]];
   function variantHtml(v = {}) {
+    const person = (k, label) => `<span class="v-cap">${label}</span>
+      ${PARTS.map(([part, name]) => `<div class="v-part"><span>${name}</span>
+        <input type="text" class="v-${k}-${part}" value="${esc(v[k]?.[part])}"></div>`).join("")}`;
     return `<div class="variant-edit" data-image="${esc(v.image || "")}">
       <div class="variant-top">
-        <input type="text" class="v-label" placeholder="의상 이름 (예: 제복, 사복)" value="${esc(v.label)}">
+        <input type="text" class="v-label" placeholder="의상 이름 (예: 사복)" value="${esc(v.label)}">
+        <input type="text" class="v-sub" placeholder="보조 문구 (예: 여름 ver)" value="${esc(v.sub)}">
         <button type="button" class="pill-btn v-remove">삭제</button>
       </div>
-      <span class="v-cap">남캐 프롬프트</span>
-      <textarea class="v-male">${esc(v.male)}</textarea>
-      <span class="v-cap">여캐 프롬프트</span>
-      <textarea class="v-female">${esc(v.female)}</textarea>
+      ${person("male", "남캐 의상")}
+      ${person("female", "여캐 의상")}
       <div class="img-field">
         <div class="preview" style="${v.image ? `background-image:url('${esc(v.image)}')` : ""}"></div>
         <div><input type="file" class="v-file" accept="image/*"><p class="hint">이 의상 사진 (선택)</p></div>
@@ -331,17 +341,19 @@
             for (const box of form.querySelectorAll(".variant-edit")) {
               const v = {
                 label: box.querySelector(".v-label").value.trim(),
+                sub: box.querySelector(".v-sub").value.trim(),
                 image: box.dataset.image || "",
-                male: box.querySelector(".v-male").value,
-                female: box.querySelector(".v-female").value,
               };
+              for (const k of ["male", "female"])
+                v[k] = Object.fromEntries(PARTS.map(([part]) => [part, box.querySelector(`.v-${k}-${part}`).value.trim()]));
               const file = box.querySelector(".v-file").files[0];
               if (file) {
                 const path = `${f.dir}/${Date.now()}.webp`;
                 await putFile(path, await imageToB64(file), `Upload image: ${path}`);
                 v.image = path;
               }
-              if (v.label || v.male || v.female || v.image) list.push(v);
+              const hasText = ["male", "female"].some((k) => Object.values(v[k]).some(Boolean));
+              if (v.label || v.image || hasText) list.push(v);
             }
             setPath(item, f.key, list);
             continue;

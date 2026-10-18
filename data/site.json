@@ -9,17 +9,28 @@
       "title": "SYNDROME X LIA",
       "image": "img/pairs/pair1.webp",
       "male": {
-        "name": "신드롬"
+        "name": "신드롬",
+        "base": "handsome male, age up, athletic build, v-shaped face, 2::ash brown hair,wolf cut,messy bangs,curtained bangs, face-framing strands::,  0.7::messy hair::, black eyes, -0.5::tsurime::, 0.5::half-lidded eyes::, expressionless,"
       },
       "female": {
-        "name": "리아"
+        "name": "리아",
+        "base": "girl, cute face, large bust, left-side hair intake, sky blue eyes, dark brown hair, long hair,  low side ponytail, white ribbon, straight bangs, voluminous wavy hair, tareme, round eyes, aegyo sal,soft smile, -1::parted bangs::,"
       },
       "variants": [
         {
           "label": "제복",
           "image": "",
-          "male": "handsome male, age up, athletic build, v-shaped face, 2::ash brown hair,wolf cut,messy bangs,curtained bangs, face-framing strands::,  0.7::messy hair::, black eyes, -0.5::tsurime::, 0.5::half-lidded eyes::, expressionless,\n\nblack military uniform, black formal jacket, white collared shirt, black necktie, black leather gloves,",
-          "female": "girl, cute face, large bust, left-side hair intake, sky blue eyes, dark brown hair, long hair,  low side ponytail, white ribbon, straight bangs, voluminous wavy hair, tareme, round eyes, aegyo sal,soft smile, -1::parted bangs::,\n\nwhite military collared shirt with black ribbon tie, a grey belt , mini white High-waisted pleated skirt, white kneehighs, white Mary Jane shoes,"
+          "male": {
+            "top": "black military uniform, black formal jacket, white collared shirt, black necktie, black leather gloves,",
+            "bottom": "",
+            "shoes": ""
+          },
+          "female": {
+            "top": "white military collared shirt with black ribbon tie, a grey belt ,",
+            "bottom": "mini white High-waisted pleated skirt, white kneehighs,",
+            "shoes": "white Mary Jane shoes,"
+          },
+          "sub": ""
         }
       ]
     },
@@ -28,17 +39,28 @@
       "title": "페어 2",
       "image": "img/pairs/pair2.webp",
       "male": {
-        "name": "남캐 이름"
+        "name": "남캐 이름",
+        "base": "남자 캐릭터 프롬프트"
       },
       "female": {
-        "name": "여캐 이름"
+        "name": "여캐 이름",
+        "base": "여자 캐릭터 프롬프트"
       },
       "variants": [
         {
           "label": "제복",
           "image": "",
-          "male": "남자 캐릭터 프롬프트",
-          "female": "여자 캐릭터 프롬프트"
+          "male": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "female": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "sub": ""
         }
       ]
     },
@@ -47,17 +69,28 @@
       "title": "페어 3",
       "image": "img/pairs/pair3.webp",
       "male": {
-        "name": "남캐 이름"
+        "name": "남캐 이름",
+        "base": "남자 캐릭터 프롬프트"
       },
       "female": {
-        "name": "여캐 이름"
+        "name": "여캐 이름",
+        "base": "여자 캐릭터 프롬프트"
       },
       "variants": [
         {
           "label": "제복",
           "image": "",
-          "male": "남자 캐릭터 프롬프트",
-          "female": "여자 캐릭터 프롬프트"
+          "male": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "female": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "sub": ""
         }
       ]
     },
@@ -66,17 +99,28 @@
       "title": "페어 4",
       "image": "img/pairs/pair4.webp",
       "male": {
-        "name": "남캐 이름"
+        "name": "남캐 이름",
+        "base": "남자 캐릭터 프롬프트"
       },
       "female": {
-        "name": "여캐 이름"
+        "name": "여캐 이름",
+        "base": "여자 캐릭터 프롬프트"
       },
       "variants": [
         {
           "label": "제복",
           "image": "",
-          "male": "남자 캐릭터 프롬프트",
-          "female": "여자 캐릭터 프롬프트"
+          "male": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "female": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "sub": ""
         }
       ]
     },
@@ -85,17 +129,28 @@
       "title": "페어 5",
       "image": "",
       "male": {
-        "name": "남캐 이름"
+        "name": "남캐 이름",
+        "base": "남자 캐릭터 프롬프트"
       },
       "female": {
-        "name": "여캐 이름"
+        "name": "여캐 이름",
+        "base": "여자 캐릭터 프롬프트"
       },
       "variants": [
         {
           "label": "제복",
           "image": "",
-          "male": "남자 캐릭터 프롬프트",
-          "female": "여자 캐릭터 프롬프트"
+          "male": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "female": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "sub": ""
         }
       ]
     },
@@ -104,17 +159,28 @@
       "title": "페어 6",
       "image": "",
       "male": {
-        "name": "남캐 이름"
+        "name": "남캐 이름",
+        "base": "남자 캐릭터 프롬프트"
       },
       "female": {
-        "name": "여캐 이름"
+        "name": "여캐 이름",
+        "base": "여자 캐릭터 프롬프트"
       },
       "variants": [
         {
           "label": "제복",
           "image": "",
-          "male": "남자 캐릭터 프롬프트",
-          "female": "여자 캐릭터 프롬프트"
+          "male": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "female": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "sub": ""
         }
       ]
     },
@@ -123,17 +189,28 @@
       "title": "페어 7",
       "image": "",
       "male": {
-        "name": "남캐 이름"
+        "name": "남캐 이름",
+        "base": "남자 캐릭터 프롬프트"
       },
       "female": {
-        "name": "여캐 이름"
+        "name": "여캐 이름",
+        "base": "여자 캐릭터 프롬프트"
       },
       "variants": [
         {
           "label": "제복",
           "image": "",
-          "male": "남자 캐릭터 프롬프트",
-          "female": "여자 캐릭터 프롬프트"
+          "male": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "female": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "sub": ""
         }
       ]
     },
@@ -142,17 +219,28 @@
       "title": "페어 8",
       "image": "",
       "male": {
-        "name": "남캐 이름"
+        "name": "남캐 이름",
+        "base": "남자 캐릭터 프롬프트"
       },
       "female": {
-        "name": "여캐 이름"
+        "name": "여캐 이름",
+        "base": "여자 캐릭터 프롬프트"
       },
       "variants": [
         {
           "label": "제복",
           "image": "",
-          "male": "남자 캐릭터 프롬프트",
-          "female": "여자 캐릭터 프롬프트"
+          "male": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "female": {
+            "top": "",
+            "bottom": "",
+            "shoes": ""
+          },
+          "sub": ""
         }
       ]
     }
