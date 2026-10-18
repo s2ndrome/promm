@@ -125,6 +125,24 @@ body.world-mode .drop-btn { color: var(--w-dim); }
 .genre-empty { color: #999; font-size: 13px; margin: 0; padding: 10px 4px; }
 .genre-add { margin: 24px 0 0; justify-content: flex-start; }
 
+/* ---------- ooc ---------- */
+.ooc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.ooc-card {
+  position: relative; display: flex; flex-direction: column; gap: 10px; cursor: pointer;
+  border: 1px solid var(--line); padding: 20px 20px 16px; background: #fff;
+  transition: border-color .2s, box-shadow .2s;
+}
+.ooc-card:hover { border-color: var(--ink); box-shadow: 0 10px 24px -18px rgba(0, 0, 0, .35); }
+.ooc-title { margin: 0; font-size: 14px; font-weight: 500; }
+.ooc-text {
+  margin: 0; font-size: 13px; font-weight: 300; line-height: 1.8; white-space: pre-wrap; word-break: break-word;
+  display: -webkit-box; -webkit-line-clamp: 7; -webkit-box-orient: vertical; overflow: hidden;
+}
+.ooc-foot { margin-top: auto; display: flex; justify-content: flex-end; padding-top: 6px; }
+.ooc-card .adm-tools { top: 10px; right: 10px; }
+.ooc-pop h2 { margin: 10px 0 18px; }
+.ooc-pop .prompt-text { max-height: 60vh; }
+
 /* ---------- gallery ---------- */
 .page-head { text-align: center; margin: -18px 0 44px; }
 .page-head h1 { font-family: var(--brand); font-weight: 600; font-size: 13px; letter-spacing: .3em; margin: 0; }
@@ -691,7 +709,7 @@ body.admin .w-team header { padding-right: 160px; }
    반응형 (맨 끝에 두어 위의 규칙보다 우선)
    ============================================================ */
 @media (max-width: 960px) {
-  .link-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .link-grid, .ooc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 760px) {
@@ -719,6 +737,10 @@ body.admin .w-team header { padding-right: 160px; }
   .item-sub { font-size: 12px; }
   .item-foot .pill-btn { font-size: 9px; padding: 5px 10px; }
   .genres { margin-top: 44px; }
+
+  .ooc-grid { grid-template-columns: 1fr; gap: 10px; }
+  .ooc-card { padding: 16px; }
+  .ooc-text { -webkit-line-clamp: 5; }
 
   /* 링크: 가로형 카드 한 줄씩 */
   .link-grid { grid-template-columns: 1fr; gap: 10px; }

@@ -127,6 +127,49 @@
       ${sections || `<p class="link-empty">아직 사진이 없어요.</p>`}`;
   }
 
+  // OOC: 사진 없이 글만. 에셋처럼 구분별 줄로 묶음
+  function renderOOC() {
+    const list = App.data.ooc || [];
+    const groups = new Map();
+    list.forEach((o, i) => {
+      const key = (o.section || "").trim();
+      if (!groups.has(key)) groups.set(key, []);
+      groups.get(key).push(i);
+    });
+    const card = (i) => {
+      const o = list[i];
+      return `<article class="ooc-card" data-open="ooc" data-i="${i}">
+        ${tools("ooc", i)}
+        ${o.title ? `<h3 class="ooc-title">${esc(o.title)}</h3>` : ""}
+        <p class="ooc-text">${esc(o.text)}</p>
+        <div class="ooc-foot"><button type="button" class="pill-btn dark" data-copy="${esc(o.text)}">Copy</button></div>
+      </article>`;
+    };
+    const sections = [...groups].map(([name, idx]) => `<section class="g-section">
+        ${name || groups.size > 1 ? `<div class="block-title">${esc(name || "ETC")}
+          ${name ? `<span class="adm-inline"><button type="button" class="pill-btn" data-act="rename-section" data-col="ooc" data-section="${esc(name)}">이름 변경</button></span>` : ""}</div>` : ""}
+        <div class="ooc-grid">${idx.map(card).join("")}</div>
+        <div class="adm-bar g-add"><button type="button" class="pill-btn" data-act="add" data-col="ooc" data-section="${esc(name)}">+ 이 줄에 OOC 추가</button></div>
+      </section>`).join("");
+    return `<div class="page-head"><h1>OOC</h1><p>누르면 전체 글이 열려요</p></div>
+      <div class="adm-bar">${addBtn("ooc", "OOC 추가")}</div>
+      ${sections || `<p class="link-empty">아직 OOC 가 없어요.</p>`}`;
+  }
+
+  function showOoc(o) {
+    detail = null;
+    openModal(`<div class="form ooc-pop">
+      ${o.section ? `<span class="pill">${esc(o.section)}</span>` : ""}
+      <h2>${esc(o.title || "OOC")}</h2>
+      <div class="prompt">
+        <div class="prompt-head"><b></b>
+          <span class="copy-btns"><button type="button" class="pill-btn dark" data-copy="${esc(o.text)}">Copy</button></span>
+        </div>
+        <div class="prompt-text"><p>${esc(o.text)}</p></div>
+      </div>
+    </div>`);
+  }
+
   function renderLinks() {
     const links = App.data.links || [];
     const groups = new Map();
@@ -164,6 +207,7 @@
     "/jaktae": { title: "작태", render: () => renderGallery("jaktae") },
     "/world": { title: "ARCH", render: () => App.renderWorld() },
     "/link": { title: "Link", render: renderLinks },
+    "/ooc": { title: "OOC", render: renderOOC },
   };
 
   function route() {
@@ -229,6 +273,7 @@
       title = p.title;
       tag = p.tag;
     } else {
+      if (col === "ooc") return showOoc(App.data.ooc[i]);
       return showGalleryPrompt(App.data[col][i]);
     }
     sub ||= `${people[0].name || ""} × ${people[1].name || ""}`;
@@ -357,7 +402,7 @@
       document.execCommand("copy");
       ta.remove();
     }
-    toast("프롬프트를 복사했어요");
+    toast("복사했어요");
   }
 
   // ---------- events ----------
@@ -403,7 +448,16 @@
   App.normalize = (d) => {
     d.links ??= [];
     d.jaktae ??= [];
-    d.genres ??= ["MO1", "月とナイフ", "ETC"];
+    d.ooc ??= [];
+    d.genres ??= ["ARCH", "MO1", "月とナイフ", "ETC"];
+    if (!d.genresV) {
+      // 한 번만: ARCH 장르를 MO1 위에 추가 (나중에 지우면 다시 생기지 않음)
+      if (!d.genres.includes("ARCH")) {
+        const at = d.genres.indexOf("MO1");
+        d.genres.splice(at < 0 ? 0 : at, 0, "ARCH");
+      }
+      d.genresV = 1;
+    }
     // 갤러리: 예전의 남/여 개별 프롬프트는 한 단락으로 합침
     for (const g of d.gallery || []) {
       if (g.prompt === undefined && (g.male || g.female)) {

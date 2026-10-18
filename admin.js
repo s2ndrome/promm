@@ -162,6 +162,17 @@
     fields: SCHEMAS.gallery.fields.map((f) => (f.type === "section" ? { ...f, source: "jaktae" } : f)),
   };
 
+  // OOC: 글만
+  SCHEMAS.ooc = {
+    title: "OOC",
+    fields: [
+      { key: "section", label: "구분 (선택)", type: "section", source: "ooc", hint: "같은 구분끼리 한 줄로 묶이고 구분선으로 나뉘어요." },
+      { key: "title", label: "제목 (선택)", type: "text" },
+      { key: "text", label: "OOC 내용", type: "textarea" },
+    ],
+    blank: () => ({ id: `o${Date.now()}`, section: "", title: "", text: "" }),
+  };
+
   // ---------- helpers ----------
   const getPath = (obj, path) => path.split(".").reduce((o, k) => (o == null ? undefined : o[k]), obj);
   function setPath(obj, path, val) {
@@ -466,7 +477,7 @@
           const list = getPath(next, col);
           isNew ? list.push(item) : (list[index] = item);
         }
-        await saveData(next, col === "genres" ? ["genres", "pairs"] : [col.split(".")[0]]);
+        await saveData(next, col === "genres" ? ["genres", "genresV", "pairs"] : [col.split(".")[0]]);
         App.closeModal();
       } catch (err) {
         form.classList.remove("busy");
@@ -510,7 +521,7 @@
     } else if (act === "move") {
       let j = i + Number(btn.dataset.dir);
       // 갤러리는 같은 구분, 페어는 같은 장르 안에서만 순서 이동
-      const groupKey = col === "gallery" || col === "jaktae" ? (x) => (x.section || "").trim()
+      const groupKey = ["gallery", "jaktae", "ooc"].includes(col) ? (x) => (x.section || "").trim()
         : col === "pairs" ? (x) => ((App.data.genres || []).includes(x.genre) ? x.genre : "")
         : null;
       if (groupKey) {
