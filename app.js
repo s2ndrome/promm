@@ -84,9 +84,30 @@
         </div>
       </details>`;
     }).join("");
+    // ONLY GIRL: 페어가 아니라 캐릭터 한 명씩. 장르 맨 아래에 항상 있음
+    const girls = App.data.girls || [];
+    const girlCard = (c, i) => `<article class="item" data-open="girls" data-i="${i}">
+        <div class="item-head">
+          ${c.tag ? `<span class="pill">${esc(c.tag)}</span>` : "<span></span>"}
+          <button type="button" class="star ${favs.has(c.id) ? "on" : ""}" data-fav="${esc(c.id)}" aria-label="즐겨찾기">${favs.has(c.id) ? "★" : "☆"}</button>
+        </div>
+        ${tools("girls", i)}
+        ${thumb(c.image, c.female?.name)}
+        <p class="item-name">${esc(c.female?.name)}</p>
+        <p class="item-sub">${esc(c.title)}</p>
+        <div class="item-foot"><button type="button" class="pill-btn" data-info="${i}" data-col="girls">Profile</button></div>
+      </article>`;
+    const G = "ONLY GIRL";
+    const girlBox = `<details class="genre" data-genre-box="${G}" ${openGenres.has(G) ? "open" : ""}>
+        <summary><span class="genre-name">${G}</span><span class="genre-count">${girls.length}</span></summary>
+        <div class="genre-body">
+          ${girls.length ? `<section class="grid">${girls.map(girlCard).join("")}</section>` : `<p class="genre-empty">아직 캐릭터가 없어요.</p>`}
+          <div class="adm-bar genre-add"><button type="button" class="pill-btn" data-act="add" data-col="girls">+ 캐릭터 추가</button></div>
+        </div>
+      </details>`;
     return `<div class="adm-bar">${addBtn("pairs", "페어 추가")}${addBtn("genres", "장르 관리")}<span class="owner-only">${addBtn("site", "사이트 정보")}</span></div>
       ${main ? `<section class="grid">${main}</section>` : ""}
-      ${boxes ? `<div class="genres">${boxes}</div>` : ""}`;
+      <div class="genres">${boxes}${girlBox}</div>`;
   }
 
   // asset 하위 페이지들 (같은 형태). col 은 데이터 이름
@@ -325,8 +346,8 @@
   function showPrompt(col, i) {
     let people, variants, image, title, sub, tag;
     const fromPair = (p) => [
-      { name: p.male?.name, base: p.male?.base || "" },
-      { name: p.female?.name, base: p.female?.base || "" },
+      { k: "male", name: p.male?.name, base: p.male?.base || "" },
+      { k: "female", name: p.female?.name, base: p.female?.base || "" },
     ];
     if (col === "pairs") {
       const p = App.data.pairs[i];
@@ -335,11 +356,19 @@
       image = p.image;
       title = p.title;
       tag = p.tag;
+    } else if (col === "girls") {
+      const c = App.data.girls[i];
+      people = [{ k: "female", name: c.female?.name, base: c.female?.base || "" }];
+      variants = c.variants || [];
+      image = c.image;
+      title = c.title || c.female?.name;
+      tag = c.tag;
+      sub = c.title ? c.female?.name || "" : "";
     } else {
       if (col === "ooc") return showOoc(App.data.ooc[i]);
       return showGalleryPrompt(App.data[col][i]);
     }
-    sub ||= `${people[0].name || ""} × ${people[1].name || ""}`;
+    if (col === "pairs") sub = `${people[0].name || ""} × ${people[1].name || ""}`;
     detail = { people, variants, image, title, sel: -1, opt: { upper: false, noShoes: false } };
     const tabs = variants.length
       ? `<div class="variants">${variants.map((v, k) => `<button type="button" class="vtab" data-variant="${k}">${esc(v.label || "의상")}${v.sub ? ` <em>${esc(v.sub)}</em>` : ""}</button>`).join("")}</div>
@@ -364,15 +393,16 @@
   }
 
   // PAIR INFO: 페어 프로필 팝업
-  function showInfo(i) {
-    const p = App.data.pairs[i];
+  function showInfo(i, col = "pairs") {
+    const solo = col === "girls";
+    const p = App.data[col][i];
     const info = p.info || {};
     const card = (who, k) => {
       const pr = who?.profile || {};
       const rows = [["이름", pr.realname], ["소속", pr.team], ["등급", pr.grade], ["속성", pr.element], ["나이", pr.age]];
       const block = (label, text) => (text ? `<div class="id-block"><h4>${label}</h4><p>${esc(text)}</p></div>` : "");
       return `<article class="id-card">
-        <button type="button" class="id-photo" data-idphoto="${i}:${k}" aria-label="공식 프롬프트 보기">${thumb(pr.photo, pr.codename || who?.name)}
+        <button type="button" class="id-photo" data-idphoto="${i}:${k}" data-col="${col}" aria-label="공식 프롬프트 보기">${thumb(pr.photo, pr.codename || who?.name)}
           <span class="id-photo-hint">공식 프롬프트</span></button>
         <p class="id-code">${esc(pr.codename || who?.name || "")}</p>
         <dl class="id-rows">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v || "—")}</dd>`).join("")}</dl>
@@ -384,24 +414,24 @@
     openModal(`<div class="pinfo">
       <header class="pinfo-head">
         ${p.tag ? `<span class="pill">${esc(p.tag)}</span>` : ""}
-        <p class="pinfo-kicker">PAIR INFO</p>
-        <h2>${esc(p.title)}</h2>
+        <p class="pinfo-kicker">${solo ? "PROFILE" : "PAIR INFO"}</p>
+        <h2>${esc(solo ? p.title || p.female?.name : p.title)}</h2>
         ${info.intro ? `<p class="pinfo-intro">${esc(info.intro)}</p>` : ""}
       </header>
-      <div class="pinfo-people">${card(p.male, "male")}${card(p.female, "female")}</div>
+      <div class="pinfo-people ${solo ? "solo" : ""}">${solo ? card(p.female, "female") : card(p.male, "male") + card(p.female, "female")}</div>
     </div>`);
   }
 
   // PAIR INFO 증명사진을 누르면: 공식 프롬프트 한 단락
-  function showIdPrompt(i, k) {
-    const p = App.data.pairs[i];
+  function showIdPrompt(i, k, col = "pairs") {
+    const p = App.data[col][i];
     const who = p[k] || {};
     const pr = who.profile || {};
     const text = pr.photoPrompt || "";
     openModal(`<div class="detail idp">
       <div class="detail-visual"><div class="id-photo id-photo-lg">${thumb(pr.photo, pr.codename || who.name)}</div></div>
       <div class="detail-info">
-        <button type="button" class="pill-btn back-btn" data-info="${i}">← Pair Info</button>
+        <button type="button" class="pill-btn back-btn" data-info="${i}" data-col="${col}">← ${col === "girls" ? "Profile" : "Pair Info"}</button>
         <h2>${esc(pr.codename || who.name || "")}</h2>
         <p class="sub">${esc(p.title)}</p>
         ${text ? `<div class="prompt">
@@ -440,10 +470,9 @@
   function renderDetail() {
     const { variants, sel, opt, people } = detail;
     const v = variants[sel];
-    const [m, f] = people;
     document.getElementById("detail-img").innerHTML = thumb(v?.image || detail.image, detail.title);
     document.getElementById("detail-prompts").innerHTML =
-      promptBlock(m.name, m.base, outfitText(v?.male, opt)) + promptBlock(f.name, f.base, outfitText(v?.female, opt));
+      people.map((p) => promptBlock(p.name, p.base, outfitText(v?.[p.k], opt))).join("");
     document.querySelectorAll(".vtab").forEach((b) => b.classList.toggle("active", Number(b.dataset.variant) === sel));
     const opts = document.querySelector(".outfit-opts");
     if (opts) {
@@ -467,7 +496,9 @@
       Object.assign(document.body.style, { position: "fixed", top: `-${lockY}px`, left: "0", right: "0", overflow: "hidden" });
     }
     modal.hidden = false;
-    modal.querySelector(".modal-box").scrollTop = 0;
+    const box = modal.querySelector(".modal-box");
+    box.className = "modal-box";
+    box.scrollTop = 0;
   }
   function closeModal() {
     const wasOpen = !modal.hidden;
@@ -522,10 +553,10 @@
     const idp = e.target.closest("[data-idphoto]");
     if (idp) {
       const [pi, pk] = idp.dataset.idphoto.split(":");
-      return showIdPrompt(Number(pi), pk);
+      return showIdPrompt(Number(pi), pk, idp.dataset.col || "pairs");
     }
     const info = e.target.closest("[data-info]");
-    if (info) return showInfo(Number(info.dataset.info));
+    if (info) return showInfo(Number(info.dataset.info), info.dataset.col || "pairs");
     const open = e.target.closest("[data-open]");
     if (open) showPrompt(open.dataset.open, Number(open.dataset.i));
   });
@@ -550,6 +581,7 @@
     d.links ??= [];
     d.jaktae ??= [];
     d.ooc ??= [];
+    d.girls ??= [];
     d.genres ??= ["ARCH", "MO1", "月とナイフ", "ETC"];
     if (!d.genresV) {
       // 한 번만: ARCH 장르를 MO1 위에 추가 (나중에 지우면 다시 생기지 않음)

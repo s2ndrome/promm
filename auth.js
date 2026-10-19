@@ -42,6 +42,10 @@
       for (const v of p.variants || []) out.push(v.image);
     }
     for (const g of [...(d.gallery || []), ...(d.jaktae || [])]) out.push(g.image);
+    for (const c of d.girls || []) {
+      out.push(c.image, c.female?.profile?.photo);
+      for (const v of c.variants || []) out.push(v.image);
+    }
     for (const t of d.world?.teams || []) for (const m of t.members || []) out.push(m.photo);
     return out.filter(Boolean);
   }

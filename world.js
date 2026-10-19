@@ -147,8 +147,8 @@
           : ""}</div>
         <figcaption><b>${esc(m.name)}</b><small>${esc(m.attr)}</small></figcaption>
       </figure>`;
-    const teams = (w.teams || []).map((t, i) => `<article class="w-team">
-        <header><h3>${esc(t.name)}</h3><span>${esc(t.cls)}</span></header>
+    const teams = (w.teams || []).map((t, i) => `<article class="w-team" data-team="${i}">
+        <header><h3>${esc(t.name)}</h3><span>${esc(t.cls)}</span><em class="w-rel-open">관계도 ›</em></header>
         ${(t.members || []).length
           ? `<div class="w-agents">${t.members.map(agent).join("")}</div>`
           : `<p class="w-agents-empty">COMING SOON</p>`}
@@ -197,8 +197,171 @@
     els.forEach((e) => io.observe(e));
   };
 
+  // ---------- 인물 관계도 (팀을 누르면 팝업) ----------
+  const LOVE = /사랑|연인|애인|짝사랑|썸|약혼|부부|♥|❤|좋아/;
+  const HATE = /라이벌|혐관|대립|적대|원수|증오|경쟁|싫어|앙숙/;
+  const relColor = (label) => (LOVE.test(label) ? "#ff7aa8" : HATE.test(label) ? "#ff5a4f" : "#bdbdbd");
+
+  let chart = null; // { i, pos: {이름: [x%, y%]}, dirty }
+
+  function defaultPos(members) {
+    const n = members.length, pos = {};
+    members.forEach((m, k) => {
+      if (n === 1) return (pos[m.name] = [50, 50]);
+      const a = (Math.PI * 2 * k) / n - Math.PI / 2;
+      pos[m.name] = [50 + Math.cos(a) * 36, 50 + Math.sin(a) * 34];
+    });
+    return pos;
+  }
+
+  function openChart(i) {
+    const t = App.data.world.teams[i];
+    const members = t.members || [];
+    const base = defaultPos(members);
+    chart = { i, pos: Object.fromEntries(members.map((m) => [m.name, (t.pos || {})[m.name] || base[m.name]])), dirty: false };
+    const canEdit = App.admin && App.rank >= 3;
+    App.openModal(`<div class="rel-pop">
+      <header class="rel-head">
+        <p>${esc(t.cls || "")}</p>
+        <h2>${esc(t.name)}</h2>
+        <span>인물 관계도</span>
+      </header>
+      <div class="rel-canvas" id="rel-canvas">
+        <svg class="rel-lines" id="rel-svg"></svg>
+        ${members.map((m) => `<div class="rel-node" data-node="${esc(m.name)}" style="--el:${attrColor(m.attr)}">
+          <div class="rel-ph ${m.photo ? "" : "empty"}">${m.photo ? `<img src="${esc(App.mediaUrl(m.photo))}" alt="" draggable="false" onerror="this.parentNode.classList.add('empty');this.remove()">` : ""}</div>
+          <b>${esc(m.name)}</b>${m.desc ? `<small>${esc(m.desc)}</small>` : m.attr ? `<small>${esc(m.attr)}</small>` : ""}
+        </div>`).join("")}
+        <div id="rel-labels"></div>
+      </div>
+      ${(t.relations || []).length ? "" : `<p class="rel-empty">아직 관계가 없어요.${canEdit ? " 팀 ✎ 편집에서 관계를 적어주세요." : ""}</p>`}
+      ${canEdit ? `<div class="rel-tools"><span>사진을 끌어서 배치를 바꿀 수 있어요</span>
+        <button type="button" class="pill-btn" data-rel="reset">자동 배치</button>
+        <button type="button" class="pill-btn dark" data-rel="save" disabled>배치 저장</button></div>` : ""}
+    </div>`);
+    document.querySelector(".modal-box").classList.add("rel-box");
+    drawChart();
+    if (canEdit) enableDrag();
+  }
+
+  function drawChart() {
+    const cv = document.getElementById("rel-canvas");
+    if (!cv || !chart) return;
+    const t = App.data.world.teams[chart.i];
+    const W = cv.clientWidth, H = cv.clientHeight;
+    const P = (name) => { const p = chart.pos[name]; return p && [p[0] / 100 * W, p[1] / 100 * H]; };
+    cv.querySelectorAll(".rel-node").forEach((n) => {
+      const p = chart.pos[n.dataset.node];
+      n.style.left = `${p[0]}%`;
+      n.style.top = `${p[1]}%`;
+    });
+    const ph = cv.querySelector(".rel-ph");
+    const pr = ph ? ph.offsetWidth / 2 : 30;
+    const R = pr + 6; // 사진 테두리에서 선이 끝나도록
+    // 아래쪽으로 나가는 선은 이름표 밑에서 끝나게 (화살표가 이름에 가리지 않게)
+    const depth = {};
+    cv.querySelectorAll(".rel-node").forEach((n) => (depth[n.dataset.node] = n.offsetHeight - pr + 6));
+    const gap = (name, down) => Math.max(R, down * (depth[name] || R));
+    const rels = (t.relations || []).filter((r) => P(r.from) && P(r.to) && r.from !== r.to);
+    const key = (a, b) => [a, b].sort().join("\u0000");
+    const count = {};
+    rels.forEach((r) => (count[key(r.from, r.to)] = (count[key(r.from, r.to)] || 0) + 1));
+    const seen = {};
+    let defs = "", lines = "", labels = "";
+    rels.forEach((r, k) => {
+      const [x1, y1] = P(r.from), [x2, y2] = P(r.to);
+      const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1;
+      const ux = dx / len, uy = dy / len;
+      // 같은 두 사람 사이에 관계가 둘이면 서로 반대쪽으로 휘게
+      const kk = key(r.from, r.to);
+      seen[kk] = (seen[kk] || 0) + 1;
+      // 방향이 반대면 수직 방향도 뒤집히므로 이름 순서로 맞춰서 번갈아 양쪽으로
+      const bend = count[kk] > 1 ? (seen[kk] % 2 ? 1 : -1) * (r.from < r.to ? 1 : -1) * Math.min(46, len * 0.18) : 0;
+      const g1 = gap(r.from, uy), g2 = gap(r.to, -uy);
+      const sx = x1 + ux * g1, sy = y1 + uy * g1, ex = x2 - ux * g2, ey = y2 - uy * g2;
+      const cx = (sx + ex) / 2 - uy * bend * 2, cy = (sy + ey) / 2 + ux * bend * 2;
+      const col = relColor(r.label);
+      const id = `rm${k}`;
+      defs += `<marker id="${id}e" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="${col}"/></marker>`;
+      const dash = r.dir === "none" ? ` stroke-dasharray="5 5"` : "";
+      const mEnd = r.dir === "none" ? "" : ` marker-end="url(#${id}e)"`;
+      const mStart = r.dir === "both" ? ` marker-start="url(#${id}e)"` : "";
+      lines += `<path d="M${sx} ${sy} Q${cx} ${cy} ${ex} ${ey}" stroke="${col}" stroke-width="1.8" fill="none"${dash}${mEnd}${mStart}/>`;
+      if (r.label) {
+        const lx = 0.25 * sx + 0.5 * cx + 0.25 * ex, ly = 0.25 * sy + 0.5 * cy + 0.25 * ey;
+        labels += `<span class="rel-label" style="left:${lx}px;top:${ly}px;--c:${col}">${LOVE.test(r.label) ? "♥ " : ""}${esc(r.label)}</span>`;
+      }
+    });
+    const svg = document.getElementById("rel-svg");
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.innerHTML = `<defs>${defs}</defs>${lines}`;
+    document.getElementById("rel-labels").innerHTML = labels;
+  }
+
+  function enableDrag() {
+    const cv = document.getElementById("rel-canvas");
+    let drag = null;
+    cv.addEventListener("pointerdown", (e) => {
+      const n = e.target.closest(".rel-node");
+      if (!n) return;
+      e.preventDefault();
+      drag = n.dataset.node;
+      n.setPointerCapture(e.pointerId);
+      n.classList.add("dragging");
+    });
+    cv.addEventListener("pointermove", (e) => {
+      if (!drag) return;
+      const r = cv.getBoundingClientRect();
+      const x = Math.min(94, Math.max(6, ((e.clientX - r.left) / r.width) * 100));
+      const y = Math.min(90, Math.max(8, ((e.clientY - r.top) / r.height) * 100));
+      chart.pos[drag] = [Math.round(x * 10) / 10, Math.round(y * 10) / 10];
+      chart.dirty = true;
+      document.querySelector('[data-rel="save"]').disabled = false;
+      drawChart();
+    });
+    const end = () => {
+      if (!drag) return;
+      cv.querySelector(".dragging")?.classList.remove("dragging");
+      drag = null;
+    };
+    cv.addEventListener("pointerup", end);
+    cv.addEventListener("pointercancel", end);
+  }
+
+  async function saveChartPos() {
+    const btn = document.querySelector('[data-rel="save"]');
+    btn.disabled = true;
+    const next = JSON.parse(JSON.stringify(App.data));
+    next.world.teams[chart.i].pos = chart.pos;
+    try {
+      await App.saveData(next, ["world"]);
+      chart.dirty = false;
+      // 저장하면 페이지가 다시 그려지므로 팝업도 다시 열기
+      openChart(chart.i);
+    } catch (err) {
+      btn.disabled = false;
+      alert(`저장하지 못했어요: ${err.message}`);
+    }
+  }
+
+  window.addEventListener("resize", () => drawChart());
+
   document.addEventListener("click", (e) => {
     const j = e.target.closest("[data-wjump]");
-    if (j) document.getElementById(j.dataset.wjump)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (j) return document.getElementById(j.dataset.wjump)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const rb = e.target.closest("[data-rel]");
+    if (rb) {
+      if (rb.dataset.rel === "save") return saveChartPos();
+      if (rb.dataset.rel === "reset") {
+        const t = App.data.world.teams[chart.i];
+        chart.pos = defaultPos(t.members || []);
+        chart.dirty = true;
+        document.querySelector('[data-rel="save"]').disabled = false;
+        return drawChart();
+      }
+    }
+    // 팀 카드를 누르면 관계도 (편집 버튼은 제외)
+    const team = e.target.closest("[data-team]");
+    if (team && !e.target.closest(".adm-tools, [data-act]")) openChart(Number(team.dataset.team));
   });
 })();

@@ -51,6 +51,36 @@
         variants: [{ label: "제복", sub: "", image: "", male: { top: "", bottom: "", shoes: "" }, female: { top: "", bottom: "", shoes: "" } }],
       }),
     },
+    girls: {
+      title: "Only Girl",
+      fields: [
+        { key: "female.name", label: "캐릭터 이름", type: "text" },
+        { key: "title", label: "부제 (선택)", type: "text" },
+        { key: "tag", label: "태그 (선택)", type: "text", hint: "카드 왼쪽 위 작은 태그에 보여요." },
+        { key: "image", label: "사진", type: "image" },
+        { key: "female.base", label: "외형 프롬프트 (첫 단락)", type: "textarea" },
+        { key: "_h_profile", label: "PROFILE", type: "heading" },
+        { key: "info.intro", label: "캐릭터 설명", type: "textarea" },
+        { key: "female.profile.photo", label: "증명사진", type: "image" },
+        { key: "female.profile.photoPrompt", label: "공식 프롬프트 (PROFILE 에서 증명사진을 누르면 나와요)", type: "textarea" },
+        { key: "female.profile.codename", label: "코드네임", type: "text" },
+        { key: "female.profile.realname", label: "이름", type: "text" },
+        { key: "female.profile.team", label: "소속", type: "text" },
+        { key: "female.profile.grade", label: "등급", type: "text" },
+        { key: "female.profile.element", label: "속성", type: "text" },
+        { key: "female.profile.age", label: "나이", type: "text" },
+        { key: "female.profile.personality", label: "성격", type: "textarea" },
+        { key: "female.profile.secret", label: "비밀 설정", type: "textarea" },
+        { key: "female.profile.tmi", label: "TMI", type: "textarea" },
+        { key: "variants", label: "의상 (둘째 단락)", type: "variants", solo: true,
+          hint: "의상 칩을 누르면 둘째 단락에 나와요. 상의/하의/신발을 나눠 적으면 '상반신만', '신발 없이' 체크로 빼고 복사할 수 있어요." },
+      ],
+      blank: () => ({
+        id: `c${Date.now()}`, title: "", tag: "", image: "",
+        female: { name: "", base: "" },
+        variants: [{ label: "제복", sub: "", image: "", female: { top: "", bottom: "", shoes: "" } }],
+      }),
+    },
     gallery: {
       title: "Asset",
       fields: [
@@ -131,7 +161,9 @@
       { key: "name", label: "팀 이름", type: "text" },
       { key: "cls", label: "등급 (예: S-CLASS)", type: "text" },
       { key: "members", label: "요원", type: "members", hint: "증명사진은 파일을 고르거나 붙여넣기. 비워두면 빈 증명사진으로 보여요." },
-    ], blank: () => ({ name: "", cls: "", members: [] }) },
+      { key: "relations", label: "인물 관계도 (한 줄에 하나)", type: "relations",
+        hint: "예) 애쉬 → 셰인 | 라이벌   ·   애쉬 ↔ 노아 | 소꿉친구   ·   → 한쪽 / ↔ 서로 / - 그냥 연결. 이름은 위 요원 이름과 똑같이 적어주세요." },
+    ], blank: () => ({ name: "", cls: "", members: [], relations: [] }) },
     "world.places": { title: "Location", fields: [
       { key: "name", label: "이름", type: "text" },
       { key: "en", label: "영문 / 부제", type: "text" },
@@ -223,6 +255,19 @@
     App.toast("저장했어요");
   }
 
+  // 관계도 한 줄: "A → B | 라벨" (→ / -> 한쪽, ↔ / <-> 서로, - 그냥 연결)
+  function parseRelations(text) {
+    return text.split("\n").map((line) => {
+      const [pairPart, ...rest] = line.split("|");
+      const m = pairPart.match(/^\s*(.+?)\s*(<->|↔|->|→|=>|-)\s*(.+?)\s*$/);
+      if (!m) return null;
+      const dir = /↔|<->/.test(m[2]) ? "both" : m[2] === "-" ? "none" : "one";
+      return { from: m[1], to: m[3], dir, label: rest.join("|").trim() };
+    }).filter(Boolean);
+  }
+
+  App.saveData = (next, keys) => saveData(next, keys);
+
   // ---------- 편집 모드 켜기/끄기 ----------
   document.getElementById("edit-btn").addEventListener("click", () => {
     App.admin = !App.admin;
@@ -232,7 +277,7 @@
 
   // ---------- edit form ----------
   const PARTS = [["top", "상의"], ["bottom", "하의"], ["shoes", "신발"]];
-  function variantHtml(v = {}) {
+  function variantHtml(v = {}, solo = false) {
     const person = (k, label) => `<span class="v-cap">${label}</span>
       ${PARTS.map(([part, name]) => `<div class="v-part"><span>${name}</span>
         <input type="text" class="v-${k}-${part}" value="${esc(v[k]?.[part])}"></div>`).join("")}`;
@@ -242,8 +287,7 @@
         <input type="text" class="v-sub" placeholder="보조 문구 (예: 여름 ver)" value="${esc(v.sub)}">
         <button type="button" class="pill-btn v-remove">삭제</button>
       </div>
-      ${person("male", "남캐 의상")}
-      ${person("female", "여캐 의상")}
+      ${solo ? person("female", "의상") : person("male", "남캐 의상") + person("female", "여캐 의상")}
       <div class="img-field">
         <div class="preview" style="${v.image ? `background-image:url('${esc(App.mediaUrl(v.image))}')` : ""}"></div>
         <div><input type="file" class="v-file" accept="image/*">
@@ -260,6 +304,7 @@
         <input type="text" class="m-attr" placeholder="속성 (예: 불 속성, S급 물)" value="${esc(m.attr)}">
         <button type="button" class="pill-btn m-remove">삭제</button>
       </div>
+      <input type="text" class="m-desc" placeholder="한 줄 소개 (관계도에 표시, 예: 27세 / 뱅가드 리더)" value="${esc(m.desc)}">
       <div class="img-field">
         <div class="preview" style="${m.photo ? `background-image:url('${esc(App.mediaUrl(m.photo))}')` : ""}"></div>
         <div><input type="file" class="m-file" accept="image/*">
@@ -272,7 +317,7 @@
   function fieldHtml(f, val) {
     const name = `f:${f.key}`;
     if (f.type === "variants")
-      return `<div class="variant-list">${(val || []).map(variantHtml).join("")}</div>
+      return `<div class="variant-list" ${f.solo ? "data-solo" : ""}>${(val || []).map((v) => variantHtml(v, f.solo)).join("")}</div>
         <button type="button" class="pill-btn v-add">+ 의상 추가</button>`;
     if (f.type === "textarea")
       return `<textarea name="${name}">${esc(val)}</textarea>`;
@@ -288,6 +333,8 @@
       return `<textarea name="${name}">${esc((val || []).join("\n"))}</textarea>`;
     if (f.type === "checkbox")
       return `<label class="check"><input type="checkbox" name="${name}" ${val ? "checked" : ""}> ${esc(f.label)}</label>`;
+    if (f.type === "relations")
+      return `<textarea name="${name}" placeholder="애쉬 → 셰인 | 라이벌">${esc((val || []).map((r) => `${r.from} ${r.dir === "both" ? "↔" : r.dir === "none" ? "-" : "→"} ${r.to}${r.label ? ` | ${r.label}` : ""}`).join("\n"))}</textarea>`;
     if (f.type === "members")
       return `<div class="member-edit-list">${(val || []).map(memberHtml).join("")}</div>
         <button type="button" class="pill-btn m-add">+ 요원 추가</button>`;
@@ -397,7 +444,10 @@
 
     // 의상 추가 / 삭제
     form.addEventListener("click", (e) => {
-      if (e.target.closest(".v-add")) form.querySelector(".variant-list").insertAdjacentHTML("beforeend", variantHtml());
+      if (e.target.closest(".v-add")) {
+        const vl = form.querySelector(".variant-list");
+        vl.insertAdjacentHTML("beforeend", variantHtml({}, vl.hasAttribute("data-solo")));
+      }
       if (e.target.closest(".m-add")) form.querySelector(".member-edit-list").insertAdjacentHTML("beforeend", memberHtml());
       const mr = e.target.closest(".m-remove");
       if (mr && confirm("이 요원을 지울까요?")) mr.closest(".member-edit").remove();
@@ -414,7 +464,7 @@
           if (f.type === "members") {
             const list = [];
             for (const box of form.querySelectorAll(".member-edit")) {
-              const m = { name: box.querySelector(".m-name").value.trim(), attr: box.querySelector(".m-attr").value.trim(), photo: box.dataset.image || "" };
+              const m = { name: box.querySelector(".m-name").value.trim(), attr: box.querySelector(".m-attr").value.trim(), desc: box.querySelector(".m-desc").value.trim(), photo: box.dataset.image || "" };
               const file = box.querySelector(".m-file").files[0];
               if (file) m.photo = await uploadImage(file);
               if (m.name) list.push(m);
@@ -430,11 +480,12 @@
                 sub: box.querySelector(".v-sub").value.trim(),
                 image: box.dataset.image || "",
               };
-              for (const k of ["male", "female"])
+              const who = f.solo ? ["female"] : ["male", "female"];
+              for (const k of who)
                 v[k] = Object.fromEntries(PARTS.map(([part]) => [part, box.querySelector(`.v-${k}-${part}`).value.trim()]));
               const file = box.querySelector(".v-file").files[0];
               if (file) v.image = await uploadImage(file);
-              const hasText = ["male", "female"].some((k) => Object.values(v[k]).some(Boolean));
+              const hasText = who.some((k) => Object.values(v[k]).some(Boolean));
               if (v.label || v.image || hasText) list.push(v);
             }
             setPath(item, f.key, list);
@@ -450,6 +501,8 @@
             }
           } else if (f.type === "lines") {
             setPath(item, f.key, [...new Set(el.value.split("\n").map((x) => x.trim()).filter(Boolean))]);
+          } else if (f.type === "relations") {
+            setPath(item, f.key, parseRelations(el.value));
           } else if (f.type === "checkbox") {
             setPath(item, f.key, el.checked);
           } else if (f.type === "list") {

@@ -441,6 +441,7 @@ body.admin .adm-badge { display: block; }
 .pinfo-head h2 { font-size: 22px; font-weight: 500; margin: 0; }
 .pinfo-intro { white-space: pre-wrap; font-size: 14px; font-weight: 300; line-height: 1.85; margin: 16px auto 0; max-width: 620px; }
 .pinfo-people { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+.pinfo-people.solo { grid-template-columns: minmax(0, 420px); justify-content: center; }
 .id-card { border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
 .id-photo { position: relative; display: block; width: 150px; margin: 0 auto; padding: 0; border: 0; background: none; cursor: pointer; }
 button.id-photo .thumb img { transition: transform .3s; }
@@ -866,4 +867,60 @@ body.admin .w-team header { padding-right: 160px; }
   .nav-side { gap: 12px; }
   .nav-link { font-size: 13px; }
   .grid { gap: 22px 10px; }
+}
+
+/* ---------- ARCH 인물 관계도 (팀을 누르면 팝업) ---------- */
+.w-team { cursor: pointer; transition: border-color .25s; }
+.w-team:hover { border-color: rgba(255, 255, 255, .32); }
+.w-team header em.w-rel-open { margin-left: auto; font-style: normal; font-size: 11px; letter-spacing: .14em; color: var(--w-dim); white-space: nowrap; transition: color .2s; }
+.w-team:hover .w-rel-open { color: #fff; }
+.modal-box.rel-box { width: min(1040px, 100%); background: #08090c; color: #ece6d8; box-shadow: 0 30px 90px rgba(0, 0, 0, .6); border: 1px solid rgba(255, 255, 255, .1); }
+.modal-box.rel-box .modal-close { background: rgba(20, 21, 26, .9); color: #ddd; border-color: rgba(255, 255, 255, .16); }
+.modal-box.rel-box .modal-close:hover { background: #fff; color: #111; }
+.rel-pop { padding: 30px 30px 26px; font-family: "Pretendard Variable", Pretendard, sans-serif; }
+.rel-head { text-align: center; margin-bottom: 18px; }
+.rel-head p { margin: 0; font-size: 11px; letter-spacing: .3em; color: #8d8a84; }
+.rel-head h2 { margin: 6px 0 4px; font-family: "Paperlogy", "Pretendard Variable", sans-serif; font-size: 26px; font-weight: 700; letter-spacing: .14em; color: #fff; }
+.rel-head span { display: inline-block; padding: 3px 12px; border: 1px solid rgba(255, 255, 255, .2); font-size: 11px; letter-spacing: .3em; color: #cfcfcf; }
+.rel-canvas {
+  position: relative; aspect-ratio: 16 / 10; overflow: hidden; user-select: none; -webkit-user-select: none;
+  border: 1px solid rgba(255, 255, 255, .08);
+  background: radial-gradient(ellipse at 50% 45%, #1a1b22 0%, #0b0c10 70%), #0b0c10;
+}
+.rel-canvas::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: .5;
+  background-image: linear-gradient(rgba(255, 255, 255, .025) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, .025) 1px, transparent 1px);
+  background-size: 32px 32px; }
+.rel-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+.rel-node { position: absolute; z-index: 2; width: 120px; display: flex; flex-direction: column; align-items: center; text-align: center; transform: translate(-50%, -38px); }
+body.admin .rel-node { cursor: grab; touch-action: none; }
+.rel-node.dragging { cursor: grabbing; z-index: 4; }
+.rel-node.dragging .rel-ph { box-shadow: 0 0 0 3px var(--el), 0 0 28px var(--el); }
+.rel-ph { width: 76px; height: 76px; border-radius: 50%; overflow: hidden; flex: none; background: #15161b; border: 2px solid #08090c; box-shadow: 0 0 0 2px var(--el), 0 8px 22px rgba(0, 0, 0, .6); }
+.rel-ph img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; }
+.rel-ph.empty { background: repeating-linear-gradient(45deg, #121318 0 8px, #17181e 8px 16px); }
+.rel-node b { margin-top: 8px; padding: 2px 10px; background: rgba(8, 9, 12, .82); font-family: "Paperlogy", "Pretendard Variable", sans-serif; font-size: 14px; font-weight: 600; letter-spacing: .06em; color: #fff; white-space: nowrap; }
+.rel-node small { margin-top: 3px; max-width: 130px; padding: 1px 6px; background: rgba(8, 9, 12, .7); font-size: 11px; line-height: 1.35; color: #a9a49b; word-break: keep-all; }
+#rel-labels { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+.rel-label {
+  position: absolute; transform: translate(-50%, -50%); white-space: nowrap;
+  padding: 3px 10px; border: 1px solid var(--c); border-radius: 999px; background: #0b0c10;
+  font-size: 11.5px; font-weight: 600; letter-spacing: .02em; color: var(--c);
+}
+.rel-empty { margin: 14px 0 0; text-align: center; font-size: 13px; color: #8d8a84; }
+.rel-tools { display: flex; align-items: center; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+.rel-tools span { margin-right: auto; font-size: 12px; color: #8d8a84; }
+.rel-tools .pill-btn { background: transparent; color: #ddd; border-color: rgba(255, 255, 255, .25); }
+.rel-tools .pill-btn.dark { background: #fff; color: #111; border-color: #fff; }
+.rel-tools .pill-btn:disabled { opacity: .35; cursor: default; }
+
+@media (max-width: 760px) {
+  .w-team header em.w-rel-open { font-size: 10px; }
+  .rel-pop { padding: 30px 12px 18px; }
+  .rel-head h2 { font-size: 20px; }
+  .rel-canvas { aspect-ratio: 3 / 4; }
+  .rel-node { width: 84px; transform: translate(-50%, -27px); }
+  .rel-ph { width: 54px; height: 54px; }
+  .rel-node b { margin-top: 6px; font-size: 12px; padding: 1px 6px; }
+  .rel-node small { font-size: 10px; max-width: 90px; }
+  .rel-label { font-size: 10px; padding: 2px 7px; }
 }
