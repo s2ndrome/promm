@@ -372,8 +372,8 @@
       const rows = [["이름", pr.realname], ["소속", pr.team], ["등급", pr.grade], ["속성", pr.element], ["나이", pr.age]];
       const block = (label, text) => (text ? `<div class="id-block"><h4>${label}</h4><p>${esc(text)}</p></div>` : "");
       return `<article class="id-card">
-        <button type="button" class="id-photo" data-idphoto="${i}:${k}" aria-label="증명사진 프롬프트 보기">${thumb(pr.photo, pr.codename || who?.name)}
-          <span class="id-photo-hint">PROMPT</span></button>
+        <button type="button" class="id-photo" data-idphoto="${i}:${k}" aria-label="공식 프롬프트 보기">${thumb(pr.photo, pr.codename || who?.name)}
+          <span class="id-photo-hint">공식 프롬프트</span></button>
         <p class="id-code">${esc(pr.codename || who?.name || "")}</p>
         <dl class="id-rows">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v || "—")}</dd>`).join("")}</dl>
         ${block("성격", pr.personality)}
@@ -392,7 +392,7 @@
     </div>`);
   }
 
-  // PAIR INFO 증명사진을 누르면: 그 사진의 프롬프트 한 단락
+  // PAIR INFO 증명사진을 누르면: 공식 프롬프트 한 단락
   function showIdPrompt(i, k) {
     const p = App.data.pairs[i];
     const who = p[k] || {};
@@ -405,11 +405,11 @@
         <h2>${esc(pr.codename || who.name || "")}</h2>
         <p class="sub">${esc(p.title)}</p>
         ${text ? `<div class="prompt">
-          <div class="prompt-head"><b>Prompt</b>
+          <div class="prompt-head"><b>공식 프롬프트</b>
             <span class="copy-btns"><button type="button" class="pill-btn dark" data-copy="${esc(text)}">Copy</button></span>
           </div>
           <div class="prompt-text"><p>${esc(text)}</p></div>
-        </div>` : `<p class="sub">아직 증명사진 프롬프트가 없어요.</p>`}
+        </div>` : `<p class="sub">아직 공식 프롬프트가 없어요.</p>`}
       </div>
     </div>`);
   }
