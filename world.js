@@ -29,24 +29,48 @@
     </section>`;
   }
 
+  // 표지 엠블럼: 처음엔 링이 그려지며 등장 → 레이더 스윕, 속성 에너지가 중심에서 퍼져 나가는 모션
   function emblem(elements) {
     const n = elements.length || 6;
+    const f = (v) => v.toFixed(1);
     const pts = elements.map((e, i) => {
       const a = (Math.PI * 2 * i) / n - Math.PI / 2;
-      return { x: 150 + Math.cos(a) * 112, y: 150 + Math.sin(a) * 112, c: e.color, icon: e.icon };
+      return { x: 150 + Math.cos(a) * 112, y: 150 + Math.sin(a) * 112, c: e.color };
     });
-    const poly = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
-    return `<svg class="w-emblem" viewBox="0 0 300 300" aria-hidden="true">
-      <circle cx="150" cy="150" r="140" class="e-ring"/>
-      <circle cx="150" cy="150" r="112" class="e-ring thin"/>
-      <circle cx="150" cy="150" r="62" class="e-ring thin"/>
+    const poly = pts.map((p) => `${f(p.x)},${f(p.y)}`).join(" ");
+    const ticks = Array.from({ length: 72 }, (_, k) => {
+      const a = (k * 5 * Math.PI) / 180, r1 = k % 6 ? 145 : 141;
+      return `<line x1="${f(150 + Math.cos(a) * r1)}" y1="${f(150 + Math.sin(a) * r1)}" x2="${f(150 + Math.cos(a) * 149)}" y2="${f(150 + Math.sin(a) * 149)}"/>`;
+    }).join("");
+    return `<div class="w-emblem-wrap"><svg class="w-emblem" viewBox="0 0 300 300" aria-hidden="true">
+      <defs>
+        <radialGradient id="e-core-glow"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+        <linearGradient id="e-sweep-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#fff" stop-opacity=".15"/></linearGradient>
+      </defs>
+      <g class="e-ticks">${ticks}</g>
+      <circle cx="150" cy="150" r="138" class="e-ring e-draw" pathLength="1"/>
+      <circle cx="150" cy="150" r="126" class="e-ring thin e-rev"/>
+      <circle cx="150" cy="150" r="62" class="e-ring thin e-spin-slow"/>
+      <path d="M150 150 L288 150 A138 138 0 0 0 269.5 81 Z" class="e-sweep" fill="url(#e-sweep-g)"/>
+      <circle cx="150" cy="150" r="138" class="e-wave"/>
+      <circle cx="150" cy="150" r="138" class="e-wave w2"/>
       <g class="e-spin">
-        <polygon points="${poly}" class="e-hex"/>
-        ${pts.map((p) => `<line x1="150" y1="150" x2="${p.x.toFixed(1)}" y2="${p.y.toFixed(1)}" class="e-spoke"/>`).join("")}
-        ${pts.map((p) => `<circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="9" fill="${p.c}" class="e-dot"/>`).join("")}
+        <polygon points="${poly}" class="e-hex" pathLength="1"/>
+        ${pts.map((p, i) => `<line x1="150" y1="150" x2="${f(p.x)}" y2="${f(p.y)}" class="e-spoke" style="--d:${i}"/>`).join("")}
+        ${pts.map((p, i) => `<line x1="150" y1="150" x2="${f(p.x)}" y2="${f(p.y)}" class="e-pulse" pathLength="1" stroke="${p.c}" style="--d:${i};color:${p.c}"/>`).join("")}
+        ${pts.map((p, i) => `<g class="e-node" style="--d:${i};color:${p.c}">
+          <circle cx="${f(p.x)}" cy="${f(p.y)}" r="9" class="e-ping" stroke="${p.c}" style="transform-origin:${f(p.x)}px ${f(p.y)}px"/>
+          <circle cx="${f(p.x)}" cy="${f(p.y)}" r="9" fill="${p.c}" class="e-dot" style="transform-origin:${f(p.x)}px ${f(p.y)}px"/>
+        </g>`).join("")}
       </g>
-      <text x="150" y="158" text-anchor="middle" class="e-core">A</text>
-    </svg>`;
+      <g class="e-orbit"><circle cx="150" cy="12" r="2.6" class="e-spark"/></g>
+      <circle cx="150" cy="150" r="46" fill="url(#e-core-glow)" class="e-core-glow"/>
+      <g class="e-core-g">
+        <text x="150" y="162" text-anchor="middle" class="e-core e-gl1">A</text>
+        <text x="150" y="162" text-anchor="middle" class="e-core e-gl2">A</text>
+        <text x="150" y="162" text-anchor="middle" class="e-core">A</text>
+      </g>
+    </svg></div>`;
   }
 
   App.renderWorld = function () {
@@ -188,6 +212,17 @@
   };
 
   // 페이지가 그려진 뒤: 스크롤 등장 효과
+  // 엠블럼: 마우스를 따라 살짝 기울어짐
+  document.addEventListener("pointermove", (e) => {
+    const em = document.querySelector(".w-emblem");
+    if (!em || e.pointerType !== "mouse") return;
+    const r = em.getBoundingClientRect();
+    const dx = (e.clientX - (r.left + r.width / 2)) / window.innerWidth;
+    const dy = (e.clientY - (r.top + r.height / 2)) / window.innerHeight;
+    em.style.setProperty("--ry", `${(dx * 28).toFixed(2)}deg`);
+    em.style.setProperty("--rx", `${(-dy * 28).toFixed(2)}deg`);
+  });
+
   App.afterWorld = function () {
     const els = document.querySelectorAll(".reveal");
     if (!("IntersectionObserver" in window)) return els.forEach((e) => e.classList.add("in"));
