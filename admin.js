@@ -22,11 +22,11 @@
         { key: "male.profile.photo", label: "증명사진", type: "image" },
         { key: "male.profile.photoPrompt", label: "공식 프롬프트 (PAIR INFO 에서 증명사진을 누르면 나와요)", type: "textarea" },
         { key: "male.profile.codename", label: "코드네임", type: "text" },
-        { key: "male.profile.realname", label: "이름", type: "text" },
-        { key: "male.profile.team", label: "소속", type: "text" },
-        { key: "male.profile.grade", label: "등급", type: "text" },
-        { key: "male.profile.element", label: "속성", type: "text" },
-        { key: "male.profile.age", label: "나이", type: "text" },
+        { key: "male.profile.realname", label: "이름", type: "idrow", hint: "왼쪽 칸은 항목 이름이에요. 바꾸면 프로필 카드에 그대로 보여요." },
+        { key: "male.profile.team", label: "소속", type: "idrow" },
+        { key: "male.profile.grade", label: "등급", type: "idrow" },
+        { key: "male.profile.element", label: "속성", type: "idrow" },
+        { key: "male.profile.age", label: "나이", type: "idrow" },
         { key: "male.profile.personality", label: "성격", type: "textarea" },
         { key: "male.profile.secret", label: "비밀 설정", type: "textarea" },
         { key: "male.profile.tmi", label: "TMI", type: "textarea" },
@@ -34,11 +34,11 @@
         { key: "female.profile.photo", label: "증명사진", type: "image" },
         { key: "female.profile.photoPrompt", label: "공식 프롬프트 (PAIR INFO 에서 증명사진을 누르면 나와요)", type: "textarea" },
         { key: "female.profile.codename", label: "코드네임", type: "text" },
-        { key: "female.profile.realname", label: "이름", type: "text" },
-        { key: "female.profile.team", label: "소속", type: "text" },
-        { key: "female.profile.grade", label: "등급", type: "text" },
-        { key: "female.profile.element", label: "속성", type: "text" },
-        { key: "female.profile.age", label: "나이", type: "text" },
+        { key: "female.profile.realname", label: "이름", type: "idrow", hint: "왼쪽 칸은 항목 이름이에요. 바꾸면 프로필 카드에 그대로 보여요." },
+        { key: "female.profile.team", label: "소속", type: "idrow" },
+        { key: "female.profile.grade", label: "등급", type: "idrow" },
+        { key: "female.profile.element", label: "속성", type: "idrow" },
+        { key: "female.profile.age", label: "나이", type: "idrow" },
         { key: "female.profile.personality", label: "성격", type: "textarea" },
         { key: "female.profile.secret", label: "비밀 설정", type: "textarea" },
         { key: "female.profile.tmi", label: "TMI", type: "textarea" },
@@ -64,11 +64,11 @@
         { key: "female.profile.photo", label: "증명사진", type: "image" },
         { key: "female.profile.photoPrompt", label: "공식 프롬프트 (PROFILE 에서 증명사진을 누르면 나와요)", type: "textarea" },
         { key: "female.profile.codename", label: "코드네임", type: "text" },
-        { key: "female.profile.realname", label: "이름", type: "text" },
-        { key: "female.profile.team", label: "소속", type: "text" },
-        { key: "female.profile.grade", label: "등급", type: "text" },
-        { key: "female.profile.element", label: "속성", type: "text" },
-        { key: "female.profile.age", label: "나이", type: "text" },
+        { key: "female.profile.realname", label: "이름", type: "idrow", hint: "왼쪽 칸은 항목 이름이에요. 바꾸면 프로필 카드에 그대로 보여요." },
+        { key: "female.profile.team", label: "소속", type: "idrow" },
+        { key: "female.profile.grade", label: "등급", type: "idrow" },
+        { key: "female.profile.element", label: "속성", type: "idrow" },
+        { key: "female.profile.age", label: "나이", type: "idrow" },
         { key: "female.profile.personality", label: "성격", type: "textarea" },
         { key: "female.profile.secret", label: "비밀 설정", type: "textarea" },
         { key: "female.profile.tmi", label: "TMI", type: "textarea" },
@@ -216,6 +216,8 @@
     target[last] = val;
   }
   const clone = (o) => JSON.parse(JSON.stringify(o));
+  // 프로필 항목 이름(이름/소속/등급/속성/나이)이 저장되는 곳: male.profile.realname → male.profile.labels.realname
+  const labelKey = (f) => f.key.replace(".profile.", ".profile.labels.");
 
   // 큰 사진은 줄이고 webp 로 변환 (투명 배경 유지)
   function imageToBlob(file, max = 1600) {
@@ -367,6 +369,10 @@
     const fields = schema.fields;
     const parts = fields.map((f) => f.type === "heading"
       ? `<h3 class="form-sec">${esc(f.label)}</h3>`
+      : f.type === "idrow"
+      ? `<div class="field"><div class="idrow">
+          <input type="text" class="idrow-l" name="l:${f.key}" placeholder="${esc(f.label)}" value="${esc(getPath(item, labelKey(f)) || f.label)}">
+          <input type="text" name="f:${f.key}" value="${esc(getPath(item, f.key))}"></div>${f.hint ? `<p class="hint">${esc(f.hint)}</p>` : ""}</div>`
       : f.type === "checkbox"
       ? `<div class="field">${fieldHtml(f, getPath(item, f.key))}${f.hint ? `<p class="hint">${esc(f.hint)}</p>` : ""}</div>`
       : `<div class="field" ${f.showIf ? `data-show-if="${f.showIf}"` : ""} ${f.hideIf ? `data-hide-if="${f.hideIf}"` : ""}><label>${esc(f.label)}</label>${fieldHtml(f, getPath(item, f.key))}${f.hint ? `<p class="hint">${esc(f.hint)}</p>` : ""}</div>`
@@ -501,6 +507,10 @@
             }
           } else if (f.type === "lines") {
             setPath(item, f.key, [...new Set(el.value.split("\n").map((x) => x.trim()).filter(Boolean))]);
+          } else if (f.type === "idrow") {
+            setPath(item, f.key, el.value);
+            const lv = form.elements[`l:${f.key}`].value.trim();
+            setPath(item, labelKey(f), lv === f.label ? "" : lv);
           } else if (f.type === "relations") {
             setPath(item, f.key, parseRelations(el.value));
           } else if (f.type === "checkbox") {

@@ -399,13 +399,14 @@
     const info = p.info || {};
     const card = (who, k) => {
       const pr = who?.profile || {};
-      const rows = [["이름", pr.realname], ["소속", pr.team], ["등급", pr.grade], ["속성", pr.element], ["나이", pr.age]];
+      const lb = pr.labels || {};
+      const rows = [[lb.realname || "이름", pr.realname], [lb.team || "소속", pr.team], [lb.grade || "등급", pr.grade], [lb.element || "속성", pr.element], [lb.age || "나이", pr.age]];
       const block = (label, text) => (text ? `<div class="id-block"><h4>${label}</h4><p>${esc(text)}</p></div>` : "");
       return `<article class="id-card">
         <button type="button" class="id-photo" data-idphoto="${i}:${k}" data-col="${col}" aria-label="공식 프롬프트 보기">${thumb(pr.photo, pr.codename || who?.name)}
           <span class="id-photo-hint">공식 프롬프트</span></button>
         <p class="id-code">${esc(pr.codename || who?.name || "")}</p>
-        <dl class="id-rows">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${esc(v || "—")}</dd>`).join("")}</dl>
+        <dl class="id-rows">${rows.map(([k, v]) => `<dt>${esc(k)}</dt><dd>${esc(v || "—")}</dd>`).join("")}</dl>
         ${block("성격", pr.personality)}
         ${pr.secret ? `<details class="id-block id-secret"><summary>비밀 설정</summary><p>${esc(pr.secret)}</p></details>` : ""}
         ${block("TMI", pr.tmi)}
