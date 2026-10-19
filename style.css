@@ -442,7 +442,19 @@ body.admin .adm-badge { display: block; }
 .pinfo-intro { white-space: pre-wrap; font-size: 14px; font-weight: 300; line-height: 1.85; margin: 16px auto 0; max-width: 620px; }
 .pinfo-people { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
 .id-card { border: 1px solid var(--line); border-radius: 16px; padding: 20px; }
-.id-photo { width: 150px; margin: 0 auto; }
+.id-photo { position: relative; display: block; width: 150px; margin: 0 auto; padding: 0; border: 0; background: none; cursor: pointer; }
+button.id-photo .thumb img { transition: transform .3s; }
+button.id-photo:hover .thumb img { transform: scale(1.04); }
+.id-photo-hint {
+  position: absolute; left: 50%; bottom: 8px; transform: translateX(-50%);
+  font-family: var(--brand); font-size: 9px; font-weight: 600; letter-spacing: .2em;
+  background: rgba(255, 255, 255, .9); color: var(--ink); padding: 3px 9px; border-radius: 999px;
+  opacity: 0; transition: opacity .2s;
+}
+button.id-photo:hover .id-photo-hint, button.id-photo:focus-visible .id-photo-hint { opacity: 1; }
+@media (hover: none) { .id-photo-hint { opacity: 1; } }
+.id-photo-lg { width: min(280px, 100%); }
+.back-btn { margin-bottom: 14px; }
 .id-photo .thumb { aspect-ratio: 3 / 4; border-radius: 10px; overflow: hidden; background: var(--soft); }
 .id-photo .thumb img { object-fit: cover; }
 .id-photo .thumb.empty::after { content: "PHOTO"; }
