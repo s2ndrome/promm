@@ -65,10 +65,18 @@
       </g>
       <g class="e-orbit"><circle cx="150" cy="12" r="2.6" class="e-spark"/></g>
       <circle cx="150" cy="150" r="46" fill="url(#e-core-glow)" class="e-core-glow"/>
-      <g class="e-core-g">
-        <text x="150" y="162" text-anchor="middle" class="e-core e-gl1">A</text>
-        <text x="150" y="162" text-anchor="middle" class="e-core e-gl2">A</text>
-        <text x="150" y="162" text-anchor="middle" class="e-core">A</text>
+      <clipPath id="e-shield-clip"><path d="M150 108 L183 119 L183 147 C183 170 169 185 150 196 C131 185 117 170 117 147 L117 119 Z"/></clipPath>
+      <linearGradient id="e-glint-g" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      <g class="e-crest">
+        <g><path d="M116 121 C104 110 90 108 76 111 C88 118 101 125 116 131" class="e-wing" pathLength="1"/><path d="M116 133 C106 126 94 125 82 128 C93 134 104 139 116 142" class="e-wing" pathLength="1"/><path d="M117 145 C109 141 100 141 91 144 C100 149 108 152 118 153" class="e-wing" pathLength="1"/></g>
+        <g transform="translate(300 0) scale(-1 1)"><path d="M116 121 C104 110 90 108 76 111 C88 118 101 125 116 131" class="e-wing" pathLength="1"/><path d="M116 133 C106 126 94 125 82 128 C93 134 104 139 116 142" class="e-wing" pathLength="1"/><path d="M117 145 C109 141 100 141 91 144 C100 149 108 152 118 153" class="e-wing" pathLength="1"/></g>
+        <path d="M150 108 L183 119 L183 147 C183 170 169 185 150 196 C131 185 117 170 117 147 L117 119 Z" class="e-shield" pathLength="1"/>
+        <path d="M150 117 L175 125.5 L175 147 C175 165 164 177 150 186 C136 177 125 165 125 147 L125 125.5 Z" class="e-shield in" pathLength="1"/>
+        <path d="M137 172 L137 151 A13 13 0 0 1 163 151 L163 172" class="e-gate" pathLength="1"/>
+        <path d="M131 172 L169 172" class="e-gate" pathLength="1"/>
+        <path d="M142 132 L150 126.5 L158 132" class="e-gate" pathLength="1"/>
+        <g class="e-star"><path d="M150 146 L152.2 154 L160 156.5 L152.2 159 L150 167 L147.8 159 L140 156.5 L147.8 154 Z"/></g>
+        <g clip-path="url(#e-shield-clip)"><rect x="60" y="100" width="34" height="110" fill="url(#e-glint-g)" class="e-glint"/></g>
       </g>
     </svg></div>`;
   }
