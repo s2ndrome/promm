@@ -100,6 +100,270 @@
     return `<svg viewBox="0 0 48 48" aria-hidden="true">${GLYPHS[k]}</svg>`;
   }
 
+  // ---------- 6속성: 캡슐 카드 캐러셀 + 선택된 속성의 오라 이펙트 ----------
+  let elIdx = 0;
+  const elKind = (e) => {
+    const s = `${e.ko || ""} ${e.en || ""}`.toLowerCase();
+    return /불|pyre|fire/.test(s) ? "fire" : /물|aqua|water/.test(s) ? "water" : /풀|verde|grass|leaf/.test(s) ? "grass"
+      : /번개|fulmen|thunder|light/.test(s) ? "bolt" : /바람|aero|wind/.test(s) ? "wind" : /얼음|glacies|ice|frost/.test(s) ? "ice" : "spark";
+  };
+  const R = (a, b) => a + Math.random() * (b - a);
+  // 부드러운 빛 덩어리 (미리 그려두고 찍어 씀)
+  const sprites = {};
+  function sprite(rgb) {
+    if (sprites[rgb]) return sprites[rgb];
+    const cv = document.createElement("canvas");
+    cv.width = cv.height = 64;
+    const c = cv.getContext("2d"), g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, `rgba(${rgb},1)`); g.addColorStop(.4, `rgba(${rgb},.45)`); g.addColorStop(1, `rgba(${rgb},0)`);
+    c.fillStyle = g; c.fillRect(0, 0, 64, 64);
+    return (sprites[rgb] = cv);
+  }
+  const blob = (c, rgb, x, y, r, a) => { c.globalAlpha = a; c.drawImage(sprite(rgb), x - r, y - r, r * 2, r * 2); };
+  // 캡슐 테두리 위의 점 (각도 a)
+  const edge = (cx, cy, w, h, a, pad = 0) => {
+    const rx = w / 2 + pad, ry = h / 2 + pad;
+    return [cx + Math.cos(a) * rx, cy + Math.sin(a) * ry];
+  };
+
+  const AURA = {
+    fire(c, f, k, t) {
+      const { cx, cy, w, h, st } = f;
+      st.ps ||= [];
+      blob(c, "255,60,30", cx, cy - h * .1, h * 1.1, .35 * k);
+      for (let n = 0; n < 10 * k; n++) {
+        const u = R(-1.08, 1.08), x = cx + u * w * .5;
+        st.ps.push({ x, y: cy - h * .5 + Math.abs(u) ** 2 * h * .5 + R(0, 22), vx: R(-.6, .6) + u * .5, vy: R(-4.2, -1.8), r: R(14, 32), life: 1 });
+      }
+      c.globalCompositeOperation = "lighter";
+      st.ps = st.ps.filter((p) => (p.life -= .026) > 0);
+      for (const p of st.ps) {
+        p.x += p.vx + Math.sin(t / 120 + p.y / 14) * .6; p.y += p.vy; p.vy *= .99;
+        const rgb = p.life > .75 ? "255,236,170" : p.life > .45 ? "255,140,40" : "230,40,20";
+        blob(c, rgb, p.x, p.y, p.r * (.4 + p.life * .8), p.life * .55 * k);
+      }
+    },
+    bolt(c, f, k, t) {
+      const { cx, cy, w, h, st } = f;
+      c.globalCompositeOperation = "lighter";
+      blob(c, "255,200,60", cx, cy, h * 1.25, .55 * k);
+      // 빛살
+      for (let n = 0; n < 64; n++) {
+        const a = (n / 64) * Math.PI * 2 + t / 6000;
+        const L = (30 + 46 * Math.abs(Math.sin(n * 2.3 + t / 380))) * k;
+        const [x1, y1] = edge(cx, cy, w, h, a, 6), [x2, y2] = edge(cx, cy, w, h, a, 6 + L);
+        const g = c.createLinearGradient(x1, y1, x2, y2);
+        g.addColorStop(0, "rgba(255,230,140,.9)"); g.addColorStop(1, "rgba(255,180,40,0)");
+        c.strokeStyle = g; c.lineWidth = n % 3 ? 1 : 2; c.globalAlpha = .8;
+        c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+      }
+      // 전기 아크
+      st.arcs ||= [];
+      if (Math.random() < .12 * k) {
+        const a = R(0, Math.PI * 2), pts = [edge(cx, cy, w, h, a, 2)];
+        for (let n = 1; n < 7; n++) pts.push(edge(cx, cy, w, h, a + R(-.12, .12), 2 + n * 9 + R(-4, 4)));
+        st.arcs.push({ pts, life: 1 });
+      }
+      st.arcs = st.arcs.filter((p) => (p.life -= .12) > 0);
+      c.strokeStyle = "#fffbe0"; c.lineWidth = 1.6; c.shadowColor = "#ffd23b"; c.shadowBlur = 12;
+      for (const a of st.arcs) { c.globalAlpha = a.life; c.beginPath(); a.pts.forEach(([x, y], n) => (n ? c.lineTo(x, y) : c.moveTo(x, y))); c.stroke(); }
+      c.shadowBlur = 0;
+      // 불티
+      st.sp ||= [];
+      if (Math.random() < .5 * k) { const a = R(0, 7); st.sp.push({ a, d: 0, v: R(.6, 1.6), r: R(1, 2.6), life: 1 }); }
+      st.sp = st.sp.filter((p) => (p.life -= .012) > 0);
+      for (const p of st.sp) { p.d += p.v; const [x, y] = edge(cx, cy, w, h, p.a, 10 + p.d); blob(c, "255,215,100", x, y, p.r * 3, p.life * k); }
+    },
+    grass(c, f, k, t) {
+      const { cx, cy, w, h, st } = f;
+      blob(c, "60,220,110", cx, cy + h * .1, h * 1.1, .35 * k);
+      const e = 1 - (1 - k) ** 3, breathe = 1 + Math.sin(t / 900) * .03;
+      const petal = (a, len, wid, base, alpha) => {
+        c.save(); c.translate(cx, base); c.rotate(a);
+        const g = c.createLinearGradient(0, 0, 0, -len);
+        g.addColorStop(0, `rgba(30,140,70,${alpha})`); g.addColorStop(.7, `rgba(120,240,150,${alpha})`); g.addColorStop(1, `rgba(220,255,225,${alpha})`);
+        c.fillStyle = g; c.strokeStyle = `rgba(210,255,220,${alpha * .9})`; c.lineWidth = 1.2;
+        c.shadowColor = "rgba(80,255,140,.8)"; c.shadowBlur = 14;
+        c.beginPath(); c.moveTo(0, 0);
+        c.bezierCurveTo(wid, -len * .35, wid * .7, -len * .8, 0, -len);
+        c.bezierCurveTo(-wid * .7, -len * .8, -wid, -len * .35, 0, 0);
+        c.fill(); c.stroke(); c.restore();
+      };
+      c.globalAlpha = 1;
+      const base = cy + h * .36;
+      for (const [a, s] of [[-1.38, .95], [1.38, .95], [-1.0, 1.08], [1.0, 1.08], [-.58, 1.18], [.58, 1.18], [-.2, 1.25], [.2, 1.25]])
+        petal(a * (0.55 + 0.45 * e), h * .78 * s * e * breathe, w * .55, base, .82);
+      for (const a of [-1.55, 1.55, -1.22, 1.22]) petal(a, h * .5 * e * breathe, w * .42, base + 10, .95);
+      c.shadowBlur = 0;
+      st.ps ||= [];
+      if (Math.random() < .4 * k) st.ps.push({ x: cx + R(-w, w), y: cy + h * .2, vy: R(-1.2, -.4), life: 1 });
+      c.globalCompositeOperation = "lighter";
+      st.ps = st.ps.filter((p) => (p.life -= .012) > 0);
+      for (const p of st.ps) { p.y += p.vy; p.x += Math.sin(t / 400 + p.y / 30) * .4; blob(c, "180,255,190", p.x, p.y, 5, p.life * k); }
+    },
+    wind(c, f, k, t) {
+      const { cx, cy, w, h, st } = f;
+      st.ws ||= Array.from({ length: 34 }, () => ({ rx: R(8, 70), ry: R(6, 50), ph: R(0, 7), v: R(.012, .03) * (Math.random() < .2 ? -1 : 1), len: R(.5, 1.5), tilt: R(-.25, .25), wd: R(.6, 2) }));
+      c.globalCompositeOperation = "lighter";
+      blob(c, "60,230,190", cx, cy, h * 1.05, .4 * k);
+      for (const s of st.ws) {
+        s.ph += s.v;
+        const rx = (w / 2 + s.rx * k), ry = (h / 2 + s.ry * k);
+        const seg = 14;
+        for (let n = 0; n < seg; n++) {
+          const a1 = s.ph - (s.len * n) / seg, a2 = s.ph - (s.len * (n + 1)) / seg;
+          const p = (a) => [cx + Math.cos(a) * rx * Math.cos(s.tilt) - Math.sin(a) * ry * Math.sin(s.tilt), cy + Math.cos(a) * rx * Math.sin(s.tilt) + Math.sin(a) * ry * Math.cos(s.tilt)];
+          const [x1, y1] = p(a1), [x2, y2] = p(a2);
+          c.globalAlpha = (1 - n / seg) * .85 * k;
+          c.strokeStyle = n < 3 ? "#eafff8" : "#5ff0c8"; c.lineWidth = s.wd;
+          c.beginPath(); c.moveTo(x1, y1); c.lineTo(x2, y2); c.stroke();
+        }
+      }
+    },
+    water(c, f, k, t) {
+      const { cx, cy, w, h, st } = f;
+      c.globalCompositeOperation = "lighter";
+      blob(c, "40,140,255", cx, cy, h * 1.1, .4 * k);
+      st.rings ||= []; st.next ||= 0;
+      if (t > st.next) { st.rings.push({ s: 0, life: 1 }); st.next = t + 620; }
+      st.rings = st.rings.filter((r) => (r.life -= .011) > 0);
+      for (const r of st.rings) {
+        r.s += 1.1;
+        c.globalAlpha = r.life * .9 * k; c.strokeStyle = r.life > .6 ? "#d8f0ff" : "#4fb4ff"; c.lineWidth = 1.6 * r.life + .3;
+        c.beginPath(); c.ellipse(cx, cy, w / 2 + 6 + r.s, h / 2 + 6 + r.s * .9, 0, 0, Math.PI * 2); c.stroke();
+      }
+      st.bs ||= [];
+      if (Math.random() < .35 * k) st.bs.push({ x: cx + R(-w * .9, w * .9), y: cy + h * .55, r: R(1.5, 4), vy: R(-1.4, -.5), life: 1 });
+      st.bs = st.bs.filter((b) => (b.life -= .01) > 0);
+      c.strokeStyle = "#cfeaff"; c.lineWidth = 1;
+      for (const b of st.bs) { b.y += b.vy; b.x += Math.sin(t / 300 + b.r * 3) * .4; c.globalAlpha = b.life * k; c.beginPath(); c.arc(b.x, b.y, b.r, 0, 7); c.stroke(); }
+    },
+    ice(c, f, k, t) {
+      const { cx, cy, w, h, st } = f;
+      c.globalCompositeOperation = "lighter";
+      blob(c, "150,200,255", cx, cy, h * 1.1, .4 * k);
+      st.sh ||= Array.from({ length: 18 }, (_, n) => ({ a: (n / 18) * Math.PI * 2 + R(-.1, .1), L: R(24, 70), wd: R(4, 9), ph: R(0, 7) }));
+      const e = 1 - (1 - k) ** 3;
+      for (const s of st.sh) {
+        const L = s.L * e * (1 + Math.sin(t / 700 + s.ph) * .05);
+        const [x0, y0] = edge(cx, cy, w, h, s.a, 2);
+        const nx = Math.cos(s.a), ny = Math.sin(s.a) * (h / w) * .6 + Math.sin(s.a) * .4;
+        const len = Math.hypot(nx, ny), ux = nx / len, uy = ny / len;
+        const g = c.createLinearGradient(x0, y0, x0 + ux * L, y0 + uy * L);
+        g.addColorStop(0, "rgba(200,230,255,.85)"); g.addColorStop(1, "rgba(255,255,255,.05)");
+        c.fillStyle = g; c.globalAlpha = .9;
+        c.beginPath(); c.moveTo(x0 - uy * s.wd / 2, y0 + ux * s.wd / 2); c.lineTo(x0 + ux * L, y0 + uy * L); c.lineTo(x0 + uy * s.wd / 2, y0 - ux * s.wd / 2); c.closePath(); c.fill();
+      }
+      st.fl ||= Array.from({ length: 30 }, () => ({ a: R(0, 7), d: R(10, 110), tw: R(0, 7), r: R(1.5, 4) }));
+      c.strokeStyle = "#f2f8ff"; c.lineWidth = 1;
+      for (const p of st.fl) {
+        p.a += .002;
+        const [x, y] = edge(cx, cy, w, h, p.a, p.d * e);
+        c.globalAlpha = (.3 + .7 * Math.abs(Math.sin(t / 500 + p.tw))) * k;
+        c.beginPath(); c.moveTo(x - p.r, y); c.lineTo(x + p.r, y); c.moveTo(x, y - p.r); c.lineTo(x, y + p.r); c.stroke();
+      }
+    },
+    spark(c, f, k, t) {
+      blob(c, "255,255,255", f.cx, f.cy, f.h, .3 * k);
+    },
+  };
+
+  let elRaf = 0, elFx = null;
+  function setEl(i, first) {
+    const els = App.data.world.elements || [];
+    if (!els.length) return;
+    elIdx = ((i % els.length) + els.length) % els.length;
+    const stage = document.querySelector(".el-stage");
+    if (!stage) return;
+    const n = els.length, mobile = innerWidth < 640;
+    const gap = mobile ? 112 : 178;
+    stage.querySelectorAll(".el-cap").forEach((cap) => {
+      const j = Number(cap.dataset.el);
+      let off = (j - elIdx + n) % n;
+      if (off > n / 2) off -= n;
+      const d = Math.abs(off), lim = mobile ? 1 : 2;
+      cap.classList.toggle("on", off === 0);
+      cap.style.transform = `translate(-50%, -50%) translateX(${off * gap}px) scale(${off === 0 ? 1.14 : 1 - d * .1})`;
+      cap.style.opacity = d > lim ? 0 : off === 0 ? 1 : 1 - d * .28;
+      cap.style.zIndex = off === 0 ? 10 : 4 - d; // 이펙트(캔버스 z 5)가 옆 카드 위, 선택 카드 아래
+      cap.style.pointerEvents = d > lim ? "none" : "";
+    });
+    stage.style.setProperty("--el", els[elIdx].color);
+    const e = els[elIdx];
+    const det = document.getElementById("el-detail");
+    det.style.setProperty("--el", e.color);
+    det.innerHTML = `<div class="el-detail-in">
+        <header><span class="el-detail-ic">${elGlyph(e)}</span><div><h3>${esc(e.ko)}</h3><p>${esc(e.en)}</p></div></header>
+        <dl>
+          <div><dt>힘의 특징</dt><dd>${nl(e.power)}</dd></div>
+          <div><dt>폭주 징후</dt><dd>${nl(e.rampage)}</dd></div>
+          <div><dt>속성 가이드</dt><dd>${nl(e.guide)}</dd></div>
+        </dl>
+        <details class="w-el-rep">
+          <summary>기관 내 평판</summary>
+          <p><b>센티넬</b> ${nl(e.sentinelRep)}</p>
+          <p><b>가이드</b> ${nl(e.guideRep)}</p>
+        </details>
+        ${tools("elements", elIdx)}
+      </div>`;
+    // 다른 속성으로 바뀔 때만 이펙트를 처음부터 (화면 크기 변경 등에서는 유지)
+    if (!elFx || elFx.i !== elIdx) elFx = { i: elIdx, kind: elKind(e), st: {}, born: performance.now() };
+  }
+
+  function startEl() {
+    cancelAnimationFrame(elRaf);
+    const stage = document.querySelector(".el-stage");
+    if (!stage) return;
+    elFx = null;
+    setEl(elIdx, true);
+    const cv = stage.querySelector(".el-fx"), c = cv.getContext("2d");
+    const still = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    let W = 0, H = 0, dpr = 1, on = true;
+    const size = () => {
+      dpr = Math.min(2, devicePixelRatio || 1);
+      W = stage.clientWidth; H = stage.clientHeight;
+      cv.width = W * dpr; cv.height = H * dpr;
+    };
+    size();
+    if ("IntersectionObserver" in window) new IntersectionObserver(([en]) => (on = en.isIntersecting)).observe(stage);
+    const loop = (t) => {
+      if (!stage.isConnected) return;
+      elRaf = requestAnimationFrame(loop);
+      if (!on || !elFx) return;
+      if (cv.width !== Math.round(stage.clientWidth * dpr)) size();
+      c.setTransform(dpr, 0, 0, dpr, 0, 0);
+      c.clearRect(0, 0, W, H);
+      const cap = stage.querySelector(".el-cap.on");
+      if (!cap) return;
+      const mobile = innerWidth < 640;
+      const w = cap.offsetWidth * 1.14, h = cap.offsetHeight * 1.14;
+      const k = still ? 1 : Math.min(1, (t - elFx.born) / 700);
+      const f = { cx: W / 2, cy: H * .46, w, h, st: elFx.st };
+      c.save();
+      (AURA[elFx.kind] || AURA.spark)(c, f, k * (mobile ? .85 : 1), t);
+      c.restore();
+      c.globalAlpha = 1; c.globalCompositeOperation = "source-over";
+    };
+    elRaf = requestAnimationFrame(loop);
+  }
+
+  document.addEventListener("click", (e) => {
+    const cap = e.target.closest(".el-cap");
+    if (cap) return setEl(Number(cap.dataset.el));
+    const st = e.target.closest("[data-el-step]");
+    if (st) setEl(elIdx + Number(st.dataset.elStep));
+  });
+  // 모바일: 좌우로 밀어서 넘기기
+  let swipeX = null;
+  document.addEventListener("pointerdown", (e) => { if (e.target.closest(".el-stage")) swipeX = e.clientX; });
+  document.addEventListener("pointerup", (e) => {
+    if (swipeX == null) return;
+    const dx = e.clientX - swipeX;
+    swipeX = null;
+    if (Math.abs(dx) > 40) setEl(elIdx + (dx < 0 ? 1 : -1));
+  });
+  window.addEventListener("resize", () => document.querySelector(".el-stage") && setEl(elIdx, true));
+
   App.renderWorld = function () {
     const w = App.data.world;
     const h = w.hero || {};
@@ -166,30 +430,26 @@
 
     // 03 6속성
     const ei = w.elementsIntro || {};
-    const elements = (w.elements || []).map((e, i) => `<article class="w-el" style="--el:${esc(e.color)}">
-        <div class="w-el-head">
-          <span class="w-el-icon">${elGlyph(e)}</span>
-          <div><h3>${esc(e.ko)}</h3><p>${esc(e.en)}</p></div>
-        </div>
-        <dl>
-          <dt>힘의 특징</dt><dd>${nl(e.power)}</dd>
-          <dt>폭주 징후</dt><dd>${nl(e.rampage)}</dd>
-          <dt>속성 가이드</dt><dd>${nl(e.guide)}</dd>
-        </dl>
-        <details class="w-el-rep">
-          <summary>기관 내 평판</summary>
-          <p><b>센티넬</b> ${nl(e.sentinelRep)}</p>
-          <p><b>가이드</b> ${nl(e.guideRep)}</p>
-        </details>
-        ${tools("elements", i)}
-      </article>`).join("");
+    const els = w.elements || [];
+    if (elIdx >= els.length) elIdx = 0;
+    const elements = els.length ? `<div class="el-stage" style="--el:${esc(els[elIdx].color)}">
+        <canvas class="el-fx" aria-hidden="true"></canvas>
+        <div class="el-track">${els.map((e, i) => `<button type="button" class="el-cap" data-el="${i}" style="--c:${esc(e.color)}">
+          <span class="el-cap-no">${pad(i + 1)}</span>
+          <span class="el-cap-ic">${elGlyph(e)}</span>
+          <b>${esc(e.ko)}</b><small>${esc(e.en)}</small>
+        </button>`).join("")}</div>
+        <button type="button" class="el-nav prev" data-el-step="-1" aria-label="이전 속성">‹</button>
+        <button type="button" class="el-nav next" data-el-step="1" aria-label="다음 속성">›</button>
+      </div>
+      <div class="el-detail" id="el-detail"></div>` : "";
     const ch3 = chapter("03", "THE SIX ELEMENTS", "6가지 속성의 힘", `
       <div class="w-grid-2 w-el-intro">
         <article class="w-panel"><p class="w-role-en">ELEMENTAL SENTINEL</p><h3>속성 센티넬: 절대적인 공격수</h3><p>${nl(ei.sentinel)}</p></article>
         <article class="w-panel"><p class="w-role-en">ELEMENTAL GUIDE</p><h3>속성 가이드: 유일한 서포터</h3><p>${nl(ei.guide)}</p></article>
       </div>
       ${addBtn("elementsIntro", "설명 수정")}
-      <div class="w-els">${elements}</div>${addBtn("elements", "속성 추가")}`);
+      ${elements}${addBtn("elements", "속성 추가")}`);
 
     // 04 로스터
     const agent = (m, k, i) => `<figure class="w-agent" data-agent="${i}:${k}" style="--el:${attrColor(m.attr)}">
@@ -251,6 +511,7 @@
   });
 
   App.afterWorld = function () {
+    startEl();
     const els = document.querySelectorAll(".reveal");
     if (!("IntersectionObserver" in window)) return els.forEach((e) => e.classList.add("in"));
     const io = new IntersectionObserver((entries) => {

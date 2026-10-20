@@ -1139,3 +1139,69 @@ body.admin .rel-node { cursor: grab; touch-action: none; }
   .sec-title { font-size: 38px; }
   .gate .gate-form input { font-size: 16px; }
 }
+
+/* ---------- ARCH 6속성: 캡슐 카드 캐러셀 + 오라 ---------- */
+@property --el { syntax: "<color>"; inherits: true; initial-value: #ffffff; }
+.el-stage {
+  position: relative; height: 440px; margin: 10px -20px 0; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-select: none;
+  background: radial-gradient(ellipse 45% 55% at 50% 46%, color-mix(in srgb, var(--el) 26%, transparent), transparent 72%), #050506;
+  transition: --el .8s ease;
+}
+.el-stage::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 90px; pointer-events: none;
+  background: linear-gradient(transparent, #050506 85%); }
+.el-fx { position: absolute; inset: 0; width: 100%; height: 100%; display: block; z-index: 5; pointer-events: none; }
+.el-track { position: absolute; left: 50%; top: 46%; width: 0; height: 0; }
+.el-cap {
+  position: absolute; left: 0; top: 0; width: 112px; height: 188px; padding: 0; border-radius: 999px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+  border: 1px solid rgba(255, 255, 255, .08); color: #d8d4cc; font-family: var(--w-body);
+  background: linear-gradient(180deg, #0e0b0d 42%, color-mix(in srgb, var(--c) 42%, #0e0b0d));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 20px 40px -20px rgba(0, 0, 0, .9);
+  -webkit-box-reflect: below 22px linear-gradient(transparent 62%, rgba(255, 255, 255, .16));
+  transition: transform .7s cubic-bezier(.2, .8, .2, 1), opacity .5s, background .5s, border-color .5s, box-shadow .5s;
+}
+.el-cap-no { position: absolute; top: 16px; font-family: var(--w-display); font-size: 9px; letter-spacing: .25em; opacity: .5; }
+.el-cap-ic svg { display: block; width: 34px; height: 34px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.el-cap b { margin-top: 14px; font-family: var(--w-display); font-size: 15px; font-weight: 700; color: #fff; letter-spacing: .04em; }
+.el-cap small { font-family: var(--w-display); font-size: 8.5px; letter-spacing: .3em; text-transform: uppercase; opacity: .55; }
+/* 선택된 캡슐: 무지갯빛 유리 */
+.el-cap.on {
+  color: #fff; border: 2px solid rgba(255, 255, 255, .75);
+  background:
+    radial-gradient(circle at 32% 18%, rgba(255, 255, 255, .6), transparent 38%),
+    linear-gradient(160deg, color-mix(in srgb, var(--c) 55%, #ff6fae), color-mix(in srgb, var(--c) 80%, #fff) 48%, color-mix(in srgb, var(--c) 55%, #7dffc0));
+  background-size: 100% 100%, 200% 200%;
+  box-shadow: 0 0 26px color-mix(in srgb, var(--c) 80%, transparent), 0 0 70px color-mix(in srgb, var(--c) 45%, transparent), inset 0 0 22px rgba(255, 255, 255, .45);
+  animation: el-iri 6s ease-in-out infinite;
+}
+.el-cap.on .el-cap-ic svg { filter: drop-shadow(0 1px 3px rgba(0, 0, 0, .35)); }
+.el-cap.on b, .el-cap.on small { text-shadow: 0 1px 4px rgba(0, 0, 0, .35); opacity: 1; }
+@keyframes el-iri { 50% { background-position: 0 0, 100% 100%; } }
+.el-nav { position: absolute; top: 46%; z-index: 12; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, .14); background: rgba(10, 10, 12, .6); color: #ddd; font-size: 20px; line-height: 1; backdrop-filter: blur(4px); }
+.el-nav:hover { background: #fff; color: #111; }
+.el-nav.prev { left: 18px; } .el-nav.next { right: 18px; }
+/* 선택된 속성 설명 */
+.el-detail { position: relative; margin-top: -40px; z-index: 3; }
+.el-detail-in { position: relative; padding: 26px 26px 18px; border: 1px solid color-mix(in srgb, var(--el) 30%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--el) 9%, #08080a), #08080a 60%); animation: el-in .5s ease; }
+@keyframes el-in { from { opacity: 0; transform: translateY(10px); } }
+.el-detail-in header { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.el-detail-ic svg { display: block; width: 30px; height: 30px; fill: none; stroke: var(--el); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 6px var(--el)); }
+.el-detail-in h3 { margin: 0; font-size: 24px; font-weight: 900; }
+.el-detail-in header p { margin: 0; font-family: var(--w-display); font-size: 12px; letter-spacing: .3em; color: var(--el); }
+.el-detail-in dl { margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+.el-detail-in dt { font-family: var(--w-display); font-size: 11px; letter-spacing: .15em; color: var(--el); }
+.el-detail-in dd { margin: 6px 0 0; font-size: 13px; line-height: 1.8; color: #d6d0c3; }
+.el-detail-in .w-el-rep b { color: var(--el); }
+@media (max-width: 760px) {
+  .el-stage { height: 380px; margin: 6px -18px 0; }
+  .el-cap { width: 92px; height: 156px; }
+  .el-cap-ic svg { width: 28px; height: 28px; }
+  .el-cap b { font-size: 13px; margin-top: 10px; }
+  .el-nav { width: 34px; height: 34px; font-size: 17px; }
+  .el-nav.prev { left: 8px; } .el-nav.next { right: 8px; }
+  .el-detail-in { padding: 22px 18px 14px; }
+  .el-detail-in dl { grid-template-columns: 1fr; gap: 14px; }
+}
+@media (prefers-reduced-motion: reduce) { .el-cap.on { animation: none; } }
