@@ -105,6 +105,24 @@
   }
 
   // ---------- 화면 ----------
+  // 불러오는 동안: 심전도처럼 선이 그려지고 로고가 박동에 맞춰 뛰는 화면
+  const ECG = "M0 40 H30 Q36 30 42 40 H52 L56 46 L62 6 L68 70 L74 40 H84 Q96 24 108 40 H140 H170 Q176 30 182 40 H192 L196 46 L202 6 L208 70 L214 40 H224 Q236 24 248 40 H280";
+  function showLoading() {
+    document.body.classList.add("locked");
+    gate.hidden = false;
+    gate.innerHTML = `<div class="gate-box ecg-box">
+      <div class="gate-logo ecg-logo">ZZON</div>
+      <div class="ecg">
+        <svg viewBox="0 0 280 80" preserveAspectRatio="none" aria-hidden="true">
+          <path d="${ECG}" class="ecg-ghost"/>
+          <path d="${ECG}" class="ecg-line" pathLength="1"/>
+        </svg>
+        <i class="ecg-dot" style="offset-path: path('${ECG}')"></i>
+      </div>
+      <p class="ecg-text">LOADING<span>.</span><span>.</span><span>.</span></p>
+    </div>`;
+  }
+
   function showGate(html) {
     document.body.classList.add("locked");
     gate.hidden = false;
@@ -210,7 +228,7 @@
     document.body.classList.toggle("owner", role === "owner");
     document.body.classList.toggle("can-edit", App.rank >= 3);
     document.getElementById("grade").textContent = ROLE_NAMES[role] || role;
-    showGate(`<p class="gate-desc">불러오는 중…</p>`);
+    showLoading();
     try {
       await loadData();
     } catch (err) {
@@ -276,5 +294,6 @@
     if (confirm("로그아웃할까요?")) logout();
   });
 
+  showLoading();
   enter();
 })();

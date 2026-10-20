@@ -1024,3 +1024,31 @@ body.admin .rel-node { cursor: grab; touch-action: none; }
   .agent-card [style*="gap: 30px"] { gap: 18px !important; }
 }
 @media (max-width: 760px) { .bgm-edit input { font-size: 16px; } }
+
+/* ---------- 처음 불러오는 화면: 심전도 모션 ---------- */
+.ecg-box { width: min(300px, 100%); }
+.ecg-logo { margin-bottom: 26px; animation: ecg-thump 2s ease-out infinite; }
+.ecg { position: relative; width: 280px; max-width: 100%; height: 80px; margin: 0 auto; }
+.ecg svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.ecg path { fill: none; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
+.ecg-ghost { stroke: #eee; stroke-width: 1.5; }
+.ecg-line { stroke: var(--ink); stroke-width: 2; stroke-dasharray: 1; stroke-dashoffset: 1; animation: ecg-draw 2s linear infinite; }
+.ecg-dot {
+  position: absolute; left: 0; top: 0; width: 8px; height: 8px; margin: -4px 0 0 -4px; border-radius: 50%;
+  background: var(--ink); box-shadow: 0 0 0 4px rgba(17, 17, 17, .08), 0 0 12px rgba(17, 17, 17, .35);
+  offset-rotate: 0deg; offset-anchor: 50% 50%; animation: ecg-dot 2s linear infinite;
+}
+.ecg-text { margin: 22px 0 0; font-family: var(--brand); font-size: 10px; font-weight: 600; letter-spacing: .5em; color: #999; }
+.ecg-text span { animation: ecg-blink 1.2s infinite; }
+.ecg-text span:nth-child(2) { animation-delay: .2s; }
+.ecg-text span:nth-child(3) { animation-delay: .4s; }
+@keyframes ecg-draw { 0% { stroke-dashoffset: 1; opacity: 1; } 75% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes ecg-dot { 0% { offset-distance: 0%; opacity: 1; } 75% { offset-distance: 100%; opacity: 1; } 76%, 100% { offset-distance: 100%; opacity: 0; } }
+/* 선이 R 파(뾰족한 부분)를 지날 때 로고가 '두근' */
+@keyframes ecg-thump {
+  0%, 15%, 22%, 52%, 59%, 100% { transform: scale(1); }
+  17.5% { transform: scale(1.12); } 19.5% { transform: scale(.97); }
+  54.5% { transform: scale(1.12); } 56.5% { transform: scale(.97); }
+}
+@keyframes ecg-blink { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .ecg-line { stroke-dashoffset: 0; animation: none; } .ecg-dot, .ecg-logo { animation: none; } .ecg-dot { display: none; } }
