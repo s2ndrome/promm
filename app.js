@@ -115,12 +115,12 @@
     const { pairs, genres = [] } = App.data;
     if (relGenre === "ONLY GIRL") {
       const girls = App.data.girls || [];
-      return `<div class="rel-head"><span>only girl</span><span>( ${girls.length} )</span></div>
+      return `<div class="rv-head"><span>only girl</span><span>( ${girls.length} )</span></div>
         ${girls.length ? `<div class="mini-grid">${girls.map((c, i) => mini("girls", c, i)).join("")}</div>` : `<p class="genre-empty">아직 캐릭터가 없어요.</p>`}
         <div class="adm-bar"><button type="button" class="pill-btn" data-act="add" data-col="girls">+ 캐릭터 추가</button></div>`;
     }
     const list = pairs.map((p, i) => (p.genre === relGenre && genres.includes(p.genre) ? i : -1)).filter((i) => i >= 0);
-    return `<div class="rel-head"><span>${esc(short(relGenre))}</span><span>( ${list.length} )</span></div>
+    return `<div class="rv-head"><span>${esc(short(relGenre))}</span><span>( ${list.length} )</span></div>
       ${list.length ? `<div class="mini-grid">${list.map((i) => mini("pairs", pairs[i], i)).join("")}</div>` : `<p class="genre-empty">아직 페어가 없어요.</p>`}
       <div class="adm-bar"><button type="button" class="pill-btn" data-act="add" data-col="pairs" data-genre="${esc(relGenre)}">+ 이 장르에 페어 추가</button></div>`;
   }
@@ -198,6 +198,7 @@
       <div class="adm-bar">${addBtn("pairs", "페어 추가")}${addBtn("genres", "장르 관리")}<span class="owner-only">${addBtn("site", "사이트 정보")}</span></div>
       <div class="row-head"><span>more pairs <i>›</i></span><span>( ${mainIdx.length} )</span></div>
       ${mainIdx.length ? `<div class="mini-grid">${mainIdx.map((i) => mini("pairs", pairs[i], i)).join("")}</div>` : ""}
+      <div class="rel-wrap">
       <section class="rel">
         <div class="rel-l">
           <p class="rel-t">related :</p>
@@ -213,7 +214,8 @@
           </form>
         </div>
       </section>
-      <div id="rel-view" class="rel-view">${relView()}</div>`;
+      <div id="rel-view" class="rel-view">${relView()}</div>
+      </div>`;
   }
 
   // asset 하위 페이지들 (같은 형태). col 은 데이터 이름
