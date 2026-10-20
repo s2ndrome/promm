@@ -619,6 +619,12 @@
       }
       d.world.v = 4;
     }
+    if (d.world.v < 5) {
+      // v5: 요원 상세 프로필(증명사진을 누르면 뜨는 팝업) 기본값
+      const cards = window.AGENT_CARDS || {};
+      for (const t of d.world.teams || []) for (const m of t.members || []) if (!m.card && cards[m.name]) m.card = cards[m.name];
+      d.world.v = 5;
+    }
     for (const p of d.pairs || []) {
       p.male ??= {};
       p.female ??= {};

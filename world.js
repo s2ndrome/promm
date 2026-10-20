@@ -173,7 +173,7 @@
       <div class="w-els">${elements}</div>${addBtn("elements", "속성 추가")}`);
 
     // 04 로스터
-    const agent = (m) => `<figure class="w-agent" style="--el:${attrColor(m.attr)}">
+    const agent = (m, k, i) => `<figure class="w-agent" data-agent="${i}:${k}" style="--el:${attrColor(m.attr)}">
         <div class="w-agent-photo ${m.photo ? "" : "empty"}">${m.photo
           ? `<img src="${esc(App.mediaUrl(m.photo))}" alt="${esc(m.name)}" loading="lazy" onerror="this.parentNode.classList.add('empty');this.remove()">`
           : ""}</div>
@@ -182,7 +182,7 @@
     const teams = (w.teams || []).map((t, i) => `<article class="w-team" data-team="${i}">
         <header><h3>${esc(t.name)}</h3><span>${esc(t.cls)}</span><em class="w-rel-open">관계도 ›</em></header>
         ${(t.members || []).length
-          ? `<div class="w-agents">${t.members.map(agent).join("")}</div>`
+          ? `<div class="w-agents">${t.members.map((m, k) => agent(m, k, i)).join("")}</div>`
           : `<p class="w-agents-empty">COMING SOON</p>`}
         ${tools("teams", i)}
       </article>`).join("");
@@ -239,6 +239,40 @@
     }, { rootMargin: "0px 0px -10% 0px" });
     els.forEach((e) => io.observe(e));
   };
+
+  // ---------- 요원 상세 프로필 (증명사진을 누르면 팝업) ----------
+  // 붙여넣은 HTML 에서 스크립트·이벤트 속성 등 위험한 것만 걷어냄 (style 은 유지)
+  function cleanHtml(html) {
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    doc.querySelectorAll("script, iframe, object, embed, link, meta, base, form, frame, frameset").forEach((n) => n.remove());
+    doc.body.querySelectorAll("*").forEach((n) => {
+      for (const a of [...n.attributes]) {
+        const v = a.value.replace(/\s/g, "").toLowerCase();
+        if (/^on/i.test(a.name) || (/^(href|src|xlink:href|action|formaction)$/i.test(a.name) && /^(javascript|vbscript|data:text)/.test(v)))
+          n.removeAttribute(a.name);
+      }
+    });
+    return doc.body.innerHTML;
+  }
+
+  function openAgent(ti, mi) {
+    const t = App.data.world.teams[ti];
+    const m = t?.members?.[mi];
+    if (!m) return;
+    const canEdit = App.admin && App.rank >= 3;
+    const body = m.card
+      ? `<div class="agent-card">${cleanHtml(m.card)}</div>`
+      : `<div class="agent-basic" style="--el:${attrColor(m.attr)}">
+          <div class="agent-basic-ph ${m.photo ? "" : "empty"}">${m.photo ? `<img src="${esc(App.mediaUrl(m.photo))}" alt="">` : ""}</div>
+          <p class="agent-basic-team">${esc(t.name)} · ${esc(t.cls || "")}</p>
+          <h2>${esc(m.name)}</h2>
+          ${m.attr ? `<p class="agent-basic-attr">${esc(m.attr)}</p>` : ""}
+          ${m.desc ? `<p class="agent-basic-desc">${esc(m.desc)}</p>` : ""}
+          <p class="agent-basic-empty">CLASSIFIED${canEdit ? " · 팀 ✎ 편집에서 이 요원의 상세 프로필 HTML 을 붙여넣어 주세요" : ""}</p>
+        </div>`;
+    App.openModal(body);
+    document.querySelector(".modal-box").classList.add("agent-box");
+  }
 
   // ---------- 인물 관계도 (팀을 누르면 팝업) ----------
   const LOVE = /사랑|연인|애인|짝사랑|썸|약혼|부부|♥|❤|좋아/;
@@ -402,6 +436,12 @@
         document.querySelector('[data-rel="save"]').disabled = false;
         return drawChart();
       }
+    }
+    // 요원 증명사진을 누르면 그 요원 상세 프로필
+    const ag = e.target.closest("[data-agent]");
+    if (ag && !e.target.closest(".adm-tools, [data-act]")) {
+      const [ti, mi] = ag.dataset.agent.split(":").map(Number);
+      return openAgent(ti, mi);
     }
     // 팀 카드를 누르면 관계도 (편집 버튼은 제외)
     const team = e.target.closest("[data-team]");

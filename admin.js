@@ -307,6 +307,7 @@
         <button type="button" class="pill-btn m-remove">삭제</button>
       </div>
       <input type="text" class="m-desc" placeholder="한 줄 소개 (관계도에 표시, 예: 27세 / 뱅가드 리더)" value="${esc(m.desc)}">
+      <textarea class="m-card" placeholder="상세 프로필 HTML (증명사진을 누르면 뜨는 팝업). 비워두면 기본 카드로 보여요.">${esc(m.card)}</textarea>
       <div class="img-field">
         <div class="preview" style="${m.photo ? `background-image:url('${esc(App.mediaUrl(m.photo))}')` : ""}"></div>
         <div><input type="file" class="m-file" accept="image/*">
@@ -470,7 +471,7 @@
           if (f.type === "members") {
             const list = [];
             for (const box of form.querySelectorAll(".member-edit")) {
-              const m = { name: box.querySelector(".m-name").value.trim(), attr: box.querySelector(".m-attr").value.trim(), desc: box.querySelector(".m-desc").value.trim(), photo: box.dataset.image || "" };
+              const m = { name: box.querySelector(".m-name").value.trim(), attr: box.querySelector(".m-attr").value.trim(), desc: box.querySelector(".m-desc").value.trim(), card: box.querySelector(".m-card").value.trim(), photo: box.dataset.image || "" };
               const file = box.querySelector(".m-file").files[0];
               if (file) m.photo = await uploadImage(file);
               if (m.name) list.push(m);
