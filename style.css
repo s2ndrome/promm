@@ -1375,3 +1375,6 @@ body.admin .ooc-card { padding-top: 40px; }
 }
 /* 모바일: 상단 바 오른쪽에는 다크 모드 버튼만 */
 @media (max-width: 900px) { .st-r { display: none; } }
+/* 생성기 입력칸 예시 글씨는 작게 (모바일은 확대 방지로 입력 글씨는 16px 유지, 예시만 작게) */
+.oc-form input::placeholder { font-size: 10px; color: var(--muted); }
+@media (max-width: 760px) { .oc-form input::placeholder { font-size: 11px; } .oc-form { padding: 2px 3px 2px 12px; } .oc-form .pb { padding: 5px 12px; font-size: 9.5px; } }
