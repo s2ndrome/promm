@@ -405,6 +405,11 @@
       ${links.length ? "" : `<p class="link-empty">아직 링크가 없어요.</p>`}`;
   }
 
+  function renderSoon(k) {
+    return `<div class="page-head"><h1>준비중</h1><p>archive ${k}.</p></div>
+      <div class="soon"><p>아직 준비중인 페이지예요.</p><small>coming soon</small></div>`;
+  }
+
   const routes = {
     "/": { title: "Pairs", render: renderHome },
     "/gallery": { title: "Asset", render: () => renderGallery("gallery") },
@@ -412,6 +417,10 @@
     "/world": { title: "ARCH", render: () => App.renderWorld() },
     "/link": { title: "Link", render: renderLinks },
     "/ooc": { title: "OOC", render: renderOOC },
+    // archive a / b / c: 아직 준비중인 페이지
+    "/archive-a": { title: "준비중", render: () => renderSoon("a") },
+    "/archive-b": { title: "준비중", render: () => renderSoon("b") },
+    "/archive-c": { title: "준비중", render: () => renderSoon("c") },
   };
 
   function route() {
