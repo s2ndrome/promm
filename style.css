@@ -684,7 +684,11 @@ body.world-mode .bgm .pill-btn { background: transparent; color: var(--w-ink); b
 .w-el::before { content: ""; position: absolute; top: -60px; right: -60px; width: 160px; height: 160px; border-radius: 50%; background: var(--el); opacity: .14; filter: blur(30px); }
 .w-el:hover { transform: translateY(-4px); border-color: var(--el); box-shadow: 0 18px 40px -20px var(--el); }
 .w-el-head { position: relative; display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
-.w-el-icon { font-size: 34px; filter: drop-shadow(0 0 12px var(--el)); }
+.w-el-icon { flex: none; width: 52px; height: 52px; display: flex; align-items: center; justify-content: center;
+  border: 1px solid color-mix(in srgb, var(--el) 45%, transparent); border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--el) 16%, transparent), transparent 70%); }
+.w-el-icon svg { width: 28px; height: 28px; fill: none; stroke: var(--el); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--el) 70%, transparent)); }
 .w-el-head h3 { margin: 0; font-size: 24px; font-weight: 900; }
 .w-el-head p { margin: 0; font-family: var(--w-display); font-size: 12px; letter-spacing: .3em; color: var(--el); }
 .w-el dl { position: relative; margin: 0; }

@@ -147,7 +147,6 @@
       { key: "guide", label: "속성 가이드 설명", type: "textarea" },
     ] },
     "world.elements": { title: "Element", fields: [
-      { key: "icon", label: "아이콘 (이모지)", type: "text" },
       { key: "ko", label: "이름", type: "text" },
       { key: "en", label: "영문", type: "text" },
       { key: "color", label: "색", type: "color" },

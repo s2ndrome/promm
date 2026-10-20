@@ -83,6 +83,23 @@
 
   App.emblem = emblem; // 로그인 화면에서도 씀
 
+  // 속성 기호: 이모지 대신 얇은 선으로 그린 문양 (이름으로 자동 선택)
+  const GLYPHS = {
+    fire: '<path d="M24 5c1.5 7.5 10 11 10 21a10 10 0 0 1-20 0c0-5 3-8 5-10 0 4 2 6 4 6-1-6 1-12 1-17z"/><path d="M24 40a4.5 4.5 0 0 1-4.5-4.5c0-3 2.5-4.5 4.5-7.5 2 3 4.5 4.5 4.5 7.5A4.5 4.5 0 0 1 24 40z"/>',
+    water: '<path d="M24 5C18 15 12 21.5 12 29a12 12 0 0 0 24 0C36 21.5 30 15 24 5z"/><path d="M18.5 30.5a6 6 0 0 0 5 5.5"/>',
+    grass: '<path d="M38 8C20 8 10 17 10 29c0 5 2 9 4 11 2-2 6-4 10-5 9-3 14-12 14-27z"/><path d="M14 40c5-11 12-19 21-27"/><path d="M20 29h7M24 23l7-1"/>',
+    bolt: '<path d="M28 4 11 27h11l-4 17 19-25H25l3-15z"/>',
+    wind: '<path d="M6 18h22a5 5 0 1 0-5-5"/><path d="M6 25h31a5 5 0 1 1-5 5"/><path d="M6 32h14"/>',
+    ice: '<path d="M24 4v40M6.7 14l34.6 20M6.7 34l34.6-20"/><path d="M19 7.5l5 4 5-4M19 40.5l5-4 5 4M7.6 21l6.2-1.3-2-6M40.4 27l-6.2 1.3 2 6M7.6 27l6.2 1.3-2 6M40.4 21l-6.2-1.3 2-6"/>',
+    spark: '<path d="M24 6l4 14 14 4-14 4-4 14-4-14-14-4 14-4z"/>',
+  };
+  function elGlyph(e) {
+    const s = `${e.ko || ""} ${e.en || ""}`.toLowerCase();
+    const k = /불|pyre|fire/.test(s) ? "fire" : /물|aqua|water/.test(s) ? "water" : /풀|verde|grass|leaf/.test(s) ? "grass"
+      : /번개|fulmen|thunder|light/.test(s) ? "bolt" : /바람|aero|wind/.test(s) ? "wind" : /얼음|glacies|ice|frost/.test(s) ? "ice" : "spark";
+    return `<svg viewBox="0 0 48 48" aria-hidden="true">${GLYPHS[k]}</svg>`;
+  }
+
   App.renderWorld = function () {
     const w = App.data.world;
     const h = w.hero || {};
@@ -151,7 +168,7 @@
     const ei = w.elementsIntro || {};
     const elements = (w.elements || []).map((e, i) => `<article class="w-el" style="--el:${esc(e.color)}">
         <div class="w-el-head">
-          <span class="w-el-icon">${esc(e.icon)}</span>
+          <span class="w-el-icon">${elGlyph(e)}</span>
           <div><h3>${esc(e.ko)}</h3><p>${esc(e.en)}</p></div>
         </div>
         <dl>
