@@ -306,7 +306,7 @@
         <input type="text" class="m-attr" placeholder="속성 (예: 불 속성, S급 물)" value="${esc(m.attr)}">
         <button type="button" class="pill-btn m-remove">삭제</button>
       </div>
-      <input type="text" class="m-desc" placeholder="한 줄 소개 (관계도에 표시, 예: 27세 / 뱅가드 리더)" value="${esc(m.desc)}">
+      <input type="text" class="m-desc" placeholder="한 줄 소개 (상세 프로필이 없을 때 기본 카드에 표시)" value="${esc(m.desc)}">
       <textarea class="m-card" placeholder="상세 프로필 HTML (증명사진을 누르면 뜨는 팝업). 비워두면 기본 카드로 보여요.">${esc(m.card)}</textarea>
       <div class="img-field">
         <div class="preview" style="${m.photo ? `background-image:url('${esc(App.mediaUrl(m.photo))}')` : ""}"></div>

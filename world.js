@@ -309,7 +309,7 @@
         <svg class="rel-lines" id="rel-svg"></svg>
         ${members.map((m) => `<div class="rel-node" data-node="${esc(m.name)}" style="--el:${attrColor(m.attr)}">
           <div class="rel-ph ${m.photo ? "" : "empty"}">${m.photo ? `<img src="${esc(App.mediaUrl(m.photo))}" alt="" draggable="false" onerror="this.parentNode.classList.add('empty');this.remove()">` : ""}</div>
-          <b>${esc(m.name)}</b>${m.desc ? `<small>${esc(m.desc)}</small>` : m.attr ? `<small>${esc(m.attr)}</small>` : ""}
+          <b>${esc(m.name)}</b>
         </div>`).join("")}
         <div id="rel-labels"></div>
       </div>
