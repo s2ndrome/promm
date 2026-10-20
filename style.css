@@ -488,25 +488,18 @@ button.id-photo:hover .id-photo-hint, button.id-photo:focus-visible .id-photo-hi
   .pinfo-people { grid-template-columns: 1fr; }
 }
 
-.link-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.link-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
 .link-card { position: relative; }
-.link-card > a {
-  display: flex; flex-direction: column; gap: 6px; height: 100%;
-  border: 1px solid var(--line); border-radius: 16px; padding: 20px 20px 16px; background: #fff;
-  transition: transform .2s, box-shadow .2s, border-color .2s;
-}
-.link-card > a:hover { transform: translateY(-3px); border-color: var(--ink); box-shadow: 0 12px 28px -18px rgba(0, 0, 0, .35); }
-.link-mono {
-  width: 38px; height: 38px; border-radius: 10px; margin-bottom: 8px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--ink); color: #fff; font-family: var(--brand); font-weight: 700; font-size: 16px; text-transform: uppercase;
-}
-.link-title { font-size: 15px; font-weight: 500; line-height: 1.4; word-break: break-word; }
-.link-desc { font-size: 13px; color: #666; font-weight: 300; line-height: 1.6; }
-.link-host { margin-top: auto; padding-top: 10px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: var(--muted); border-top: 1px solid #f0f0f0; }
-.link-arrow { font-size: 14px; color: var(--ink); transition: transform .2s; }
-.link-card > a:hover .link-arrow { transform: translate(2px, -2px); }
-.link-card .adm-tools { top: 14px; right: 14px; }
+/* 링크 박스: 얇은 테두리 사각형 · 왼쪽 위 작은 원 · 오른쪽 위 주소 · 왼쪽 아래 큰 이름 */
+.lk { display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 7 / 3; padding: 9% 5% 7% 9%;
+  border: 1px solid #333; background: #fff; color: var(--ink); text-decoration: none; transition: background .25s, color .25s; }
+.lk-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.lk-dot { flex: none; width: 13px; height: 13px; border-radius: 50%; border: 1.5px solid var(--dot); transition: background .25s; }
+.lk-host { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: "Pretendard Variable", Pretendard, sans-serif; font-size: 15px; font-weight: 300; letter-spacing: .03em; color: #333; }
+.lk-title { font-family: "Pretendard Variable", Pretendard, sans-serif; font-size: clamp(26px, 4.2vw, 48px); font-weight: 300; line-height: 1.1; letter-spacing: .01em; overflow-wrap: anywhere; }
+.lk:hover .lk-dot { background: var(--dot); }
+.lk:hover { background: #fafafa; }
+.link-card .adm-tools { top: 50%; right: 14px; transform: translateY(-50%); }
 .link-empty { text-align: center; color: #999; }
 
 /* ============================================================
@@ -803,7 +796,7 @@ body.admin .w-team header { padding-right: 160px; }
    반응형 (맨 끝에 두어 위의 규칙보다 우선)
    ============================================================ */
 @media (max-width: 960px) {
-  .link-grid, .ooc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ooc-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 @media (max-width: 760px) {
@@ -838,20 +831,10 @@ body.admin .w-team header { padding-right: 160px; }
   .ooc-card { padding: 16px; }
   .ooc-text { -webkit-line-clamp: 5; }
 
-  /* 링크: 가로형 카드 한 줄씩 */
-  .link-grid { grid-template-columns: 1fr; gap: 10px; }
-  .link-card > a {
-    display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; grid-template-rows: auto auto auto;
-    column-gap: 14px; row-gap: 2px; align-items: center; padding: 14px 16px; border-radius: 14px;
-  }
-  .link-mono { grid-row: 1 / span 3; margin: 0; width: 40px; height: 40px; }
-  .link-title { grid-column: 2; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .link-desc { grid-column: 2; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .link-host { grid-column: 2; margin: 0; padding: 0; border: 0; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
-  .link-arrow { grid-column: 3; grid-row: 1 / span 3; }
-  .link-host .link-arrow { display: none; }
-  .link-card > a::after { content: "↗"; grid-column: 3; grid-row: 1 / span 3; font-size: 16px; }
-  .link-card .adm-tools { top: 50%; right: 40px; transform: translateY(-50%); }
+  /* 링크: 한 줄에 하나 */
+  .link-grid { grid-template-columns: 1fr; gap: 14px; }
+  .lk-host { font-size: 13px; }
+  .lk-title { font-size: 34px; }
 
   /* footer */
   .foot { flex-wrap: wrap; row-gap: 8px; padding: 24px 16px 30px; }

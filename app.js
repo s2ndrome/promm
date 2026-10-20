@@ -256,33 +256,47 @@
 
   function renderLinks() {
     const links = App.data.links || [];
-    const groups = new Map();
-    links.forEach((l, i) => {
-      const key = (l.section || "").trim();
-      if (!groups.has(key)) groups.set(key, []);
-      groups.get(key).push(i);
-    });
-    const host = (u) => { try { return new URL(u).hostname.replace(/^www\./, ""); } catch { return ""; } };
-    const row = (i) => {
+    const host = (u) => { try { return new URL(u).host; } catch { return ""; } };
+    const card = (i) => {
       const l = links[i];
-      const name = l.title || host(l.url) || l.url;
+      const name = l.title || host(l.url).replace(/^www\./, "") || l.url;
       return `<div class="link-card">
-        <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer">
-          <span class="link-mono">${esc([...name][0] || "·")}</span>
-          <span class="link-title">${esc(name)}</span>
-          ${l.desc ? `<span class="link-desc">${esc(l.desc)}</span>` : ""}
-          <span class="link-host">${esc(host(l.url))}<span class="link-arrow">↗</span></span>
+        <a class="lk" href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" style="--dot:${esc(l.dot || "#111111")}">
+          <span class="lk-top"><i class="lk-dot"></i><span class="lk-host">${esc(host(l.url))}</span></span>
+          <span class="lk-title">${esc(name)}</span>
         </a>
         ${tools("links", i)}
       </div>`;
     };
-    const sections = [...groups].map(([name, idx]) => `<section class="g-section">
-        ${name || groups.size > 1 ? `<div class="block-title">${esc(name || "ETC")}</div>` : ""}
-        <div class="link-grid">${idx.map(row).join("")}</div>
+    // 장르(토글) → 구분(구분선) 순서로 묶기. 처음 나온 순서대로
+    const byGenre = new Map();
+    links.forEach((l, i) => {
+      const g = (l.genre || "").trim(), s = (l.section || "").trim();
+      if (!byGenre.has(g)) byGenre.set(g, new Map());
+      const secs = byGenre.get(g);
+      if (!secs.has(s)) secs.set(s, []);
+      secs.get(s).push(i);
+    });
+    const sectionsHtml = (secs) => [...secs].map(([name, idx]) => `<section class="g-section">
+        ${name ? `<div class="block-title">${esc(name)}</div>` : ""}
+        <div class="link-grid">${idx.map(card).join("")}</div>
       </section>`).join("");
+    const top = byGenre.has("") ? sectionsHtml(byGenre.get("")) : "";
+    const boxes = [...byGenre].filter(([g]) => g).map(([g, secs]) => {
+      const key = `link:${g}`, n = [...secs.values()].reduce((a, x) => a + x.length, 0);
+      return `<details class="genre" data-genre-box="${esc(key)}" ${openGenres.has(key) ? "open" : ""}>
+        <summary><span class="genre-name">${esc(g)}</span><span class="genre-count">${n}</span></summary>
+        <div class="genre-body">
+          ${sectionsHtml(secs)}
+          <div class="adm-bar genre-add"><button type="button" class="pill-btn" data-act="add" data-col="links" data-genre="${esc(g)}">+ 이 장르에 링크 추가</button></div>
+        </div>
+      </details>`;
+    }).join("");
     return `<div class="page-head"><h1>LINK</h1><p>모아둔 링크</p></div>
       <div class="adm-bar">${addBtn("links", "링크 추가")}</div>
-      ${sections || `<p class="link-empty">아직 링크가 없어요.</p>`}`;
+      ${top}
+      ${boxes ? `<div class="genres">${boxes}</div>` : ""}
+      ${links.length ? "" : `<p class="link-empty">아직 링크가 없어요.</p>`}`;
   }
 
   const routes = {

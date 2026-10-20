@@ -103,10 +103,11 @@
       fields: [
         { key: "title", label: "이름", type: "text" },
         { key: "url", label: "주소 (https://...)", type: "text" },
-        { key: "desc", label: "설명 (선택)", type: "text" },
-        { key: "section", label: "구분 (선택)", type: "section", source: "links", hint: "같은 구분끼리 묶여요." },
+        { key: "dot", label: "박스 안 작은 원 색", type: "color", def: "#111111" },
+        { key: "genre", label: "장르 (선택)", type: "section", source: "links", prop: "genre", hint: "같은 장르끼리 토글로 묶여요. 비워두면 맨 위에 보여요." },
+        { key: "section", label: "구분 (선택)", type: "section", source: "links", hint: "장르 안에서 같은 구분끼리 묶이고 구분선으로 나뉘어요." },
       ],
-      blank: () => ({ title: "", url: "", desc: "", section: "" }),
+      blank: () => ({ title: "", url: "", dot: "#111111", genre: "", section: "" }),
     },
 
     // ---------- ARCH World (쭌식 전용) ----------
@@ -324,7 +325,7 @@
     if (f.type === "textarea")
       return `<textarea name="${name}">${esc(val)}</textarea>`;
     if (f.type === "color")
-      return `<input type="color" name="${name}" value="${esc(val || "#c9a4b4")}">`;
+      return `<input type="color" name="${name}" value="${esc(val || f.def || "#c9a4b4")}">`;
     if (f.type === "list")
       return `<input type="text" name="${name}" value="${esc((val || []).join(", "))}">`;
     if (f.type === "genre") {
@@ -341,9 +342,11 @@
       return `<div class="member-edit-list">${(val || []).map(memberHtml).join("")}</div>
         <button type="button" class="pill-btn m-add">+ 요원 추가</button>`;
     if (f.type === "section") {
-      const names = [...new Set(App.data[f.source || "gallery"].map((g) => (g.section || "").trim()).filter(Boolean))];
-      return `<input type="text" name="${name}" value="${esc(val)}" list="section-list" autocomplete="off">
-        <datalist id="section-list">${names.map((n) => `<option value="${esc(n)}">`).join("")}</datalist>`;
+      const prop = f.prop || "section";
+      const names = [...new Set(App.data[f.source || "gallery"].map((g) => (g[prop] || "").trim()).filter(Boolean))];
+      const id = `list-${f.key.replace(/\W/g, "")}`;
+      return `<input type="text" name="${name}" value="${esc(val)}" list="${id}" autocomplete="off">
+        <datalist id="${id}">${names.map((n) => `<option value="${esc(n)}">`).join("")}</datalist>`;
     }
     if (f.type === "pair") {
       const opts = App.data.pairs.map((p, i) => `<option value="${esc(p.id)}" ${p.id === val ? "selected" : ""}>#${String(i + 1).padStart(2, "0")} ${esc(p.title)}</option>`).join("");
@@ -666,6 +669,7 @@
       // 갤러리는 같은 구분, 페어는 같은 장르 안에서만 순서 이동
       const groupKey = ["gallery", "jaktae", "ooc"].includes(col) ? (x) => (x.section || "").trim()
         : col === "pairs" ? (x) => ((App.data.genres || []).includes(x.genre) ? x.genre : "")
+        : col === "links" ? (x) => `${(x.genre || "").trim()}\u0000${(x.section || "").trim()}`
         : null;
       if (groupKey) {
         const g = groupKey(list[i]);
