@@ -50,7 +50,9 @@
 
   function paint() {
     const t = tracks[cur];
-    $(".bgm-title").textContent = t ? t.title : tracks.length ? "재생할 곡을 골라주세요" : "아직 곡이 없어요 · List 에서 추가";
+    $(".bgm-title").innerHTML = t
+      ? `<b>${esc(t.title)}</b>${t.artist ? `<em>${esc(t.artist)}</em>` : ""}`
+      : tracks.length ? "재생할 곡을 골라주세요" : "아직 곡이 없어요 · List 에서 추가";
     $(".bgm-play").innerHTML = playing ? ICON.pause : ICON.play;
     $(".bgm-shuffle").classList.toggle("on", shuffle);
     $(".bgm-yt").classList.toggle("show", t?.kind === "youtube");
@@ -156,14 +158,25 @@
   });
 
   // ---------- 목록 팝업 ----------
+  let editing = -1; // 목록에서 수정 중인 곡
+  // 곡 정보 수정: 쭌식, 또는 그 곡을 올린 사람
+  const canEdit = (t) => App.role === "owner" || (App.rank >= 2 && t.added_by && t.added_by === App.user?.id);
   function listHtml() {
     if (!tracks.length) return `<p class="bgm-empty">아직 곡이 없어요. 아래에서 추가해 주세요.</p>`;
-    return tracks.map((t, i) => `<div class="bgm-row ${i === cur ? "on" : ""}">
+    return tracks.map((t, i) => i === editing
+      ? `<form class="bgm-row bgm-edit" data-bgm-save="${i}">
+          <input type="text" name="title" value="${esc(t.title)}" placeholder="곡 제목" required>
+          <input type="text" name="artist" value="${esc(t.artist || "")}" placeholder="아티스트">
+          <button type="submit" class="pill-btn dark">저장</button>
+          <button type="button" class="pill-btn" data-bgm-cancel>취소</button>
+        </form>`
+      : `<div class="bgm-row ${i === cur ? "on" : ""}">
       <button type="button" class="bgm-row-play" data-bgm-play="${i}">
         <span class="bgm-row-icon">${i === cur && playing ? ICON.pause : ICON.play}</span>
-        <span class="bgm-row-title">${esc(t.title)}</span>
+        <span class="bgm-row-text"><span class="bgm-row-title">${esc(t.title)}</span>${t.artist ? `<span class="bgm-row-artist">${esc(t.artist)}</span>` : ""}</span>
       </button>
       <span class="pill">${t.kind === "youtube" ? "YouTube" : "File"}</span>
+      ${canEdit(t) ? `<button type="button" class="bgm-del" data-bgm-edit="${i}" aria-label="수정" title="수정">✎</button>` : ""}
       ${App.role === "owner" ? `<button type="button" class="bgm-del" data-bgm-del="${i}" aria-label="삭제">✕</button>` : ""}
     </div>`).join("");
   }
@@ -180,6 +193,7 @@
           <button type="button" class="vtab" data-kind="youtube">유튜브 링크</button>
         </div>
         <div class="field"><input type="text" name="title" placeholder="곡 제목"></div>
+        <div class="field"><input type="text" name="artist" placeholder="아티스트 (선택 · 유튜브는 비워두면 채널 이름)"></div>
         <div class="field" data-for="file"><input type="file" name="file" accept="audio/*"><p class="hint">mp3, m4a 등 · 50MB 이하</p></div>
         <div class="field" data-for="youtube" hidden><input type="text" name="url" placeholder="https://youtu.be/..."></div>
         <div class="form-actions"><button type="submit" class="pill-btn dark">+ 곡 추가</button></div>
@@ -208,6 +222,7 @@
 
   async function addTrack(kind, form) {
     let title = form.title.value.trim();
+    let artist = form.artist.value.trim();
     let src;
     if (kind === "file") {
       const file = form.file.files[0];
@@ -220,15 +235,24 @@
     } else {
       src = youtubeId(form.url.value);
       if (!src) throw new Error("유튜브 링크를 확인해 주세요.");
-      if (!title) {
+      if (!title || !artist) {
         try {
           const r = await fetch(`https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(`https://www.youtube.com/watch?v=${src}`)}`);
-          if (r.ok) title = (await r.json()).title;
+          if (r.ok) {
+            const o = await r.json();
+            title ||= o.title;
+            artist ||= (o.author_name || "").replace(/ - Topic$/, "");
+          }
         } catch {}
       }
       title ||= `YouTube ${src}`;
     }
-    const { data, error } = await App.sb.from("bgm").insert({ title, kind, src }).select().single();
+    let { data, error } = await App.sb.from("bgm").insert({ title, artist, kind, src }).select().single();
+    if (error && /artist/.test(error.message)) {
+      // 아직 Supabase 에 artist 칸이 없으면 제목만 저장
+      ({ data, error } = await App.sb.from("bgm").insert({ title, kind, src }).select().single());
+      if (!error) App.toast("아티스트는 저장되지 않았어요 (Supabase SQL 업데이트 필요)");
+    }
     if (error) throw new Error(error.message);
     tracks.push(data);
     paint();
@@ -269,7 +293,29 @@
       return i === cur ? toggle() : play(i);
     }
     const del = e.target.closest("[data-bgm-del]");
-    if (del) removeTrack(Number(del.dataset.bgmDel));
+    if (del) return removeTrack(Number(del.dataset.bgmDel));
+    const ed = e.target.closest("[data-bgm-edit]");
+    if (ed) { editing = Number(ed.dataset.bgmEdit); return paint(); }
+    if (e.target.closest("[data-bgm-cancel]")) { editing = -1; paint(); }
+  });
+
+  document.addEventListener("submit", async (e) => {
+    const f = e.target.closest("[data-bgm-save]");
+    if (!f) return;
+    e.preventDefault();
+    const t = tracks[Number(f.dataset.bgmSave)];
+    const patch = { title: f.title.value.trim(), artist: f.artist.value.trim() };
+    if (!patch.title) return;
+    f.classList.add("busy");
+    const { data, error } = await App.sb.from("bgm").update(patch).eq("id", t.id).select().single();
+    if (error || !data) {
+      f.classList.remove("busy");
+      return alert(`저장하지 못했어요: ${error ? error.message : "권한이 없어요"}${error && /artist|permission|policy/.test(error.message) ? "\n(Supabase SQL Editor 에서 setup.sql 의 BGM 아티스트 부분을 실행해 주세요)" : ""}`);
+    }
+    Object.assign(t, data);
+    editing = -1;
+    paint();
+    App.toast("저장했어요");
   });
 
   document.addEventListener("app:ready", async () => {

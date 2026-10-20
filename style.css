@@ -274,6 +274,9 @@ body.has-bgm { padding-bottom: 64px; }
 .bgm-yt.show { display: block; }
 .bgm-yt iframe { width: 64px; height: 36px; display: block; }
 .bgm-title { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bgm-title b { font-weight: 500; }
+.bgm-title em { font-style: normal; opacity: .55; margin-left: 8px; }
+.bgm-title em::before { content: "— "; }
 .bgm-vol { width: 80px; accent-color: var(--ink); }
 
 .bgm-pop h2 { margin-bottom: 4px; }
@@ -283,6 +286,11 @@ body.has-bgm { padding-bottom: 64px; }
 .bgm-row-play { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; border: 0; background: none; cursor: pointer; padding: 10px 4px; text-align: left; font-size: 14px; }
 .bgm-row-icon { width: 14px; font-size: 10px; color: #888; flex: none; }
 .bgm-row-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bgm-row-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.bgm-row-artist { font-size: 12px; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bgm-edit { gap: 6px; padding: 8px 0; flex-wrap: wrap; }
+.bgm-edit input { flex: 1 1 140px; min-width: 0; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; font: inherit; font-size: 14px; }
+.bgm-edit .pill-btn { padding: 6px 12px; }
 .bgm-del { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: #fff; cursor: pointer; font-size: 11px; flex: none; }
 .bgm-del:hover { background: var(--ink); color: #fff; }
 .bgm-empty { color: #999; font-size: 13px; padding: 16px 0; margin: 0; }
@@ -1015,3 +1023,4 @@ body.admin .rel-node { cursor: grab; touch-action: none; }
   .agent-card [style*="min-height: 650px"] { min-height: 520px !important; }
   .agent-card [style*="gap: 30px"] { gap: 18px !important; }
 }
+@media (max-width: 760px) { .bgm-edit input { font-size: 16px; } }

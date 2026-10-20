@@ -166,11 +166,18 @@ drop policy if exists "members add bgm" on public.bgm;
 create policy "members add bgm" on public.bgm for insert to authenticated with check (public.my_rank() >= 2 and added_by = auth.uid());
 drop policy if exists "owner deletes bgm" on public.bgm;
 create policy "owner deletes bgm" on public.bgm for delete to authenticated using (public.is_owner());
+-- 아티스트 이름 + 곡 정보 수정 (쭌식, 또는 그 곡을 올린 사람)
+alter table public.bgm add column if not exists artist text not null default '';
+drop policy if exists "edit own bgm" on public.bgm;
+create policy "edit own bgm" on public.bgm for update to authenticated
+  using (public.is_owner() or (public.my_rank() >= 2 and added_by = auth.uid()))
+  with check (public.is_owner() or (public.my_rank() >= 2 and added_by = auth.uid()));
 
 -- ---------- 권한 (비회원/비로그인은 아무것도 못 함) ----------
 revoke all on public.members, public.site_data, public.bgm from anon, authenticated;
 grant select, insert, update on public.site_data to authenticated;
 grant select, insert, delete on public.bgm to authenticated;
+grant update (title, artist) on public.bgm to authenticated;
 revoke all on function
   public.join_with_code(text), public.my_role(), public.my_rank(), public.is_member(), public.is_owner(),
   public.list_members(), public.set_member_role(uuid, text), public.remove_member(uuid)
