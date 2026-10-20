@@ -705,6 +705,21 @@
 
   $("#year").textContent = new Date().getFullYear();
 
+  // ---------- 다크 모드 버튼 ----------
+  const darkNow = () => {
+    const t = document.documentElement.dataset.theme;
+    return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  };
+  const paintTheme = () => { const b = $("#theme-btn span"); if (b) b.textContent = darkNow() ? "light" : "dark"; };
+  $("#theme-btn")?.addEventListener("click", () => {
+    const next = darkNow() ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("zzon_theme", next); } catch {}
+    paintTheme();
+  });
+  matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", paintTheme);
+  paintTheme();
+
   // 예전 형식을 지금 형식으로 변환
   // 지금 형식: male/female.base = 외형 프롬프트
   //           variants[].male/female = { top, bottom, shoes } 의상 프롬프트
