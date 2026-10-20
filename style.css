@@ -488,18 +488,18 @@ button.id-photo:hover .id-photo-hint, button.id-photo:focus-visible .id-photo-hi
   .pinfo-people { grid-template-columns: 1fr; }
 }
 
-.link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.link-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
 .link-card { position: relative; }
 /* 링크 박스: 얇은 테두리 사각형 · 왼쪽 위 작은 원 · 오른쪽 위 주소 · 왼쪽 아래 큰 이름 */
-.lk { display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 7 / 3; padding: 14px 14px 12px 18px;
+.lk { display: flex; flex-direction: column; justify-content: space-between; aspect-ratio: 7 / 3; padding: 9px 9px 8px 11px;
   border: 1px solid #333; background: #fff; color: var(--ink); text-decoration: none; transition: background .25s, color .25s; }
 .lk-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-.lk-dot { flex: none; width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--dot); transition: background .25s; }
-.lk-host { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: "Pretendard Variable", Pretendard, sans-serif; font-size: 10px; font-weight: 300; letter-spacing: .03em; color: #333; }
-.lk-title { font-family: "Pretendard Variable", Pretendard, sans-serif; font-size: 20px; font-weight: 300; line-height: 1.1; letter-spacing: .01em; overflow-wrap: anywhere; }
+.lk-dot { flex: none; width: 5px; height: 5px; border-radius: 50%; border: 1px solid var(--dot); transition: background .25s; }
+.lk-host { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: "Pretendard Variable", Pretendard, sans-serif; font-size: 8px; font-weight: 300; letter-spacing: .03em; color: #333; }
+.lk-title { font-family: "Pretendard Variable", Pretendard, sans-serif; font-size: 14px; font-weight: 300; line-height: 1.1; letter-spacing: .01em; overflow-wrap: anywhere; }
 .lk:hover .lk-dot { background: var(--dot); }
 .lk:hover { background: #fafafa; }
-.link-card .adm-tools { top: auto; bottom: 8px; right: 8px; transform: scale(.85); transform-origin: right bottom; }
+.link-card .adm-tools { top: auto; bottom: 4px; right: 4px; transform: scale(.7); transform-origin: right bottom; }
 .link-empty { text-align: center; color: #999; }
 
 /* ============================================================
@@ -832,10 +832,10 @@ body.admin .w-team header { padding-right: 160px; }
   .ooc-text { -webkit-line-clamp: 5; }
 
   /* 링크: 한 줄에 하나 */
-  .link-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-  .lk { padding: 10px 10px 9px 13px; }
-  .lk-host { font-size: 9px; }
-  .lk-title { font-size: 16px; }
+  .link-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+  .lk { padding: 7px 7px 6px 8px; }
+  .lk-host { font-size: 7px; }
+  .lk-title { font-size: 12px; }
 
   /* footer */
   .foot { flex-wrap: wrap; row-gap: 8px; padding: 24px 16px 30px; }
