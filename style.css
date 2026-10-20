@@ -1026,8 +1026,6 @@ body.admin .rel-node { cursor: grab; touch-action: none; }
 @media (max-width: 760px) { .bgm-edit input { font-size: 16px; } }
 
 /* ---------- 처음 불러오는 화면: 심전도 모션 ---------- */
-.ecg-box { width: min(300px, 100%); }
-.ecg-logo { margin-bottom: 26px; animation: ecg-thump 2s ease-out infinite; }
 .ecg { position: relative; width: 280px; max-width: 100%; height: 80px; margin: 0 auto; }
 .ecg svg { display: block; width: 100%; height: 100%; overflow: visible; }
 .ecg path { fill: none; stroke-linejoin: round; stroke-linecap: round; vector-effect: non-scaling-stroke; }
@@ -1038,17 +1036,99 @@ body.admin .rel-node { cursor: grab; touch-action: none; }
   background: var(--ink); box-shadow: 0 0 0 4px rgba(17, 17, 17, .08), 0 0 12px rgba(17, 17, 17, .35);
   offset-rotate: 0deg; offset-anchor: 50% 50%; animation: ecg-dot 2s linear infinite;
 }
-.ecg-text { margin: 22px 0 0; font-family: var(--brand); font-size: 10px; font-weight: 600; letter-spacing: .5em; color: #999; }
-.ecg-text span { animation: ecg-blink 1.2s infinite; }
-.ecg-text span:nth-child(2) { animation-delay: .2s; }
-.ecg-text span:nth-child(3) { animation-delay: .4s; }
 @keyframes ecg-draw { 0% { stroke-dashoffset: 1; opacity: 1; } 75% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
 @keyframes ecg-dot { 0% { offset-distance: 0%; opacity: 1; } 75% { offset-distance: 100%; opacity: 1; } 76%, 100% { offset-distance: 100%; opacity: 0; } }
-/* 선이 R 파(뾰족한 부분)를 지날 때 로고가 '두근' */
-@keyframes ecg-thump {
-  0%, 15%, 22%, 52%, 59%, 100% { transform: scale(1); }
-  17.5% { transform: scale(1.12); } 19.5% { transform: scale(.97); }
-  54.5% { transform: scale(1.12); } 56.5% { transform: scale(.97); }
-}
 @keyframes ecg-blink { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
-@media (prefers-reduced-motion: reduce) { .ecg-line { stroke-dashoffset: 0; animation: none; } .ecg-dot, .ecg-logo { animation: none; } .ecg-dot { display: none; } }
+@media (prefers-reduced-motion: reduce) { .ecg-line { stroke-dashoffset: 0; animation: none; } .ecg-dot { display: none; } }
+
+/* ---------- ARCH 보안 접속 터미널 (로그인 / 가입 / 불러오기) ---------- */
+.gate {
+  --w-gold: #d9d9d9; --w-gold-2: #fff; --w-display: "Paperlogy", "Pretendard Variable", Pretendard, sans-serif;
+  --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  position: fixed; inset: 0; z-index: 60; overflow-y: auto; overscroll-behavior: contain;
+  min-height: 100vh; min-height: 100dvh; padding: 64px 20px 56px; flex-direction: column;
+  background: #05060a; color: #e8e6e1; font-family: "Pretendard Variable", Pretendard, sans-serif;
+  transition: opacity .45s ease, filter .45s ease;
+}
+.gate.leaving { opacity: 0; filter: blur(6px) brightness(1.6); }
+.sec-bg { position: fixed; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 55% 45% at 50% 40%, rgba(255, 255, 255, .09), transparent 70%),
+    linear-gradient(rgba(255, 255, 255, .035) 1px, transparent 1px) 0 0 / 100% 48px,
+    linear-gradient(90deg, rgba(255, 255, 255, .035) 1px, transparent 1px) 0 0 / 48px 100%;
+  mask-image: radial-gradient(ellipse 80% 75% at 50% 45%, #000 35%, transparent 85%); }
+.sec-scan { position: fixed; inset: 0; pointer-events: none; z-index: 2;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px); }
+.sec-scan::after { content: ""; position: absolute; left: 0; right: 0; height: 140px; top: -140px;
+  background: linear-gradient(transparent, rgba(255, 255, 255, .05), transparent); animation: sec-sweep 6s linear infinite; }
+@keyframes sec-sweep { to { transform: translateY(calc(100vh + 140px)); } }
+.sec-top, .sec-foot { position: fixed; left: 0; right: 0; z-index: 3; display: flex; justify-content: space-between; gap: 12px;
+  padding: 14px 22px; font-family: var(--mono); font-size: 10px; letter-spacing: .18em; color: #77746d; }
+.sec-top { top: 0; border-bottom: 1px solid rgba(255, 255, 255, .06); background: rgba(5, 6, 10, .8); backdrop-filter: blur(6px); }
+.sec-foot { bottom: 0; justify-content: center; border-top: 1px solid rgba(255, 255, 255, .06); background: rgba(5, 6, 10, .8); text-align: center; }
+.sec-dot { display: inline-block; width: 6px; height: 6px; margin-right: 8px; border-radius: 50%; background: #5cff8a; box-shadow: 0 0 8px #5cff8a; vertical-align: 1px; animation: ecg-blink 1.6s infinite; }
+.sec-box { position: relative; z-index: 3; width: min(360px, 100%); margin: auto; text-align: center; }
+.sec-crest { width: 150px; margin: 0 auto 6px; }
+.sec-crest .w-emblem-wrap { width: 100%; margin: 0; }
+.sec-kicker { margin: 0; font-family: var(--mono); font-size: 10px; letter-spacing: .5em; color: #ff5a4f; animation: ecg-blink 2.4s infinite; }
+.sec-title { margin: 4px 0 0; font-family: var(--w-display); font-size: 46px; font-weight: 800; letter-spacing: .32em; text-indent: .32em; color: #fff;
+  text-shadow: 0 0 24px rgba(255, 255, 255, .25); animation: sec-glitch 7s steps(1) 2s infinite; }
+@keyframes sec-glitch {
+  0%, 94%, 97%, 100% { text-shadow: 0 0 24px rgba(255, 255, 255, .25); transform: none; }
+  95% { text-shadow: -3px 0 #ff3b5c, 3px 0 #3bd5ff; transform: translateX(1px); }
+  96% { text-shadow: 3px 0 #ff3b5c, -3px 0 #3bd5ff; transform: translateX(-1px); }
+}
+.sec-sub { margin: 6px 0 30px; font-family: var(--mono); font-size: 10px; letter-spacing: .32em; color: #8d8a84; }
+.sec-content { text-align: left; }
+.gate .gate-tabs { justify-content: stretch; gap: 0; margin-bottom: 18px; border: 1px solid rgba(255, 255, 255, .12); }
+.gate .gate-tabs button { flex: 1; padding: 10px 0; color: #77746d; font-size: 11px; text-decoration: none; display: flex; flex-direction: column; align-items: center; gap: 2px; transition: background .2s, color .2s; }
+.gate .gate-tabs button b { font-family: var(--mono); font-size: 11px; letter-spacing: .3em; font-weight: 600; }
+.gate .gate-tabs button.on { background: #fff; color: #05060a; }
+.gate .gate-form { gap: 12px; }
+.sec-field { display: block; position: relative; }
+.sec-field span { display: block; margin-bottom: 6px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .3em; color: #8d8a84; }
+.gate .gate-form input { width: 100%; box-sizing: border-box; padding: 12px 14px; border: 1px solid rgba(255, 255, 255, .14); border-radius: 0;
+  background: rgba(255, 255, 255, .03); color: #fff; font-family: var(--mono); font-size: 14px; letter-spacing: .04em; }
+.gate .gate-form input::placeholder { color: #55534e; }
+.gate .gate-form input:focus { outline: none; border-color: #fff; background: rgba(255, 255, 255, .06); box-shadow: 0 0 0 3px rgba(255, 255, 255, .06), 0 0 18px rgba(255, 255, 255, .08); }
+.gate .gate-msg { font-family: var(--mono); font-size: 11px; letter-spacing: .04em; color: #ff5a4f; line-height: 1.6; }
+.gate .gate-desc { font-family: var(--mono); font-size: 11px; line-height: 1.7; color: #bdb8ae; text-align: center; }
+.gate .gate-link { display: block; margin: 4px auto 0; color: #77746d; font-size: 11px; }
+.sec-btn { position: relative; overflow: hidden; width: 100%; padding: 13px; border: 1px solid #fff; background: #fff; color: #05060a; cursor: pointer;
+  font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: .3em; transition: background .2s, color .2s; }
+.sec-btn span { display: inline-block; transition: transform .2s; }
+.sec-btn:hover { background: transparent; color: #fff; }
+.sec-btn:hover span { transform: translateX(4px); }
+.sec-btn::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%; background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .6), transparent); animation: sec-shine 3.2s ease-in-out infinite; }
+@keyframes sec-shine { 0%, 60% { left: -60%; } 100% { left: 130%; } }
+.gate .gate-form.busy .sec-btn { opacity: .5; pointer-events: none; }
+.gate .gate-form.busy .sec-btn::before { content: "VERIFYING… "; }
+/* 불러오는 중 */
+.sec-log { margin: 0 0 18px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; color: #8d8a84; }
+.sec-log p { display: flex; justify-content: space-between; gap: 10px; margin: 0 0 6px; opacity: 0; animation: sec-line .25s steps(2) calc(var(--i) * .35s) forwards; }
+.sec-log b { color: #5cff8a; font-weight: 600; }
+.sec-log p:last-child b { color: #fff; animation: ecg-blink 1s infinite; }
+@keyframes sec-line { to { opacity: 1; } }
+.gate .ecg { width: 100%; border: 1px solid rgba(255, 255, 255, .08); background: linear-gradient(rgba(92, 255, 138, .05) 1px, transparent 1px) 0 0 / 100% 16px, linear-gradient(90deg, rgba(92, 255, 138, .05) 1px, transparent 1px) 0 0 / 16px 100%; }
+.gate .ecg-ghost { stroke: rgba(92, 255, 138, .1); }
+.gate .ecg-line { stroke: #5cff8a; filter: drop-shadow(0 0 4px rgba(92, 255, 138, .8)); }
+.gate .ecg-dot { background: #eaffef; box-shadow: 0 0 0 4px rgba(92, 255, 138, .15), 0 0 14px #5cff8a; }
+.sec-vitals { display: flex; justify-content: space-between; margin: 8px 0 0; font-family: var(--mono); font-size: 10px; letter-spacing: .2em; color: #77746d; }
+.sec-vitals b { color: #5cff8a; font-size: 13px; }
+/* 접속 성공 */
+.sec-granted { text-align: center; padding: 8px 0; animation: sec-in .35s ease-out; }
+.sec-granted-k { margin: 0; font-family: var(--mono); font-size: 10px; letter-spacing: .4em; color: #5cff8a; }
+.sec-granted-t { margin: 10px 0 8px; padding: 12px 0; border-top: 1px solid #5cff8a; border-bottom: 1px solid #5cff8a; font-family: var(--w-display); font-size: 24px; font-weight: 800; letter-spacing: .3em; color: #5cff8a;
+  text-shadow: 0 0 18px rgba(92, 255, 138, .7); animation: sec-flash .9s steps(1) 1; }
+.sec-granted-s { margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: .3em; color: #bdb8ae; }
+.gate.ok .sec-kicker { color: #5cff8a; animation: none; }
+@keyframes sec-in { from { opacity: 0; transform: scale(.96); } }
+@keyframes sec-flash { 0%, 20%, 40% { opacity: 1; } 10%, 30% { opacity: .2; } }
+@media (max-width: 760px) {
+  .gate { padding: 54px 18px 64px; }
+  .sec-top { padding: 12px 14px; font-size: 9px; letter-spacing: .1em; }
+  .sec-foot { padding: 10px 14px; font-size: 8.5px; letter-spacing: .1em; }
+  .sec-crest { width: 120px; }
+  .sec-title { font-size: 38px; }
+  .gate .gate-form input { font-size: 16px; }
+}

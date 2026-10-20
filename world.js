@@ -81,6 +81,8 @@
     </svg></div>`;
   }
 
+  App.emblem = emblem; // 로그인 화면에서도 씀
+
   App.renderWorld = function () {
     const w = App.data.world;
     const h = w.hero || {};

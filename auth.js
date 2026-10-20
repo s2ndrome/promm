@@ -105,13 +105,50 @@
   }
 
   // ---------- 화면 ----------
-  // 불러오는 동안: 심전도처럼 선이 그려지고 로고가 박동에 맞춰 뛰는 화면
+  // ARCH 보안 접속 터미널: 틀(배경·엠블럼·상단바)은 한 번만 그리고 가운데 내용만 바꿈
   const ECG = "M0 40 H30 Q36 30 42 40 H52 L56 46 L62 6 L68 70 L74 40 H84 Q96 24 108 40 H140 H170 Q176 30 182 40 H192 L196 46 L202 6 L208 70 L214 40 H224 Q236 24 248 40 H280";
-  function showLoading() {
+  const NODE = `NODE-${String(Math.floor(Math.random() * 900) + 100)}`;
+  let ticker = null;
+
+  function frame() {
     document.body.classList.add("locked");
     gate.hidden = false;
-    gate.innerHTML = `<div class="gate-box ecg-box">
-      <div class="gate-logo ecg-logo">ZZON</div>
+    gate.classList.remove("leaving");
+    if (gate.querySelector(".sec-content")) return gate.querySelector(".sec-content");
+    const crest = App.emblem ? App.emblem(window.WORLD_DEFAULT?.elements || []) : "";
+    gate.innerHTML = `<div class="sec-bg"></div><div class="sec-scan"></div>
+      <header class="sec-top">
+        <span><i class="sec-dot"></i>ARCH // SECURE ACCESS ${NODE}</span>
+        <span class="sec-clock"></span>
+      </header>
+      <div class="gate-box sec-box">
+        <div class="sec-crest">${crest}</div>
+        <p class="sec-kicker">RESTRICTED ACCESS</p>
+        <h1 class="sec-title">ARCH</h1>
+        <p class="sec-sub">AUTHORIZED PERSONNEL ONLY</p>
+        <div class="sec-content"></div>
+      </div>
+      <footer class="sec-foot">ENCRYPTED CHANNEL · AES-256 · ALL ACCESS IS MONITORED AND LOGGED</footer>`;
+    const tick = () => {
+      if (gate.hidden) return clearInterval(ticker);
+      const c = gate.querySelector(".sec-clock");
+      if (c) c.textContent = new Date().toISOString().replace("T", " ").slice(0, 19) + " UTC";
+      const bpm = gate.querySelector(".sec-bpm");
+      if (bpm) bpm.textContent = 68 + Math.floor(Math.random() * 9);
+    };
+    clearInterval(ticker);
+    ticker = setInterval(tick, 1000);
+    tick();
+    return gate.querySelector(".sec-content");
+  }
+
+  // 불러오는 동안: 접속 로그 + 심전도(생체 신호) 모니터
+  function showLoading() {
+    const box = frame();
+    if (box.querySelector(".sec-loading")) return;
+    const log = [["SECURE CHANNEL", "OK"], ["AGENT CREDENTIALS", "VERIFIED"], ["BIOMETRIC SIGNATURE", "MATCH"], ["DECRYPTING ARCHIVE", "…"]];
+    box.innerHTML = `<div class="sec-loading">
+      <div class="sec-log">${log.map(([k, v], i) => `<p style="--i:${i}"><span>&gt; ${k}</span><b>${v}</b></p>`).join("")}</div>
       <div class="ecg">
         <svg viewBox="0 0 280 80" preserveAspectRatio="none" aria-hidden="true">
           <path d="${ECG}" class="ecg-ghost"/>
@@ -119,29 +156,40 @@
         </svg>
         <i class="ecg-dot" style="offset-path: path('${ECG}')"></i>
       </div>
-      <p class="ecg-text">LOADING<span>.</span><span>.</span><span>.</span></p>
+      <p class="sec-vitals"><span>VITAL SIGN MONITOR</span><span><b class="sec-bpm">72</b> BPM</span></p>
     </div>`;
   }
 
   function showGate(html) {
-    document.body.classList.add("locked");
-    gate.hidden = false;
-    gate.innerHTML = `<div class="gate-box"><div class="gate-logo">ZZON</div>${html}</div>`;
+    frame().innerHTML = html;
+  }
+
+  // 접속 성공: ACCESS GRANTED 를 잠깐 보여주고 화면이 열림
+  async function granted() {
+    showGate(`<div class="sec-granted">
+      <p class="sec-granted-k">IDENTITY CONFIRMED</p>
+      <p class="sec-granted-t">ACCESS GRANTED</p>
+      <p class="sec-granted-s">WELCOME, ${esc(ROLE_NAMES[App.role] || App.role)}</p>
+    </div>`);
+    gate.classList.add("ok");
+    await new Promise((r) => setTimeout(r, 1100));
+    gate.classList.add("leaving");
+    await new Promise((r) => setTimeout(r, 450));
   }
 
   function authForm(mode = "login", msg = "") {
     const signup = mode === "signup";
     showGate(`
       <div class="gate-tabs">
-        <button type="button" class="${signup ? "" : "on"}" data-mode="login">로그인</button>
-        <button type="button" class="${signup ? "on" : ""}" data-mode="signup">회원가입</button>
+        <button type="button" class="${signup ? "" : "on"}" data-mode="login"><b>ACCESS</b>로그인</button>
+        <button type="button" class="${signup ? "on" : ""}" data-mode="signup"><b>ENLIST</b>회원가입</button>
       </div>
       <form id="auth-form" class="gate-form">
-        <input type="email" name="email" placeholder="이메일" autocomplete="email" required>
-        <input type="password" name="password" placeholder="비밀번호 (6자 이상)" autocomplete="${signup ? "new-password" : "current-password"}" minlength="6" required>
-        ${signup ? `<input type="text" name="code" placeholder="초대 코드" autocomplete="off" required>` : ""}
-        <p class="gate-msg">${esc(msg)}</p>
-        <button type="submit" class="pill-btn dark">${signup ? "가입하기" : "로그인"}</button>
+        <label class="sec-field"><span>AGENT ID</span><input type="email" name="email" placeholder="이메일" autocomplete="email" required></label>
+        <label class="sec-field"><span>PASSCODE</span><input type="password" name="password" placeholder="비밀번호 (6자 이상)" autocomplete="${signup ? "new-password" : "current-password"}" minlength="6" required></label>
+        ${signup ? `<label class="sec-field"><span>CLEARANCE KEY</span><input type="text" name="code" placeholder="초대 코드" autocomplete="off" required></label>` : ""}
+        <p class="gate-msg">${msg ? `ACCESS DENIED — ${esc(msg)}` : ""}</p>
+        <button type="submit" class="sec-btn">${signup ? "REQUEST CLEARANCE" : "AUTHENTICATE"} <span>›</span></button>
       </form>`);
     gate.querySelectorAll("[data-mode]").forEach((b) => (b.onclick = () => authForm(b.dataset.mode)));
     const form = document.getElementById("auth-form");
@@ -179,11 +227,11 @@
   // 로그인은 했지만 아직 회원이 아닌 경우 (초대 코드가 틀렸던 경우 등)
   function codeForm(msg = "") {
     showGate(`
-      <p class="gate-desc">초대 코드를 입력하면 들어갈 수 있어요.</p>
+      <p class="gate-desc">CLEARANCE REQUIRED — 초대 코드를 입력하면 들어갈 수 있어요.</p>
       <form id="code-form" class="gate-form">
-        <input type="text" name="code" placeholder="초대 코드" autocomplete="off" required>
-        <p class="gate-msg">${esc(msg)}</p>
-        <button type="submit" class="pill-btn dark">확인</button>
+        <label class="sec-field"><span>CLEARANCE KEY</span><input type="text" name="code" placeholder="초대 코드" autocomplete="off" required></label>
+        <p class="gate-msg">${msg ? `ACCESS DENIED — ${esc(msg)}` : ""}</p>
+        <button type="submit" class="sec-btn">VERIFY <span>›</span></button>
         <button type="button" class="gate-link" id="gate-logout">다른 계정으로 로그인</button>
       </form>`);
     document.getElementById("gate-logout").onclick = logout;
@@ -232,9 +280,11 @@
     try {
       await loadData();
     } catch (err) {
-      return showGate(`<p class="gate-desc">불러오지 못했어요: ${esc(err.message)}</p>`);
+      return showGate(`<p class="gate-msg">CONNECTION FAILED — 불러오지 못했어요: ${esc(err.message)}</p>`);
     }
+    await granted();
     gate.hidden = true;
+    gate.classList.remove("ok", "leaving");
     gate.innerHTML = "";
     document.body.classList.remove("locked");
     App.render();
