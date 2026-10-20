@@ -1353,10 +1353,8 @@ body.admin .ooc-card { padding-top: 40px; }
 .soon small { font-size: 10px; letter-spacing: .3em; color: var(--muted); text-transform: uppercase; }
 
 
-/* ---------- 다크 모드 (ARCH 페이지는 원래 어두워서 제외) ---------- */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) { --bg: #121315; --surface: #1b1c1f; --ink: #ebebeb; --muted: #8d8d92; --line: #303136; --soft: #222327; --text-2: #b8b8bc; --on-ink: #121315; color-scheme: dark; }
-}
+/* ---------- 다크 모드: 처음엔 라이트, 상단 버튼을 눌렀을 때만 (ARCH 페이지는 원래 어두워서 제외) ---------- */
+
 :root[data-theme="dark"] { --bg: #121315; --surface: #1b1c1f; --ink: #ebebeb; --muted: #8d8d92; --line: #303136; --soft: #222327; --text-2: #b8b8bc; --on-ink: #121315; color-scheme: dark; }
 .theme-btn { justify-self: end; display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid var(--line); border-radius: 999px; background: none; color: var(--ink); cursor: pointer; font-family: var(--it); font-size: 10px; }
 .theme-btn:hover { border-color: var(--ink); }

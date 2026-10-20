@@ -708,7 +708,7 @@
   // ---------- 다크 모드 버튼 ----------
   const darkNow = () => {
     const t = document.documentElement.dataset.theme;
-    return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    return t === "dark";
   };
   const paintTheme = () => { const b = $("#theme-btn span"); if (b) b.textContent = darkNow() ? "light" : "dark"; };
   $("#theme-btn")?.addEventListener("click", () => {
@@ -717,7 +717,6 @@
     try { localStorage.setItem("zzon_theme", next); } catch {}
     paintTheme();
   });
-  matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", paintTheme);
   paintTheme();
 
   // 예전 형식을 지금 형식으로 변환
@@ -767,8 +766,17 @@
     if (d.world.v < 6) {
       // v5~6: 요원 상세 프로필(증명사진을 누르면 뜨는 팝업) 기본값 — 비어 있는 요원만 채움 (v6: 휴고)
       const cards = window.AGENT_CARDS || {};
-      for (const t of d.world.teams || []) for (const m of t.members || []) if (!m.card && cards[m.name]) m.card = cards[m.name];
+      for (const t of d.world.teams || []) for (const m of t.members || []) if (!m.card && cards[(m.name || "").trim()]) m.card = cards[(m.name || "").trim()];
       d.world.v = 6;
+    }
+    // 예전 편집 화면(상세 프로필 칸이 없던 버전)으로 저장하면 card 가 통째로 빠짐 → 기본값으로 되살림
+    // (편집에서 일부러 비운 경우는 card 가 "" 로 남으므로 그대로 둠)
+    {
+      const cards = window.AGENT_CARDS || {};
+      for (const t of d.world.teams || []) for (const m of t.members || []) {
+        const k = (m.name || "").trim();
+        if (m.card === undefined && cards[k]) m.card = cards[k];
+      }
     }
     for (const p of d.pairs || []) {
       p.male ??= {};
