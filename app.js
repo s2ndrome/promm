@@ -57,57 +57,161 @@
     if (d) d.open ? openGenres.add(d.dataset.genreBox) : openGenres.delete(d.dataset.genreBox);
   }, true);
 
+  // ---------- 메인 (흑백 에디토리얼) ----------
+  let ftCur = 0, ftList = [], relGenre = null;
+  const short = (t) => String(t || "").trim().toLowerCase();
+
+  function heroHtml() {
+    const pairs = App.data.pairs, i = ftList[ftCur], p = pairs[i];
+    if (!p) return "";
+    return `<div class="hc-head">
+        <div class="hc-id"><small>pair</small><b>${esc(p.title)}</b><small>${esc(p.male?.name)} × ${esc(p.female?.name)}</small></div>
+        <div class="hc-btns">
+          <button type="button" class="pb" data-open="pairs" data-i="${i}">prompt</button>
+          <button type="button" class="pc" data-info="${i}" aria-label="Pair Info">i</button>
+        </div>
+        <button type="button" class="star ${favs.has(p.id) ? "on" : ""}" data-fav="${esc(p.id)}" aria-label="즐겨찾기">${favs.has(p.id) ? "★" : "☆"}</button>
+      </div>
+      <div class="hc-stage" data-open="pairs" data-i="${i}">
+        ${thumb(p.image, p.title)}
+        <p class="hc-label">${esc(short(p.tag) || "zzon")}</p>
+        <p class="hc-huge">${esc(short(p.title))}</p>
+        <p class="hc-vol">( vol.${num(ftCur)} )</p>
+        <p class="hc-side">character<br>prompt<br>archive</p>
+        ${ftList.length > 1 ? `<button type="button" class="hc-next" data-ft-step="1">next ›</button>` : ""}
+      </div>`;
+  }
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ft-step]");
+    if (b && ftList.length) {
+      ftCur = (ftCur + 1) % ftList.length;
+      const el = document.getElementById("hc");
+      el.innerHTML = heroHtml();
+      el.classList.remove("swap"); void el.offsetWidth; el.classList.add("swap");
+      return;
+    }
+    const c = e.target.closest("[data-rel-genre]");
+    if (c) {
+      relGenre = relGenre === c.dataset.relGenre ? null : c.dataset.relGenre;
+      document.querySelectorAll("[data-rel-genre]").forEach((x) => x.classList.toggle("on", x.dataset.relGenre === relGenre));
+      document.getElementById("rel-view").innerHTML = relView();
+    }
+  });
+
+  const mini = (col, x, i) => {
+    const solo = col === "girls";
+    return `<article class="mini" data-open="${col}" data-i="${i}">
+      ${tools(col, i)}
+      ${thumb(x.image, x.title)}
+      <p>${esc(solo ? x.female?.name : x.title)}</p>
+      <small>${esc(solo ? x.title : `${x.male?.name || ""} × ${x.female?.name || ""}`)}</small>
+      <button type="button" class="mini-info" data-info="${i}" ${solo ? `data-col="girls"` : ""}>${solo ? "profile" : "info"} ›</button>
+    </article>`;
+  };
+  function relView() {
+    if (!relGenre) return "";
+    const { pairs, genres = [] } = App.data;
+    if (relGenre === "ONLY GIRL") {
+      const girls = App.data.girls || [];
+      return `<div class="rel-head"><span>only girl</span><span>( ${girls.length} )</span></div>
+        ${girls.length ? `<div class="mini-grid">${girls.map((c, i) => mini("girls", c, i)).join("")}</div>` : `<p class="genre-empty">아직 캐릭터가 없어요.</p>`}
+        <div class="adm-bar"><button type="button" class="pill-btn" data-act="add" data-col="girls">+ 캐릭터 추가</button></div>`;
+    }
+    const list = pairs.map((p, i) => (p.genre === relGenre && genres.includes(p.genre) ? i : -1)).filter((i) => i >= 0);
+    return `<div class="rel-head"><span>${esc(short(relGenre))}</span><span>( ${list.length} )</span></div>
+      ${list.length ? `<div class="mini-grid">${list.map((i) => mini("pairs", pairs[i], i)).join("")}</div>` : `<p class="genre-empty">아직 페어가 없어요.</p>`}
+      <div class="adm-bar"><button type="button" class="pill-btn" data-act="add" data-col="pairs" data-genre="${esc(relGenre)}">+ 이 장르에 페어 추가</button></div>`;
+  }
+
+  // ---------- 의상 프롬프트 생성기 (Supabase 함수 outfit-chat → Claude) ----------
+  const OUTFIT_API = "https://outfit-chat.jenojeno0423.workers.dev/"; // 사이트 정보에서 다른 주소로 바꿀 수 있음
+  let ocMsgs = [], ocBusy = false, ocErr = "";
+  function ocLogHtml() {
+    if (!ocMsgs.length && !ocBusy && !ocErr) return `<p class="oc-hint">원하는 분위기나 아이템을 적으면 의상 프롬프트만 만들어줘요.<br>이어서 "치마를 바지로" 처럼 고쳐 달라고 해도 돼요.</p>`;
+    return ocMsgs.map((m) => m.role === "user"
+      ? `<p class="oc-q">${esc(m.content)}</p>`
+      : `<div class="oc-a"><p>${esc(m.content)}</p><button type="button" class="oc-copy" data-copy="${esc(m.content)}">copy</button></div>`).join("")
+      + (ocBusy ? `<p class="oc-wait"><i></i><i></i><i></i></p>` : "")
+      + (ocErr ? `<p class="oc-err">${esc(ocErr)}</p>` : "");
+  }
+  function ocPaint() {
+    const log = document.getElementById("oc-log");
+    if (!log) return;
+    log.innerHTML = ocLogHtml();
+    log.scrollTop = log.scrollHeight;
+    const r = document.querySelector("[data-oc-reset]");
+    if (r) r.hidden = !ocMsgs.length;
+  }
+  document.addEventListener("submit", async (e) => {
+    if (e.target.id !== "oc-form") return;
+    e.preventDefault();
+    const inp = document.getElementById("oc-in");
+    const q = inp.value.trim();
+    if (!q || ocBusy) return;
+    inp.value = "";
+    ocMsgs.push({ role: "user", content: q });
+    ocBusy = true; ocErr = "";
+    ocPaint();
+    try {
+      const api = (App.data.site?.outfitApi || OUTFIT_API).trim();
+      const { data: ss } = await App.sb.auth.getSession();
+      let res;
+      try {
+        res = await fetch(api, {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${ss.session?.access_token || ""}` },
+          body: JSON.stringify({ messages: ocMsgs.slice(-12) }),
+        });
+      } catch {
+        throw new Error("생성기 주소에 연결하지 못했어요. 주소를 확인해 주세요.");
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(res.status === 403 ? "회원만 쓸 수 있어요." : res.status === 429 ? "지금 요청이 많아요. 잠시 후 다시 해주세요." : "만들지 못했어요. 다시 해주세요.");
+      if (!data?.text) throw new Error("만들지 못했어요. 다시 해주세요.");
+      ocMsgs.push({ role: "assistant", content: data.text });
+    } catch (err) {
+      ocMsgs.pop();
+      inp.value = q;
+      ocErr = err.message;
+    }
+    ocBusy = false;
+    ocPaint();
+  });
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("[data-oc-reset]")) return;
+    ocMsgs = []; ocErr = "";
+    ocPaint();
+  });
+
   function renderHome() {
     const { pairs, genres = [] } = App.data;
-    const card = (p, i) => `<article class="item" data-open="pairs" data-i="${i}">
-        <div class="item-head">
-          ${p.tag ? `<span class="pill">${esc(p.tag)}</span>` : "<span></span>"}
-          <button type="button" class="star ${favs.has(p.id) ? "on" : ""}" data-fav="${esc(p.id)}" aria-label="즐겨찾기">${favs.has(p.id) ? "★" : "☆"}</button>
-        </div>
-        ${tools("pairs", i)}
-        ${thumb(p.image, p.title)}
-        <p class="item-name">${esc(p.male?.name)} × ${esc(p.female?.name)}</p>
-        <p class="item-sub">${esc(p.title)}</p>
-        <div class="item-foot"><button type="button" class="pill-btn" data-info="${i}">Pair Info</button></div>
-      </article>`;
-    // 장르가 없거나 목록에 없는 장르면 메인에
     const genreOf = (p) => (genres.includes(p.genre) ? p.genre : "");
-    const cards = (g) => pairs.map((p, i) => (genreOf(p) === g ? card(p, i) : "")).join("");
-    const main = cards("");
-    const boxes = genres.map((g) => {
-      const n = pairs.filter((p) => genreOf(p) === g).length;
-      return `<details class="genre" data-genre-box="${esc(g)}" ${openGenres.has(g) ? "open" : ""}>
-        <summary><span class="genre-name">${esc(g)}</span><span class="genre-count">${n}</span></summary>
-        <div class="genre-body">
-          ${n ? `<section class="grid">${cards(g)}</section>` : `<p class="genre-empty">아직 페어가 없어요.</p>`}
-          <div class="adm-bar genre-add"><button type="button" class="pill-btn" data-act="add" data-col="pairs" data-genre="${esc(g)}">+ 이 장르에 페어 추가</button></div>
+    const mainIdx = pairs.map((p, i) => (genreOf(p) ? -1 : i)).filter((i) => i >= 0);
+    ftList = mainIdx.filter((i) => pairs[i].image);
+    if (!ftList.length) ftList = pairs.map((p, i) => (p.image ? i : -1)).filter((i) => i >= 0);
+    if (ftCur >= ftList.length) ftCur = 0;
+    if (relGenre && relGenre !== "ONLY GIRL" && !genres.includes(relGenre)) relGenre = null;
+    const chips = [...genres, "ONLY GIRL"].map((g) => `<button type="button" class="chip ${relGenre === g ? "on" : ""}" data-rel-genre="${esc(g)}">${esc(g)}</button>`).join("");
+    return `
+      <div class="adm-bar">${addBtn("pairs", "페어 추가")}${addBtn("genres", "장르 관리")}<span class="owner-only">${addBtn("site", "사이트 정보")}</span></div>
+      <div class="row-head"><span>more pairs <i>›</i></span><span>( ${mainIdx.length} )</span></div>
+      ${mainIdx.length ? `<div class="mini-grid">${mainIdx.map((i) => mini("pairs", pairs[i], i)).join("")}</div>` : ""}
+      <section class="rel">
+        <div class="rel-l">
+          <p class="rel-t">related :</p>
+          <p class="rel-s">zzon also keeps <span>×</span></p>
+          <div class="chips">${chips}</div>
         </div>
-      </details>`;
-    }).join("");
-    // ONLY GIRL: 페어가 아니라 캐릭터 한 명씩. 장르 맨 아래에 항상 있음
-    const girls = App.data.girls || [];
-    const girlCard = (c, i) => `<article class="item" data-open="girls" data-i="${i}">
-        <div class="item-head">
-          ${c.tag ? `<span class="pill">${esc(c.tag)}</span>` : "<span></span>"}
-          <button type="button" class="star ${favs.has(c.id) ? "on" : ""}" data-fav="${esc(c.id)}" aria-label="즐겨찾기">${favs.has(c.id) ? "★" : "☆"}</button>
+        <div class="rel-r oc">
+          <div class="oc-head"><span class="pb pb-sm">outfit generator</span><button type="button" class="oc-reset" data-oc-reset ${ocMsgs.length ? "" : "hidden"}>reset</button></div>
+          <div class="oc-log" id="oc-log">${ocLogHtml()}</div>
+          <form class="oc-form" id="oc-form" autocomplete="off">
+            <input type="text" id="oc-in" placeholder="예) 겨울 데이트룩, 니트랑 롱코트" maxlength="300" enterkeyhint="send">
+            <button type="submit" class="pb">send</button>
+          </form>
         </div>
-        ${tools("girls", i)}
-        ${thumb(c.image, c.female?.name)}
-        <p class="item-name">${esc(c.female?.name)}</p>
-        <p class="item-sub">${esc(c.title)}</p>
-        <div class="item-foot"><button type="button" class="pill-btn" data-info="${i}" data-col="girls">Profile</button></div>
-      </article>`;
-    const G = "ONLY GIRL";
-    const girlBox = `<details class="genre" data-genre-box="${G}" ${openGenres.has(G) ? "open" : ""}>
-        <summary><span class="genre-name">${G}</span><span class="genre-count">${girls.length}</span></summary>
-        <div class="genre-body">
-          ${girls.length ? `<section class="grid">${girls.map(girlCard).join("")}</section>` : `<p class="genre-empty">아직 캐릭터가 없어요.</p>`}
-          <div class="adm-bar genre-add"><button type="button" class="pill-btn" data-act="add" data-col="girls">+ 캐릭터 추가</button></div>
-        </div>
-      </details>`;
-    return `<div class="adm-bar">${addBtn("pairs", "페어 추가")}${addBtn("genres", "장르 관리")}<span class="owner-only">${addBtn("site", "사이트 정보")}</span></div>
-      ${main ? `<section class="grid">${main}</section>` : ""}
-      <div class="genres">${boxes}${girlBox}</div>`;
+      </section>
+      <div id="rel-view" class="rel-view">${relView()}</div>`;
   }
 
   // asset 하위 페이지들 (같은 형태). col 은 데이터 이름
@@ -550,6 +654,7 @@
   // ---------- events ----------
   document.addEventListener("click", (e) => {
     if (e.target.closest("[data-act]")) return; // admin.js 가 처리
+    if (e.target.closest("[data-ft-step], [data-rel-genre]")) return; // 메인 '다음' 버튼 · 장르 칩
     const fav = e.target.closest("[data-fav]");
     if (fav) {
       toggleFav(fav.dataset.fav);

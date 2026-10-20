@@ -185,6 +185,7 @@
       single: true,
       fields: [
         { key: "title", label: "로고 글자", type: "text" },
+        { key: "outfitApi", label: "의상 프롬프트 생성기 주소 (Cloudflare Worker)", type: "text", hint: "비워두면 기본 주소(outfit-chat.jenojeno0423.workers.dev)를 써요. Worker 를 새로 만들었을 때만 바꿔주세요." },
       ],
     },
   };
