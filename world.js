@@ -176,30 +176,72 @@
     },
     grass(c, f, k, t) {
       const { cx, cy, w, h, st } = f;
-      blob(c, "60,220,110", cx, cy + h * .1, h * 1.1, .35 * k);
-      const e = 1 - (1 - k) ** 3, breathe = 1 + Math.sin(t / 900) * .03;
-      const petal = (a, len, wid, base, alpha) => {
-        c.save(); c.translate(cx, base); c.rotate(a);
-        const g = c.createLinearGradient(0, 0, 0, -len);
-        g.addColorStop(0, `rgba(30,140,70,${alpha})`); g.addColorStop(.7, `rgba(120,240,150,${alpha})`); g.addColorStop(1, `rgba(220,255,225,${alpha})`);
-        c.fillStyle = g; c.strokeStyle = `rgba(210,255,220,${alpha * .9})`; c.lineWidth = 1.2;
-        c.shadowColor = "rgba(80,255,140,.8)"; c.shadowBlur = 14;
-        c.beginPath(); c.moveTo(0, 0);
-        c.bezierCurveTo(wid, -len * .35, wid * .7, -len * .8, 0, -len);
-        c.bezierCurveTo(-wid * .7, -len * .8, -wid, -len * .35, 0, 0);
-        c.fill(); c.stroke(); c.restore();
-      };
-      c.globalAlpha = 1;
-      const base = cy + h * .36;
-      for (const [a, s] of [[-1.38, .95], [1.38, .95], [-1.0, 1.08], [1.0, 1.08], [-.58, 1.18], [.58, 1.18], [-.2, 1.25], [.2, 1.25]])
-        petal(a * (0.55 + 0.45 * e), h * .78 * s * e * breathe, w * .55, base, .82);
-      for (const a of [-1.55, 1.55, -1.22, 1.22]) petal(a, h * .5 * e * breathe, w * .42, base + 10, .95);
+      blob(c, "60,220,110", cx, cy + h * .05, h * 1.1, .32 * k);
+      // 처음 한 번: 캡슐 가장자리에서 뻗어 나갈 덩굴 모양을 만듦 (가지·잎·끝 덩굴손 포함)
+      if (!st.vines) {
+        st.t0 = t;
+        st.vines = [];
+        const grow = (x, y, dir, len, curl, depth, delay) => {
+          const pts = [[x, y]], leaves = [];
+          let a = dir, cv = curl;
+          const n = Math.round(len / 3);
+          for (let m = 1; m <= n; m++) {
+            const u = m / n;
+            cv += R(-.004, .004);
+            a += cv * (1 + u * u * 6); // 끝으로 갈수록 말려 들어감 (덩굴손)
+            x += Math.cos(a) * 3; y += Math.sin(a) * 3;
+            pts.push([x, y]);
+            if (m % 7 === 0 && u < .85) leaves.push({ m, a: a + (m % 14 ? 1 : -1) * R(.7, 1.2), s: R(4, 7) * (1 - depth * .25) });
+            if (depth < 2 && m % 13 === 0 && u > .2 && u < .75 && Math.random() < .7)
+              grow(x, y, a + (Math.random() < .5 ? 1 : -1) * R(.6, 1.1), len * R(.35, .55), -curl * R(.8, 1.4), depth + 1, delay + u * 1100);
+          }
+          st.vines.push({ pts, leaves, depth, delay, ph: R(0, 7), root: [pts[0][0] - cx, pts[0][1] - cy] });
+        };
+        const N = 9;
+        for (let q = 0; q < N; q++) {
+          const a = (q / N) * Math.PI * 2 + R(-.2, .2) + .3;
+          const [x, y] = edge(0, 0, w, h, a, -2);
+          grow(x, y, a + R(-.3, .3), R(70, 125), (Math.random() < .5 ? 1 : -1) * R(.012, .03), 0, q * 90);
+        }
+      }
+      const el = t - st.t0;
+      c.lineCap = "round"; c.lineJoin = "round";
+      c.shadowColor = "rgba(90,255,150,.9)"; c.shadowBlur = 10;
+      for (const v of st.vines) {
+        const g = Math.max(0, Math.min(1, (el - v.delay) / 1500));
+        if (!g) continue;
+        const e = 1 - (1 - g) ** 2, upto = Math.max(1, Math.floor((v.pts.length - 1) * e));
+        c.save();
+        c.translate(cx, cy);
+        // 바람에 살짝 흔들림 (뿌리 기준 회전)
+        c.translate(v.root[0], v.root[1]); c.rotate(Math.sin(t / 1300 + v.ph) * .035); c.translate(-v.root[0], -v.root[1]);
+        for (let m = 1; m <= upto; m++) {
+          const u = m / (v.pts.length - 1);
+          c.strokeStyle = `rgba(${Math.round(110 + 110 * u)},${Math.round(225 + 30 * u)},${Math.round(140 + 80 * u)},${.95 * k})`;
+          c.lineWidth = Math.max(.6, (3.2 - v.depth * 1) * (1 - u * .8));
+          c.beginPath(); c.moveTo(v.pts[m - 1][0], v.pts[m - 1][1]); c.lineTo(v.pts[m][0], v.pts[m][1]); c.stroke();
+        }
+        for (const lf of v.leaves) {
+          if (lf.m > upto) continue;
+          const sc = Math.min(1, (upto - lf.m) / 10);
+          const [x, y] = v.pts[lf.m];
+          c.save(); c.translate(x, y); c.rotate(lf.a);
+          const L = lf.s * 2.2 * sc, W2 = lf.s * sc;
+          const gr = c.createLinearGradient(0, 0, L, 0);
+          gr.addColorStop(0, `rgba(60,190,100,${k})`); gr.addColorStop(1, `rgba(200,255,210,${k})`);
+          c.fillStyle = gr;
+          c.beginPath(); c.moveTo(0, 0); c.quadraticCurveTo(L * .5, -W2, L, 0); c.quadraticCurveTo(L * .5, W2, 0, 0); c.fill();
+          c.restore();
+        }
+        c.restore();
+      }
       c.shadowBlur = 0;
+      // 꽃가루 같은 빛 알갱이
       st.ps ||= [];
-      if (Math.random() < .4 * k) st.ps.push({ x: cx + R(-w, w), y: cy + h * .2, vy: R(-1.2, -.4), life: 1 });
+      if (Math.random() < .35 * k) { const [x, y] = edge(cx, cy, w, h, R(0, 7), R(10, 80)); st.ps.push({ x, y, vy: R(-.8, -.2), life: 1 }); }
       c.globalCompositeOperation = "lighter";
       st.ps = st.ps.filter((p) => (p.life -= .012) > 0);
-      for (const p of st.ps) { p.y += p.vy; p.x += Math.sin(t / 400 + p.y / 30) * .4; blob(c, "180,255,190", p.x, p.y, 5, p.life * k); }
+      for (const p of st.ps) { p.y += p.vy; p.x += Math.sin(t / 400 + p.y / 30) * .3; blob(c, "180,255,190", p.x, p.y, 5, p.life * .8 * k); }
     },
     wind(c, f, k, t) {
       const { cx, cy, w, h, st } = f;
