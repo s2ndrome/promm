@@ -1,7 +1,7 @@
 // ARCH 세계관 기본 내용. 쭌식이 World 페이지에서 처음 저장하면 이 내용이 Supabase 로 옮겨지고,
 // 그 뒤로는 페이지에서 직접 수정합니다.
 window.WORLD_DEFAULT = {
-  v: 5,
+  v: 6,
   hero: {
     title: "ARCH",
     kicker: "OFFICIAL WORLD GUIDE",

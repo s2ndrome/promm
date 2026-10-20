@@ -991,6 +991,8 @@ body.admin .rel-node { cursor: grab; touch-action: none; }
 
 /* 붙여넣은 프로필 HTML 에서 쓰는 애니메이션 이름들 */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes bounce { 0%, 20%, 53%, 100% { transform: translate3d(0, 0, 0); } 40%, 43% { transform: translate3d(0, -12px, 0); } 70% { transform: translate3d(0, -6px, 0); } 90% { transform: translate3d(0, -2px, 0); } }
+@keyframes rollIn { from { opacity: 0; transform: translate3d(-100%, 0, 0) rotate(-120deg); } to { opacity: 1; transform: none; } }
 @keyframes zoomIn { from { opacity: 0; transform: scale3d(.3, .3, .3); } 50% { opacity: 1; } }
 @keyframes pulse { 0%, 100% { transform: scale3d(1, 1, 1); } 50% { transform: scale3d(1.05, 1.05, 1.05); } }
 @keyframes rubberBand {
@@ -1007,6 +1009,8 @@ body.admin .rel-node { cursor: grab; touch-action: none; }
   /* 붙여넣은 HTML 의 넓은 여백·최소 폭을 폰 화면에 맞게 줄임 */
   .agent-card [style*="padding: 40px"] { padding: 22px 16px !important; }
   .agent-card [style*="padding: 30px"] { padding: 18px !important; }
+  .agent-card [style*="padding:25px 30px"] { padding: 20px 18px !important; }
+  .agent-card [style*="font-size: 80px"] { font-size: 56px !important; }
   .agent-card [style*="min-width"] { min-width: 0 !important; flex-basis: 100% !important; }
   .agent-card [style*="min-height: 650px"] { min-height: 520px !important; }
   .agent-card [style*="gap: 30px"] { gap: 18px !important; }

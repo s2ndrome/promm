@@ -619,11 +619,11 @@
       }
       d.world.v = 4;
     }
-    if (d.world.v < 5) {
-      // v5: 요원 상세 프로필(증명사진을 누르면 뜨는 팝업) 기본값
+    if (d.world.v < 6) {
+      // v5~6: 요원 상세 프로필(증명사진을 누르면 뜨는 팝업) 기본값 — 비어 있는 요원만 채움 (v6: 휴고)
       const cards = window.AGENT_CARDS || {};
       for (const t of d.world.teams || []) for (const m of t.members || []) if (!m.card && cards[m.name]) m.card = cards[m.name];
-      d.world.v = 5;
+      d.world.v = 6;
     }
     for (const p of d.pairs || []) {
       p.male ??= {};
