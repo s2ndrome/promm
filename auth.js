@@ -169,8 +169,8 @@
     showGate(`<div class="sec-granted">
       <p class="sec-granted-k">IDENTITY CONFIRMED</p>
       <p class="sec-granted-t">ACCESS GRANTED</p>
-      <p class="sec-granted-s">WELCOME, ${esc(nickname() || ROLE_NAMES[App.role] || App.role)}</p>
-      ${nickname() ? `<p class="sec-granted-c">CLEARANCE · ${esc(ROLE_NAMES[App.role] || App.role)}</p>` : ""}
+      <p class="sec-granted-s">WELCOME, ${esc(nickname() || "AGENT")}</p>
+      ${myTitle() ? `<p class="sec-granted-c">${esc(myTitle())}</p>` : ""}
     </div>`);
     gate.classList.add("ok");
     await new Promise((r) => setTimeout(r, 1100));
@@ -311,6 +311,8 @@
   }
 
   // ---------- 닉네임 (각자 자기 계정 정보에 저장) ----------
+  // 접속 화면 이름 아래 칭호: 쭌식이 회원 관리에서 회원마다 지정 (site_data.titles = { user_id: 칭호 })
+  const myTitle = () => (App.data?.titles?.[App.user?.id] || "").trim();
   function nickname() {
     return (App.user?.user_metadata?.nickname || "").trim();
   }
@@ -355,9 +357,10 @@
       .map((r) => `<option value="${r}" ${r === role ? "selected" : ""}>${ROLE_NAMES[r]}</option>`).join("");
     App.openModal(`<div class="form">
       <h2>MEMBERS</h2>
-      <p class="desc">등급을 바꾸면 바로 저장돼요. 바뀐 등급은 그 회원이 새로고침하면 적용돼요.</p>
+      <p class="desc">등급을 바꾸면 바로 저장돼요. 칭호는 접속 화면에서 닉네임 아래에 보이는 이름이에요 (등급과 따로, 칸을 벗어나면 저장).</p>
       <div class="member-list">${(data || []).map((m) => `<div class="member-row">
         <span class="member-email">${esc(m.email || m.user_id)}</span>
+        <input type="text" class="member-title" data-title-for="${m.user_id}" maxlength="30" placeholder="칭호 (예: S급 가이드)" value="${esc(App.data?.titles?.[m.user_id] || "")}">
         ${m.role === "owner"
           ? `<span class="pill">${ROLE_NAMES.owner}</span>`
           : `<select data-member="${m.user_id}">${opts(m.role)}</select>
@@ -366,6 +369,21 @@
     </div>`);
   }
 
+  // 칭호 저장 (쭌식만)
+  document.addEventListener("change", async (e) => {
+    const inp = e.target.closest("[data-title-for]");
+    if (!inp) return;
+    const next = JSON.parse(JSON.stringify(App.data));
+    next.titles = { ...(next.titles || {}) };
+    const v = inp.value.trim();
+    if (v) next.titles[inp.dataset.titleFor] = v;
+    else delete next.titles[inp.dataset.titleFor];
+    try {
+      await App.saveData(next, ["titles"]);
+    } catch (err) {
+      alert(`저장하지 못했어요: ${err.message}`);
+    }
+  });
   document.addEventListener("change", async (e) => {
     const sel = e.target.closest("[data-member]");
     if (!sel) return;
