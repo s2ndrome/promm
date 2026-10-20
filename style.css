@@ -1120,6 +1120,7 @@ body.admin .rel-node { cursor: grab; touch-action: none; }
 .sec-granted-k { margin: 0; font-family: var(--mono); font-size: 10px; letter-spacing: .4em; color: #5cff8a; }
 .sec-granted-t { margin: 10px 0 8px; padding: 12px 0; border-top: 1px solid #5cff8a; border-bottom: 1px solid #5cff8a; font-family: var(--w-display); font-size: 24px; font-weight: 800; letter-spacing: .3em; color: #5cff8a;
   text-shadow: 0 0 18px rgba(92, 255, 138, .7); animation: sec-flash .9s steps(1) 1; }
+.sec-granted-c { margin: 8px 0 0; font-family: var(--mono); font-size: 9.5px; letter-spacing: .3em; color: #77746d; }
 .sec-granted-s { margin: 0; font-family: var(--mono); font-size: 11px; letter-spacing: .3em; color: #bdb8ae; }
 .gate.ok .sec-kicker { color: #5cff8a; animation: none; }
 @keyframes sec-in { from { opacity: 0; transform: scale(.96); } }

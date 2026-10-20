@@ -169,7 +169,8 @@
     showGate(`<div class="sec-granted">
       <p class="sec-granted-k">IDENTITY CONFIRMED</p>
       <p class="sec-granted-t">ACCESS GRANTED</p>
-      <p class="sec-granted-s">WELCOME, ${esc(ROLE_NAMES[App.role] || App.role)}</p>
+      <p class="sec-granted-s">WELCOME, ${esc(nickname() || ROLE_NAMES[App.role] || App.role)}</p>
+      ${nickname() ? `<p class="sec-granted-c">CLEARANCE · ${esc(ROLE_NAMES[App.role] || App.role)}</p>` : ""}
     </div>`);
     gate.classList.add("ok");
     await new Promise((r) => setTimeout(r, 1100));
@@ -187,6 +188,7 @@
       <form id="auth-form" class="gate-form">
         <label class="sec-field"><span>AGENT ID</span><input type="email" name="email" placeholder="이메일" autocomplete="email" required></label>
         <label class="sec-field"><span>PASSCODE</span><input type="password" name="password" placeholder="비밀번호 (6자 이상)" autocomplete="${signup ? "new-password" : "current-password"}" minlength="6" required></label>
+        ${signup ? `<label class="sec-field"><span>CODENAME</span><input type="text" name="nick" placeholder="닉네임 (선택 · 나중에 바꿀 수 있어요)" maxlength="20" autocomplete="nickname"></label>` : ""}
         ${signup ? `<label class="sec-field"><span>CLEARANCE KEY</span><input type="text" name="code" placeholder="초대 코드" autocomplete="off" required></label>` : ""}
         <p class="gate-msg">${msg ? `ACCESS DENIED — ${esc(msg)}` : ""}</p>
         <button type="submit" class="sec-btn">${signup ? "REQUEST CLEARANCE" : "AUTHENTICATE"} <span>›</span></button>
@@ -200,12 +202,14 @@
       const password = form.password.value;
       try {
         if (signup) {
-          const { data, error } = await sb.auth.signUp({ email, password });
+          const nick = form.nick.value.trim();
+          const { data, error } = await sb.auth.signUp({ email, password, options: { data: nick ? { nickname: nick } : {} } });
           if (error) throw error;
           if (!data.session) {
             // 이미 가입한 이메일이거나 이메일 인증이 켜져 있는 경우: 바로 로그인 시도
             const { error: e2 } = await sb.auth.signInWithPassword({ email, password });
             if (e2) throw e2;
+            if (nick) await sb.auth.updateUser({ data: { nickname: nick } });
           }
           try {
             await join(form.code.value.trim());
@@ -276,6 +280,7 @@
     document.body.classList.toggle("owner", role === "owner");
     document.body.classList.toggle("can-edit", App.rank >= 3);
     document.getElementById("grade").textContent = ROLE_NAMES[role] || role;
+    paintNick();
     showLoading();
     try {
       await loadData();
@@ -304,6 +309,43 @@
     await sb.auth.signOut();
     location.reload();
   }
+
+  // ---------- 닉네임 (각자 자기 계정 정보에 저장) ----------
+  function nickname() {
+    return (App.user?.user_metadata?.nickname || "").trim();
+  }
+  function paintNick() {
+    const b = document.getElementById("nick-btn");
+    if (b) b.textContent = nickname() || "닉네임 설정";
+  }
+  function openNick() {
+    App.openModal(`<form class="form" id="nick-form">
+      <h2>CODENAME</h2>
+      <p class="desc">접속 화면의 WELCOME 에 보일 닉네임이에요. 언제든 바꿀 수 있어요.</p>
+      <div class="field"><label>닉네임</label><input type="text" name="nick" maxlength="20" value="${esc(nickname())}" placeholder="비워두면 등급 이름으로 보여요"></div>
+      <div class="form-actions">
+        <button type="button" class="pill-btn" data-close>Cancel</button>
+        <button type="submit" class="pill-btn dark">Save</button>
+      </div>
+    </form>`);
+    const form = document.getElementById("nick-form");
+    form.querySelector("[data-close]").onclick = App.closeModal;
+    form.nick.focus();
+    form.onsubmit = async (e) => {
+      e.preventDefault();
+      form.classList.add("busy");
+      const { data, error } = await sb.auth.updateUser({ data: { nickname: form.nick.value.trim() } });
+      if (error) {
+        form.classList.remove("busy");
+        return alert(`저장하지 못했어요: ${error.message}`);
+      }
+      App.user = data.user;
+      paintNick();
+      App.closeModal();
+      App.toast("닉네임을 바꿨어요");
+    };
+  }
+  document.getElementById("nick-btn").addEventListener("click", openNick);
 
   // ---------- 회원 관리 (쭌식 전용) ----------
   async function openMembers() {
