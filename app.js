@@ -269,14 +269,36 @@
     return safe.replace(re, (m) => `<mark>${m}</mark>`);
   }
 
+  // NPC ⇄ PC 바꾸기 (글마다 따로, 이 화면에서만)
+  const oocSwapped = new Set();
+  function swapPc(text) {
+    return String(text || "").replace(/\b(npc|pc)\b/gi, (m) => {
+      const to = m.length === 3 ? "pc" : "npc";
+      if (m === m.toUpperCase()) return to.toUpperCase();
+      if (m[0] === m[0].toUpperCase()) return to[0].toUpperCase() + to.slice(1);
+      return to;
+    });
+  }
+  const oocText = (i) => (oocSwapped.has(i) ? swapPc(App.data.ooc[i].text) : App.data.ooc[i].text);
+  const swapBtn = (i) => `<button type="button" class="ooc-swap ${oocSwapped.has(i) ? "on" : ""}" data-ooc-swap="${i}" title="글 속 NPC 와 PC 를 서로 바꿔요">NPC ⇄ PC</button>`;
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-ooc-swap]");
+    if (!b) return;
+    const i = Number(b.dataset.oocSwap);
+    oocSwapped.has(i) ? oocSwapped.delete(i) : oocSwapped.add(i);
+    const card = document.querySelector(`.ooc-card[data-i="${i}"]`);
+    if (card) card.outerHTML = oocCard(i, oocQuery.trim());
+    if (b.closest(".ooc-pop")) showOoc(i);
+  });
+
   function oocCard(i, q = "") {
     const o = App.data.ooc[i];
     return `<article class="ooc-card" data-open="ooc" data-i="${i}">
       ${tools("ooc", i)}
       ${q && o.section ? `<span class="pill ooc-sec">${mark(o.section, q)}</span>` : ""}
       ${o.title ? `<h3 class="ooc-title">${mark(o.title, q)}</h3>` : ""}
-      <p class="ooc-text">${mark(o.text, q)}</p>
-      <div class="ooc-foot"><button type="button" class="pill-btn dark" data-copy="${esc(o.text)}">Copy</button></div>
+      <p class="ooc-text">${mark(oocText(i), q)}</p>
+      <div class="ooc-foot">${swapBtn(i)}<button type="button" class="pill-btn dark" data-copy="${esc(oocText(i))}">Copy</button></div>
     </article>`;
   }
 
@@ -348,16 +370,18 @@
     e.target.closest(".ooc-clear").hidden = true;
   });
 
-  function showOoc(o) {
+  function showOoc(i) {
+    const o = App.data.ooc[i];
+    const text = oocText(i);
     detail = null;
     openModal(`<div class="form ooc-pop">
       ${o.section ? `<span class="pill">${esc(o.section)}</span>` : ""}
       <h2>${esc(o.title || "OOC")}</h2>
       <div class="prompt">
         <div class="prompt-head"><b></b>
-          <span class="copy-btns"><button type="button" class="pill-btn dark" data-copy="${esc(o.text)}">Copy</button></span>
+          <span class="copy-btns">${swapBtn(i)}<button type="button" class="pill-btn dark" data-copy="${esc(text)}">Copy</button></span>
         </div>
-        <div class="prompt-text"><p>${esc(o.text)}</p></div>
+        <div class="prompt-text"><p>${esc(text)}</p></div>
       </div>
     </div>`);
   }
@@ -496,7 +520,7 @@
       tag = c.tag;
       sub = c.title ? c.female?.name || "" : "";
     } else {
-      if (col === "ooc") return showOoc(App.data.ooc[i]);
+      if (col === "ooc") return showOoc(i);
       return showGalleryPrompt(App.data[col][i]);
     }
     if (col === "pairs") sub = `${people[0].name || ""} × ${people[1].name || ""}`;
@@ -667,7 +691,7 @@
   // ---------- events ----------
   document.addEventListener("click", (e) => {
     if (e.target.closest("[data-act]")) return; // admin.js 가 처리
-    if (e.target.closest("[data-ft-step], [data-rel-genre]")) return; // 메인 '다음' 버튼 · 장르 칩
+    if (e.target.closest("[data-ft-step], [data-rel-genre], [data-ooc-swap]")) return; // 메인 '다음' 버튼 · 장르 칩
     const fav = e.target.closest("[data-fav]");
     if (fav) {
       toggleFav(fav.dataset.fav);

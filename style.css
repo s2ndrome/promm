@@ -1378,3 +1378,9 @@ body.admin .ooc-card { padding-top: 40px; }
 /* 생성기 입력칸 예시 글씨는 작게 (모바일은 확대 방지로 입력 글씨는 16px 유지, 예시만 작게) */
 .oc-form input::placeholder { font-size: 10px; color: var(--muted); }
 @media (max-width: 760px) { .oc-form input::placeholder { font-size: 11px; } .oc-form { padding: 2px 3px 2px 12px; } .oc-form .pb { padding: 5px 12px; font-size: 9.5px; } }
+/* OOC: NPC ⇄ PC 바꾸기 버튼 */
+.ooc-foot { gap: 5px; align-items: center; }
+.ooc-swap { padding: 3px 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text-2); cursor: pointer; font-family: inherit; font-size: 9px; letter-spacing: .02em; white-space: nowrap; }
+.ooc-swap:hover { border-color: var(--ink); color: var(--ink); }
+.ooc-swap.on { border-color: var(--ink); background: var(--ink); color: var(--on-ink); }
+.ooc-pop .ooc-swap { padding: 5px 12px; font-size: 11px; }
