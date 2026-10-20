@@ -1373,3 +1373,5 @@ body.admin .ooc-card { padding-top: 40px; }
   .chips { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; max-width: none; }
   .chip { min-width: 0; padding: 8px 4px; font-size: 9.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
+/* 모바일: 상단 바 오른쪽에는 다크 모드 버튼만 */
+@media (max-width: 900px) { .st-r { display: none; } }
