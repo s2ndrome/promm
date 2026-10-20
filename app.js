@@ -104,8 +104,10 @@
       ${tools(col, i)}
       ${thumb(x.image, x.title)}
       <p>${esc(solo ? x.female?.name : x.title)}</p>
-      <small>${esc(solo ? x.title : `${x.male?.name || ""} × ${x.female?.name || ""}`)}</small>
-      <button type="button" class="mini-info" data-info="${i}" ${solo ? `data-col="girls"` : ""}>${solo ? "profile" : "info"} ›</button>
+      <div class="mini-sub">
+        <small>${esc(solo ? x.title : `${x.male?.name || ""} × ${x.female?.name || ""}`)}</small>
+        <button type="button" class="mini-info" data-info="${i}" ${solo ? `data-col="girls"` : ""}>${solo ? "profile" : "info"} ›</button>
+      </div>
     </article>`;
   };
   function relView() {
