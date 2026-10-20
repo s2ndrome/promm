@@ -202,7 +202,7 @@
       <section class="rel">
         <div class="rel-l">
           <p class="rel-t">related :</p>
-          <p class="rel-s">zzon also keeps <span>×</span></p>
+          <p class="rel-s">zzon also keeps</p>
           <div class="chips">${chips}</div>
         </div>
         <div class="rel-r oc">
