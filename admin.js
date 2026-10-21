@@ -250,13 +250,20 @@
     return path;
   }
 
-  // 저장: 서버의 최신 데이터를 받아서, 이번에 고친 부분(keys)만 바꿔 넣음.
-  // 다른 탭/다른 회원이 그 사이 저장한 내용(예: 링크)을 덮어쓰지 않기 위해서.
+  // 저장: 서버의 최신 데이터를 받아서, 이번에 고친 "그 하나"만 바꿔 넣음.
+  // 오래 열어둔 탭이나 다른 기기에서 저장해도, 그 사이 다른 곳에서 올린 사진·글·링크를 덮어쓰지 않기 위해서.
+  // saveData(d => { ...최신 데이터 d 를 고침... })  또는 예전 방식 saveData(next, keys)
   async function saveData(next, keys) {
     const { data: row, error: e1 } = await App.sb.from("site_data").select("data").eq("id", "main").maybeSingle();
     if (e1) throw new Error(e1.message);
-    const merged = row?.data ? App.normalize(row.data) : next;
-    for (const k of keys) merged[k] = next[k];
+    let merged;
+    if (typeof next === "function") {
+      merged = row?.data ? App.normalize(row.data) : clone(App.data);
+      next(merged);
+    } else {
+      merged = row?.data ? App.normalize(row.data) : next;
+      for (const k of keys) merged[k] = next[k];
+    }
     const { error } = await App.sb.from("site_data").upsert({ id: "main", data: merged, updated_at: new Date().toISOString() });
     if (error) throw new Error(error.message);
     App.data = App.normalize(merged);
@@ -276,6 +283,20 @@
   }
 
   App.saveData = (next, keys) => saveData(next, keys);
+  // 최신 목록에서 "내가 고친 그 항목"의 자리를 찾음: id → 내용이 같은 것 → 원래 자리 순서로
+  function locate(list, before, index) {
+    if (!Array.isArray(list) || !before) return -1;
+    if (before.id != null) { const k = list.findIndex((x) => x && x.id === before.id); if (k >= 0) return k; }
+    const key = JSON.stringify(before);
+    if (JSON.stringify(list[index]) === key) return index;
+    const k = list.findIndex((x) => JSON.stringify(x) === key);
+    if (k >= 0) return k;
+    // 같은 이름(팀 이름 · 제목 · 이름)으로 한 번 더
+    const name = (x) => x && (x.name || x.title || x.term || x.caption || x.url);
+    if (name(before)) { const n = list.findIndex((x) => name(x) === name(before)); if (n >= 0) return n; }
+    return index < list.length ? index : -1;
+  }
+  App.locate = locate;
 
   // ---------- 편집 모드 켜기/끄기 ----------
   document.getElementById("edit-btn").addEventListener("click", () => {
@@ -537,22 +558,36 @@
           for (const k of ["male", "female"]) if (item[k] && !item[k].name && !item[k].prompt) delete item[k];
         }
 
-        const next = clone(App.data);
-        if (col === "genres") {
-          // 같은 자리의 이름이 바뀌었으면 그 장르의 페어도 새 이름으로 옮김
-          const before = App.data.genres || [];
-          before.forEach((old, k) => {
-            const now = item.list[k];
-            if (now && old !== now && !item.list.includes(old) && !before.includes(now))
-              next.pairs.forEach((p) => { if (p.genre === old) p.genre = now; });
-          });
-          next.genres = item.list;
-        } else if (schema.single) setPath(next, col, item);
-        else {
-          const list = getPath(next, col);
-          isNew ? list.push(item) : (list[index] = item);
-        }
-        await saveData(next, col === "genres" ? ["genres", "genresV", "pairs"] : [col.split(".")[0]]);
+        const original = !schema.single && !isNew ? clone(getPath(App.data, col)[index]) : null;
+        await saveData((d) => {
+          if (col === "genres") {
+            // 같은 자리의 이름이 바뀌었으면 그 장르의 페어도 새 이름으로 옮김
+            const before = App.data.genres || [];
+            before.forEach((old, k) => {
+              const now = item.list[k];
+              if (now && old !== now && !item.list.includes(old) && !before.includes(now))
+                (d.pairs || []).forEach((p) => { if (p.genre === old) p.genre = now; });
+            });
+            d.genres = item.list;
+          } else if (schema.single) setPath(d, col, item);
+          else {
+            let list = getPath(d, col);
+            if (!Array.isArray(list)) { setPath(d, col, []); list = getPath(d, col); }
+            const j = isNew ? -1 : locate(list, original, index);
+            // 팀(요원 목록)을 고칠 때: 다른 곳에서 그 사이 올린 사진·상세 프로필·새 요원은 살림
+            if (col === "world.teams" && j >= 0) {
+              const remote = list[j].members || [], had = new Set((original?.members || []).map((m) => m.name));
+              for (const m of item.members || []) {
+                const r = remote.find((x) => x.name === m.name);
+                if (!r) continue;
+                if (!m.photo && r.photo) m.photo = r.photo;
+                if (!m.card && r.card) m.card = r.card;
+              }
+              for (const r of remote) if (!had.has(r.name) && !(item.members || []).some((m) => m.name === r.name)) (item.members ||= []).push(r);
+            }
+            j >= 0 ? (list[j] = item) : list.push(item);
+          }
+        });
         App.closeModal();
       } catch (err) {
         form.classList.remove("busy");
@@ -624,11 +659,12 @@
       if (!parsed.length) return alert("가져올 OOC 가 없어요.");
       form.classList.add("busy");
       const section = form.section.value.trim();
-      const next = clone(App.data);
       const t = Date.now();
-      parsed.forEach((x, k) => next.ooc.push({ id: `o${t}-${k}`, section: section || x.section || "", title: x.title, text: x.text }));
       try {
-        await saveData(next, ["ooc"]);
+        await saveData((d) => {
+          d.ooc = d.ooc || [];
+          parsed.forEach((x, k) => d.ooc.push({ id: `o${t}-${k}`, section: section || x.section || "", title: x.title, text: x.text }));
+        });
         App.closeModal();
         App.toast(`${parsed.length}개를 가져왔어요`);
       } catch (err) {
@@ -658,19 +694,18 @@
       const from = btn.dataset.section;
       const to = prompt("새 구분 이름", from);
       if (to == null || to.trim() === from) return;
-      const next = clone(App.data);
       const gcol = btn.dataset.col || "gallery";
-      next[gcol].forEach((g) => { if ((g.section || "").trim() === from) g.section = to.trim(); });
-      try { await saveData(next, [gcol]); } catch (err) { alert(`저장하지 못했어요: ${err.message}`); }
+      try { await saveData((d) => (d[gcol] || []).forEach((g) => { if ((g.section || "").trim() === from) g.section = to.trim(); })); } catch (err) { alert(`저장하지 못했어요: ${err.message}`); }
       return;
     }
     if (act === "edit") return openEditor(col, i);
 
-    const next = clone(App.data);
-    const list = getPath(next, col);
+    const list = getPath(App.data, col);
+    let apply;
     if (act === "del") {
       if (!confirm("정말 삭제할까요?")) return;
-      list.splice(i, 1);
+      const target = clone(list[i]);
+      apply = (d) => { const l = getPath(d, col), k = locate(l, target, i); if (k >= 0) l.splice(k, 1); };
     } else if (act === "move") {
       let j = i + Number(btn.dataset.dir);
       // 갤러리는 같은 구분, 페어는 같은 장르 안에서만 순서 이동
@@ -683,10 +718,15 @@
         while (j >= 0 && j < list.length && groupKey(list[j]) !== g) j += Number(btn.dataset.dir);
       }
       if (j < 0 || j >= list.length) return;
-      [list[i], list[j]] = [list[j], list[i]];
+      const a = clone(list[i]), b = clone(list[j]);
+      apply = (d) => {
+        const l = getPath(d, col), ka = locate(l, a, i), kb = locate(l, b, j);
+        if (ka >= 0 && kb >= 0 && ka !== kb) [l[ka], l[kb]] = [l[kb], l[ka]];
+      };
     }
+    if (!apply) return;
     try {
-      await saveData(next, [col.split(".")[0]]);
+      await saveData(apply);
     } catch (err) {
       alert(`저장하지 못했어요: ${err.message}`);
     }

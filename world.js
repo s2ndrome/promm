@@ -730,10 +730,11 @@
   async function saveChartPos() {
     const btn = document.querySelector('[data-rel="save"]');
     btn.disabled = true;
-    const next = JSON.parse(JSON.stringify(App.data));
-    next.world.teams[chart.i].pos = chart.pos;
+    const team = JSON.parse(JSON.stringify(App.data.world.teams[chart.i]));
+    const pos = chart.pos;
     try {
-      await App.saveData(next, ["world"]);
+      // 이 팀의 배치만 바꿔서 저장 (다른 데 바뀐 건 그대로)
+      await App.saveData((d) => { const k = App.locate(d.world.teams, team, chart.i); if (k >= 0) d.world.teams[k].pos = pos; });
       chart.dirty = false;
       // 저장하면 페이지가 다시 그려지므로 팝업도 다시 열기
       openChart(chart.i);

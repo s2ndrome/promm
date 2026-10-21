@@ -497,11 +497,8 @@
     const sv = e.target.closest("[data-om-save]");
     if (sv && App.saveData) {
       const { title, text } = omOut(Number(sv.dataset.omSave));
-      const next = JSON.parse(JSON.stringify(App.data));
-      next.ooc = next.ooc || [];
-      next.ooc.push({ section: "OOC MAKER", title: title || "OOC MAKER", text });
       sv.disabled = true;
-      try { await App.saveData(next, ["ooc"]); sv.textContent = "추가했어요"; } catch (err) { sv.disabled = false; alert(`저장하지 못했어요: ${err.message}`); }
+      try { await App.saveData((d) => { d.ooc = d.ooc || []; d.ooc.push({ id: `o${Date.now()}`, section: "OOC MAKER", title: title || "OOC MAKER", text }); }); sv.textContent = "추가했어요"; } catch (err) { sv.disabled = false; alert(`저장하지 못했어요: ${err.message}`); }
     }
   });
 

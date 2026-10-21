@@ -395,13 +395,13 @@
   document.addEventListener("change", async (e) => {
     const inp = e.target.closest("[data-title-for]");
     if (!inp) return;
-    const next = JSON.parse(JSON.stringify(App.data));
-    next.titles = { ...(next.titles || {}) };
-    const v = inp.value.trim();
-    if (v) next.titles[inp.dataset.titleFor] = v;
-    else delete next.titles[inp.dataset.titleFor];
+    const v = inp.value.trim(), who = inp.dataset.titleFor;
     try {
-      await App.saveData(next, ["titles"]);
+      await App.saveData((d) => {
+        d.titles = { ...(d.titles || {}) };
+        if (v) d.titles[who] = v;
+        else delete d.titles[who];
+      });
     } catch (err) {
       alert(`저장하지 못했어요: ${err.message}`);
     }
