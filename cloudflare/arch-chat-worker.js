@@ -64,7 +64,7 @@ export default {
       .slice(-20)
       .map((m) => ({ role: m.role, content: m.content.slice(0, 1500) }));
     if (!messages.length || messages[messages.length - 1].role !== "user") return json({ error: "no message" }, 400);
-    const lore = String(body.context || "").slice(0, 80000);
+    const lore = String(body.context || "").slice(0, 300000); // ARCH 자료 최대 30만 자 (요원 상세 프로필 50명 정도)
     const system = `${PERSONA}\n\n${RULES}\n\n[ARCH 자료]\n${lore}`;
 
     const model = env.GEMINI_MODEL || "gemini-2.5-flash";
