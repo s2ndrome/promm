@@ -545,7 +545,7 @@
       <p class="jj-sub">롯데리아 ARCH 지점 알바생</p>
       <div class="om-log jj-log" id="jj-log">${jjLogHtml()}</div>
       <form class="oc-form jj-form" id="jj-form" autocomplete="off">
-        <input type="text" id="jj-in" placeholder="예) 신드롬 누구야?" maxlength="500" enterkeyhint="send">
+        <input type="text" id="jj-in" maxlength="500" enterkeyhint="send" aria-label="쭌식이에게 보낼 말">
         <button type="submit" class="pb">send</button>
       </form>
     </div>`);
