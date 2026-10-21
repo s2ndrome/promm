@@ -91,16 +91,20 @@ export default {
         systemInstruction: { parts: [{ text: system }] },
         contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })),
         generationConfig: { temperature: 1, maxOutputTokens: 8192 },
-        // 성인 대상 창작용: 성적인 표현은 아주 심한 것만 막음
-        safetySettings: [
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
-        ],
+        // 성인 회원 대상 창작용이라 조절 가능한 필터는 끔 (구글이 무조건 막는 내용은 그래도 막힘)
+        safetySettings: ["HARM_CATEGORY_SEXUALLY_EXPLICIT", "HARM_CATEGORY_HARASSMENT", "HARM_CATEGORY_HATE_SPEECH", "HARM_CATEGORY_DANGEROUS_CONTENT"]
+          .map((category) => ({ category, threshold: "OFF" })),
       }),
     });
     if (res.status === 429) return json({ error: "busy" }, 429);
-    if (!res.ok) return json({ error: `api ${res.status}` }, 502);
+    if (!res.ok) {
+      const detail = await res.text().catch(() => "");
+      return json({ error: `api ${res.status}`, detail: detail.slice(0, 300) }, 502);
+    }
     const data = await res.json();
+    // 구글 안전 필터에 막힌 경우: 이유를 같이 돌려줌
+    const block = data.promptFeedback?.blockReason || (["SAFETY", "PROHIBITED_CONTENT", "BLOCKLIST", "SPII"].includes(data.candidates?.[0]?.finishReason) && data.candidates[0].finishReason);
+    if (block) return json({ error: "blocked", detail: block }, 422);
     const text = (data.candidates?.[0]?.content?.parts || [])
       .map((p) => p.text || "")
       .join("");
@@ -109,7 +113,7 @@ export default {
     if (String(body.genre || "").includes("HTML") && clean && !clean.includes("(HTML출력시참고)")) clean += `\n${HTML_RULE}`;
     // 보고서·HTML·테스트를 뺀 장르는 3000자 이상 출력 지시가 꼭 들어가게
     if (clean && !/보고서|HTML|테스트/.test(String(body.genre || "")) && !/3000\s*자/.test(clean)) clean += "\n출력은 반드시 3000자 이상으로 한다.";
-    if (!clean) return json({ error: "empty" }, 502);
+    if (!clean) return json({ error: "empty", detail: data.candidates?.[0]?.finishReason || "" }, 502);
     return json({ text: clean });
   },
 };

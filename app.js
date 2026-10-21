@@ -448,7 +448,12 @@
         throw new Error("생성기 주소에 연결하지 못했어요.");
       }
       const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.text) throw new Error(res.status === 403 ? "회원만 쓸 수 있어요." : res.status === 429 ? "지금 요청이 많아요. 잠시 후 다시 해주세요." : "만들지 못했어요. 다시 해주세요.");
+      if (!res.ok || !data.text) {
+        const why = data.error === "blocked" ? `구글 안전 필터에 막혔어요 (${data.detail}). 표현을 조금 바꿔서 다시 해주세요.`
+          : res.status === 403 ? "회원만 쓸 수 있어요." : res.status === 429 ? "지금 요청이 많아요. 잠시 후 다시 해주세요."
+          : `만들지 못했어요. 다시 해주세요. (${[res.status, data.error, data.detail].filter(Boolean).join(" · ").slice(0, 160)})`;
+        throw new Error(why);
+      }
       // HTML 출력이면 마지막에 규칙 문구가 꼭 들어가게
       let text = data.text;
       if (omGenre === "HTML 출력" && !text.includes("(HTML출력시참고)")) text += `\n${HTML_RULE}`;
