@@ -1414,3 +1414,5 @@ body.admin .ooc-card { padding-top: 40px; }
   .om-form textarea { font-size: 16px; }
   .om-form textarea::placeholder { font-size: 11px; }
 }
+.om-a-btns { align-items: center; }
+.om-a-btns .ooc-swap { padding: 4px 10px; font-size: 10px; }

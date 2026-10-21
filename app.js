@@ -376,6 +376,8 @@
   const HTML_RULE = "[(HTML출력시참고) - 마크다운사용금지 - 인라인css - html,head,body,태그사용금지 - 임의이미지생성금지(글자로대체) - 속성값 및 모든 내용에 쌍따옴표는모두‘로치환 (ex:style=‘font-size:12px;’) -HTML은줄바꿈없이무조건한줄표시(줄바꿈필요시<br>처리)]";
   const OM_GENRES = ["코믹", "로맨스", "로맨스 코미디", "에로", "피폐 · 집착", "일상", "HTML 출력", "보고서 출력", "테스트", "자유"];
   let omGenre = "로맨스", omMsgs = [], omBusy = false, omErr = "";
+  const omSwapped = new Set(); // NPC ⇄ PC 바꾼 답 (답 번호)
+  const omOut = (k) => { const r = omSplit(omMsgs[k].content); return omSwapped.has(k) ? { title: r.title, text: swapPc(r.text) } : r; };
   // 장르에 맞는 예시를 고름 (HTML 은 html 이 들어간 글, 보고서는 보고서 글 …), 모자라면 아무거나
   function omExamples() {
     const all = (App.data.ooc || []).filter((o) => o.text);
@@ -393,11 +395,12 @@
     const canAdd = App.rank >= 3;
     return omMsgs.map((m, k) => {
       if (m.role === "user") return `<p class="oc-q">${esc(m.content)}</p>`;
-      const { title, text } = omSplit(m.content);
+      const { title, text } = omOut(k);
       return `<div class="om-a">
         ${title ? `<b>${esc(title)}</b>` : ""}
         <p>${esc(text)}</p>
         <div class="om-a-btns">
+          <button type="button" class="ooc-swap ${omSwapped.has(k) ? "on" : ""}" data-om-swap="${k}" title="NPC 와 PC 를 서로 바꿔요">NPC ⇄ PC</button>
           ${canAdd ? `<button type="button" class="pill-btn" data-om-save="${k}">OOC 에 추가</button>` : ""}
           <button type="button" class="pill-btn dark" data-copy="${esc(text)}">Copy</button>
         </div>
@@ -481,10 +484,19 @@
     if (e.target.closest("[data-om-open]")) return openOocMaker();
     const g = e.target.closest("[data-om-genre]");
     if (g) { omGenre = g.dataset.omGenre; return omPaint(); }
-    if (e.target.closest("[data-om-reset]")) { omMsgs = []; omErr = ""; return omPaint(); }
+    if (e.target.closest("[data-om-reset]")) { omMsgs = []; omErr = ""; omSwapped.clear(); return omPaint(); }
+    const sw = e.target.closest("[data-om-swap]");
+    if (sw) {
+      const k = Number(sw.dataset.omSwap);
+      omSwapped.has(k) ? omSwapped.delete(k) : omSwapped.add(k);
+      const log = document.getElementById("om-log"), top = log?.scrollTop;
+      omPaint();
+      if (log) log.scrollTop = top; // 바꿔도 보던 자리 유지
+      return;
+    }
     const sv = e.target.closest("[data-om-save]");
     if (sv && App.saveData) {
-      const { title, text } = omSplit(omMsgs[Number(sv.dataset.omSave)].content);
+      const { title, text } = omOut(Number(sv.dataset.omSave));
       const next = JSON.parse(JSON.stringify(App.data));
       next.ooc = next.ooc || [];
       next.ooc.push({ section: "OOC MAKER", title: title || "OOC MAKER", text });
