@@ -17,17 +17,27 @@
 
   // ---------- 비공개 파일 주소 ----------
   // 저장소 경로(images/..., bgm/...) → 서명된 주소. 예전 경로(img/...)나 http 주소는 그대로
-  const urls = new Map();
+  // 서명된 주소는 6시간 뒤 만료됨 → 만든 시각을 기억해두고 5시간이 지나면 새로 받음
+  const urls = new Map(); // path → { url, at }
+  const FRESH = (URL_TTL - 60 * 60) * 1000;
   const isRemote = (src) => src && !/^(https?:|data:|blob:|img\/)/.test(src);
-  App.mediaUrl = (src) => (isRemote(src) ? urls.get(src) || "" : src || "");
+  App.mediaUrl = (src) => (isRemote(src) ? urls.get(src)?.url || "" : src || "");
 
-  App.resolveMedia = async (paths) => {
-    const need = [...new Set(paths.filter((p) => isRemote(p) && !urls.has(p)))];
+  App.resolveMedia = async (paths, force = false) => {
+    const now = Date.now();
+    const need = [...new Set(paths.filter((p) => isRemote(p) && (force || !urls.has(p) || now - urls.get(p).at > FRESH)))];
     if (!need.length) return;
     const { data, error } = await sb.storage.from(BUCKET).createSignedUrls(need, URL_TTL);
     if (error) throw new Error(error.message);
-    for (const r of data || []) if (r.signedUrl) urls.set(r.path, r.signedUrl);
+    for (const r of data || []) if (r.signedUrl) urls.set(r.path, { url: r.signedUrl, at: now });
   };
+  // 페이지를 오래 열어두면 주소가 만료되므로 30분마다 확인해서 미리 새로 받음 (바뀐 게 있으면 화면도 다시 그림)
+  setInterval(async () => {
+    if (!App.data || document.visibilityState !== "visible") return;
+    const before = urls.size && [...urls.values()].map((u) => u.at).join();
+    try { await App.resolveMedia(imagePaths(App.data)); } catch { return; }
+    if (before !== [...urls.values()].map((u) => u.at).join() && document.getElementById("modal").hidden) App.render();
+  }, 30 * 60 * 1000);
 
   App.uploadMedia = async (path, blob, contentType) => {
     const { error } = await sb.storage.from(BUCKET).upload(path, blob, { contentType, upsert: false });
