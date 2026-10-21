@@ -1416,3 +1416,23 @@ body.admin .ooc-card { padding-top: 40px; }
 }
 .om-a-btns { align-items: center; }
 .om-a-btns .ooc-swap { padding: 4px 10px; font-size: 10px; }
+
+/* ---------- 쭌식이 채팅 ---------- */
+.jj-open { display: inline-flex; align-items: center; gap: 7px; margin-top: 22px; padding: 4px 12px; border: 1px solid var(--ink); border-radius: 999px; background: var(--ink); color: var(--on-ink); cursor: pointer; font-family: var(--it, inherit); font-size: 10px; letter-spacing: .06em; }
+.jj-open i { width: 5px; height: 5px; border-radius: 50%; background: #5cff8a; box-shadow: 0 0 6px #5cff8a; }
+.jj-open:hover { background: var(--surface); color: var(--ink); }
+.modal-box.jj-box { width: min(460px, 100%); }
+.jj-pop h2 { display: flex; align-items: center; gap: 8px; font-size: 17px; letter-spacing: .02em; }
+.jj-dot { width: 7px; height: 7px; border-radius: 50%; background: #5cff8a; box-shadow: 0 0 6px #5cff8a; }
+.jj-sub { margin: 4px 0 12px; font-size: 10.5px; color: var(--muted); }
+.jj-log { height: min(52vh, 420px); }
+.jj-a { align-self: flex-start; max-width: 85%; margin: 0; padding: 7px 12px; border: 1px solid var(--line); border-radius: 2px 14px 14px 14px; background: var(--surface); font-size: 12px; line-height: 1.55; word-break: break-word; }
+.jj-pop .oc-q { font-size: 12px; }
+.jj-form { margin-top: 10px; }
+.jj-form input { font-size: 12px; }
+@media (max-width: 900px) {
+  body:not(.world-mode):not(.locked) .side { display: flex; align-items: center; gap: 12px; }
+  .side-nav { flex: 1; min-width: 0; }
+  .jj-open { margin: 0; flex: none; }
+  .jj-form input { font-size: 16px; }
+}

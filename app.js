@@ -505,6 +505,96 @@
     }
   });
 
+  // ---------- 쭌식이 채팅: ARCH 페이지 내용을 다 아는 롯데리아 ARCH 지점 알바생 (Worker → Gemini) ----------
+  const ARCH_API = "https://arch-chat.jenojeno0423.workers.dev/"; // 사이트 정보에서 바꿀 수 있음
+  let jjMsgs = [], jjBusy = false, jjErr = "";
+  // ARCH 페이지 데이터를 글로 정리 (사진·색·위치 같은 건 빼고, 요원 상세 프로필 HTML 은 글자만)
+  function archContext() {
+    const skip = /^(photo|pos|v|color|icon|image|cardsV)$/;
+    const plain = (h) => { const d = document.createElement("div"); d.innerHTML = h; return (d.textContent || "").replace(/\s+/g, " ").trim(); };
+    const walk = (x, depth) => {
+      if (x == null || x === "") return "";
+      if (Array.isArray(x)) return x.map((y) => walk(y, depth)).filter(Boolean).join("\n");
+      if (typeof x === "object") {
+        return Object.entries(x).filter(([k, v]) => !skip.test(k) && v !== "" && v != null)
+          .map(([k, v]) => {
+            if (k === "card") return `${"  ".repeat(depth)}상세 프로필: ${plain(v)}`;
+            const inner = walk(v, depth + 1);
+            return typeof v === "object" ? `${"  ".repeat(depth)}${k}:\n${inner}` : `${"  ".repeat(depth)}${k}: ${inner}`;
+          }).join("\n");
+      }
+      return String(x);
+    };
+    return walk(App.data.world || {}, 0);
+  }
+  function jjLogHtml() {
+    if (!jjMsgs.length && !jjBusy && !jjErr) return `<p class="oc-hint">롯데리아 ARCH 지점 알바생 쭌식이. ARCH 에 대해 아무거나 물어봐.</p>`;
+    return jjMsgs.map((m) => m.role === "user" ? `<p class="oc-q">${esc(m.content)}</p>` : `<p class="jj-a">${esc(m.content)}</p>`).join("")
+      + (jjBusy ? `<p class="oc-wait"><i></i><i></i><i></i></p>` : "")
+      + (jjErr ? `<p class="oc-err">${esc(jjErr)}</p>` : "");
+  }
+  function jjPaint() {
+    const log = document.getElementById("jj-log");
+    if (!log) return;
+    log.innerHTML = jjLogHtml();
+    log.scrollTop = log.scrollHeight;
+  }
+  function openJj() {
+    openModal(`<div class="form jj-pop">
+      <div class="om-top"><h2><span class="jj-dot"></span>쭌식이</h2><button type="button" class="oc-reset" data-jj-reset>reset</button></div>
+      <p class="jj-sub">롯데리아 ARCH 지점 알바생</p>
+      <div class="om-log jj-log" id="jj-log">${jjLogHtml()}</div>
+      <form class="oc-form jj-form" id="jj-form" autocomplete="off">
+        <input type="text" id="jj-in" placeholder="예) 신드롬 누구야?" maxlength="500" enterkeyhint="send">
+        <button type="submit" class="pb">send</button>
+      </form>
+    </div>`);
+    modal.querySelector(".modal-box").classList.add("jj-box");
+    jjPaint();
+    document.getElementById("jj-in").focus();
+  }
+  document.addEventListener("submit", async (e) => {
+    if (e.target.id !== "jj-form") return;
+    e.preventDefault();
+    const inp = document.getElementById("jj-in");
+    const q = inp.value.trim();
+    if (!q || jjBusy) return;
+    inp.value = "";
+    jjMsgs.push({ role: "user", content: q });
+    jjBusy = true; jjErr = "";
+    jjPaint();
+    try {
+      const { data: ss } = await App.sb.auth.getSession();
+      let res;
+      try {
+        res = await fetch((App.data.site?.archApi || ARCH_API).trim(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${ss.session?.access_token || ""}` },
+          body: JSON.stringify({ context: archContext(), messages: jjMsgs.slice(-20) }),
+        });
+      } catch {
+        throw new Error("채팅 주소에 연결하지 못했어요.");
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.text) {
+        throw new Error(data.error === "blocked" ? `구글 안전 필터에 막혔어요 (${data.detail}).`
+          : res.status === 403 ? "회원만 쓸 수 있어요." : res.status === 429 ? "지금 요청이 많아요. 잠시 후 다시 해주세요."
+          : `대답하지 못했어요. 다시 해주세요. (${[res.status, data.error, data.detail].filter(Boolean).join(" · ").slice(0, 160)})`);
+      }
+      jjMsgs.push({ role: "assistant", content: data.text });
+    } catch (err) {
+      jjMsgs.pop();
+      inp.value = q;
+      jjErr = err.message;
+    }
+    jjBusy = false;
+    jjPaint();
+  });
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-jj-open]")) return openJj();
+    if (e.target.closest("[data-jj-reset]")) { jjMsgs = []; jjErr = ""; jjPaint(); }
+  });
+
   function showOoc(i) {
     const o = App.data.ooc[i];
     const text = oocText(i);
