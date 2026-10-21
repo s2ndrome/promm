@@ -510,7 +510,7 @@
   let jjMsgs = [], jjBusy = false, jjErr = "";
   // ARCH 페이지 데이터를 글로 정리 (사진·색·위치 같은 건 빼고, 요원 상세 프로필 HTML 은 글자만)
   function archContext() {
-    const skip = /^(photo|pos|v|color|icon|image|cardsV)$/;
+    const skip = /^(photo|photoPrompt|labels|pos|v|color|icon|image|cardsV|id)$/;
     const plain = (h) => { const d = document.createElement("div"); d.innerHTML = h; return (d.textContent || "").replace(/\s+/g, " ").trim(); };
     const walk = (x, depth) => {
       if (x == null || x === "") return "";
@@ -525,7 +525,12 @@
       }
       return String(x);
     };
-    return walk(App.data.world || {}, 0);
+    const w = App.data.world || {};
+    const notes = (w.jj?.notes || "").trim();
+    const { jj, ...rest } = w;
+    // 메인 페어 정보도 같이 (커플·이름·프로필)
+    const pairs = (App.data.pairs || []).filter((p) => p.title || p.male?.name).map((p) => ({ 페어: p.title, 남캐: p.male?.name, 여캐: p.female?.name, 설명: p.info?.intro, 남캐프로필: p.male?.profile, 여캐프로필: p.female?.profile }));
+    return `${notes ? `[중요 설정]\n${notes}\n\n` : ""}${walk(rest, 0)}\n\n[페어 목록]\n${walk(pairs, 0)}`;
   }
   function jjLogHtml() {
     if (!jjMsgs.length && !jjBusy && !jjErr) return `<p class="oc-hint">롯데리아 ARCH 지점 알바생 쭌식이. ARCH 에 대해 아무거나 물어봐.</p>`;
@@ -1020,6 +1025,8 @@
       for (const t of d.world.teams || []) for (const m of t.members || []) if (!m.card && cards[(m.name || "").trim()]) m.card = cards[(m.name || "").trim()];
       d.world.v = 6;
     }
+    // 쭌식이 메모 기본값 (한 번만, 이후엔 ARCH 편집에서 수정)
+    if (!d.world.jj) d.world.jj = { notes: "신드롬의 연인이자 아내는 리아." };
     // 예전 편집 화면(상세 프로필 칸이 없던 버전)으로 저장하면 card 가 통째로 빠짐 → 기본값으로 되살림
     // (편집에서 일부러 비운 경우는 card 가 "" 로 남으므로 그대로 둠)
     {

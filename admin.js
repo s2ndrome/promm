@@ -180,6 +180,10 @@
       { key: "en", label: "영문", type: "text" },
       { key: "body", label: "설명", type: "textarea" },
     ], blank: () => ({ term: "", en: "", body: "" }) },
+    // 쭌식이 채팅만 아는 설정 (페이지에는 안 보임)
+    "world.jj": { title: "쭌식이 메모", single: true, fields: [
+      { key: "notes", label: "쭌식이가 알아야 할 설정 (한 줄에 하나)", type: "textarea", hint: "예) 신드롬의 연인이자 아내는 리아. — ARCH 페이지에는 안 보이고 쭌식이 채팅만 참고해요." },
+    ] },
     site: {
       title: "Site",
       single: true,

@@ -537,7 +537,7 @@
     const ch7 = chapter("07", "GLOSSARY", "기타 용어", `<div class="w-terms">${terms}</div>${addBtn("terms", "용어 추가")}`);
 
     return `<div class="world-page">${hero}<div class="w-body">${ch1}${ch2}${ch3}${ch4}${ch5}${ch6}${ch7}</div>
-      <p class="w-end">— END OF DOCUMENT —</p></div>`;
+      <p class="w-end">— END OF DOCUMENT —</p>${addBtn("jj", "쭌식이 메모 (채팅 전용 설정)")}</div>`;
   };
 
   // 페이지가 그려진 뒤: 스크롤 등장 효과
