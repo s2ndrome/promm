@@ -1384,3 +1384,33 @@ body.admin .ooc-card { padding-top: 40px; }
 .ooc-swap:hover { border-color: var(--ink); color: var(--ink); }
 .ooc-swap.on { border-color: var(--ink); background: var(--ink); color: var(--on-ink); }
 .ooc-pop .ooc-swap { padding: 5px 12px; font-size: 11px; }
+
+/* ---------- OOC 메이커 ---------- */
+.om-open-row { display: flex; justify-content: center; margin: -10px 0 26px; }
+.om-open { display: inline-flex; align-items: center; gap: 10px; padding: 9px 20px; border: 1px solid var(--ink); border-radius: 999px; background: var(--ink); color: var(--on-ink); cursor: pointer; font-family: var(--it, inherit); font-size: 11px; font-weight: 600; letter-spacing: .14em; transition: background .2s, color .2s; }
+.om-open i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: ecg-blink 1.6s infinite; }
+.om-open:hover { background: var(--surface); color: var(--ink); }
+.modal-box.om-box { width: min(760px, 100%); }
+.om-pop { display: flex; flex-direction: column; }
+.om-top { display: flex; align-items: baseline; justify-content: space-between; padding-right: 44px; }
+.om-top h2 { margin: 0; font-size: 18px; letter-spacing: .12em; }
+.om-genres { display: flex; flex-wrap: wrap; gap: 6px; margin: 16px 0 12px; }
+.om-g { padding: 6px 13px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--text-2); cursor: pointer; font-family: inherit; font-size: 11px; }
+.om-g:hover { border-color: var(--ink); color: var(--ink); }
+.om-g.on { border-color: var(--ink); background: var(--ink); color: var(--on-ink); }
+.om-log { display: flex; flex-direction: column; gap: 10px; height: min(52vh, 460px); padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--soft); overflow-y: auto; overscroll-behavior: contain; font-size: 12px; }
+.om-a { padding: 12px 14px; border: 1px solid var(--line); border-radius: 2px 14px 14px 14px; background: var(--surface); }
+.om-a b { display: block; margin-bottom: 6px; font-size: 12.5px; }
+.om-a p { margin: 0; font-size: 12px; line-height: 1.75; white-space: pre-wrap; word-break: break-word; }
+.om-a-btns { display: flex; justify-content: flex-end; gap: 6px; margin-top: 10px; }
+.om-a-btns .pill-btn { padding: 4px 12px; font-size: 10px; }
+.om-form { display: flex; align-items: flex-end; gap: 8px; margin-top: 10px; padding: 8px 8px 8px 14px; border: 1px solid var(--ink); border-radius: 16px; }
+.om-form textarea { flex: 1; min-width: 0; resize: none; border: 0; outline: none; background: none; color: var(--ink); font-family: inherit; font-size: 12px; line-height: 1.5; }
+.om-form textarea::placeholder { font-size: 11px; color: var(--muted); }
+.om-form .pb { padding: 7px 16px; font-size: 10.5px; }
+@media (max-width: 760px) {
+  .om-log { height: 50vh; }
+  .om-g { padding: 5px 10px; font-size: 10.5px; }
+  .om-form textarea { font-size: 16px; }
+  .om-form textarea::placeholder { font-size: 11px; }
+}

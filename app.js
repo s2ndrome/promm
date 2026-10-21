@@ -349,6 +349,7 @@
         <input type="search" id="ooc-q" placeholder="키워드로 OOC 검색" value="${esc(oocQuery)}" autocomplete="off" enterkeyhint="search">
         <button type="button" class="ooc-clear" aria-label="검색어 지우기" ${oocQuery ? "" : "hidden"}>✕</button>
       </div>
+      <div class="om-open-row"><button type="button" class="om-open" data-om-open><i></i>OOC MAKER <span>›</span></button></div>
       <div class="adm-bar">${addBtn("ooc", "OOC 추가")}<button type="button" class="pill-btn" data-act="import" data-col="ooc">파일로 가져오기</button></div>
       <div id="ooc-list">${oocListHtml()}</div>`;
   }
@@ -368,6 +369,116 @@
     q.focus();
     document.getElementById("ooc-list").innerHTML = oocListHtml();
     e.target.closest(".ooc-clear").hidden = true;
+  });
+
+  // ---------- OOC 메이커: 장르 + 대충 적은 상황 → 올려둔 OOC 형식으로 새 OOC (Worker → Gemini) ----------
+  const OM_GENRES = ["코믹", "로맨스", "로맨스 코미디", "에로", "피폐 · 집착", "일상", "HTML 출력", "보고서 출력", "테스트", "자유"];
+  let omGenre = "로맨스", omMsgs = [], omBusy = false, omErr = "";
+  // 장르에 맞는 예시를 고름 (HTML 은 html 이 들어간 글, 보고서는 보고서 글 …), 모자라면 아무거나
+  function omExamples() {
+    const all = (App.data.ooc || []).filter((o) => o.text);
+    const key = { "HTML 출력": /html|<div|css/i, "보고서 출력": /보고서|리포트|report/i, "테스트": /테스트|test/i, "에로": /섹스|야하|19|에로/i, "코믹": /코믹|웃|개그/i }[omGenre];
+    const hit = key ? all.filter((o) => key.test(`${o.title} ${o.text}`)) : [];
+    const rest = all.filter((o) => !hit.includes(o)).sort(() => Math.random() - 0.5);
+    return [...hit.sort(() => Math.random() - 0.5), ...rest].slice(0, 5).map((o) => ({ title: o.title || "", text: o.text }));
+  }
+  const omSplit = (t) => {
+    const m = String(t).match(/^\s*\[제목\]\s*(.+)\n([\s\S]*)$/);
+    return m ? { title: m[1].trim(), text: m[2].trim() } : { title: "", text: String(t).trim() };
+  };
+  function omLogHtml() {
+    if (!omMsgs.length && !omBusy && !omErr) return `<p class="oc-hint">장르를 고르고 원하는 상황을 대충 적어주세요.<br>올려둔 OOC 들과 같은 형식으로 만들어줘요. 이어서 "더 길게", "말투 바꿔줘" 처럼 고쳐 달라고 해도 돼요.</p>`;
+    const canAdd = App.rank >= 3;
+    return omMsgs.map((m, k) => {
+      if (m.role === "user") return `<p class="oc-q">${esc(m.content)}</p>`;
+      const { title, text } = omSplit(m.content);
+      return `<div class="om-a">
+        ${title ? `<b>${esc(title)}</b>` : ""}
+        <p>${esc(text)}</p>
+        <div class="om-a-btns">
+          ${canAdd ? `<button type="button" class="pill-btn" data-om-save="${k}">OOC 에 추가</button>` : ""}
+          <button type="button" class="pill-btn dark" data-copy="${esc(text)}">Copy</button>
+        </div>
+      </div>`;
+    }).join("")
+      + (omBusy ? `<p class="oc-wait"><i></i><i></i><i></i></p>` : "")
+      + (omErr ? `<p class="oc-err">${esc(omErr)}</p>` : "");
+  }
+  function omPaint() {
+    const log = document.getElementById("om-log");
+    if (!log) return;
+    log.innerHTML = omLogHtml();
+    log.scrollTop = log.scrollHeight;
+    document.querySelectorAll("[data-om-genre]").forEach((b) => b.classList.toggle("on", b.dataset.omGenre === omGenre));
+  }
+  function openOocMaker() {
+    openModal(`<div class="form om-pop">
+      <div class="om-top"><h2>OOC MAKER</h2><button type="button" class="oc-reset" data-om-reset>reset</button></div>
+      <div class="om-genres">${OM_GENRES.map((g) => `<button type="button" class="om-g ${g === omGenre ? "on" : ""}" data-om-genre="${esc(g)}">${esc(g)}</button>`).join("")}</div>
+      <div class="om-log" id="om-log">${omLogHtml()}</div>
+      <form class="om-form" id="om-form" autocomplete="off">
+        <textarea id="om-in" rows="2" maxlength="1000" placeholder="예) 술 취한 NPC 가 새벽에 PC 한테 전화해서 보고 싶다고 함"></textarea>
+        <button type="submit" class="pb">만들기</button>
+      </form>
+    </div>`);
+    modal.querySelector(".modal-box").classList.add("om-box");
+    const log = document.getElementById("om-log");
+    log.scrollTop = log.scrollHeight;
+  }
+  async function omSend() {
+    const inp = document.getElementById("om-in");
+    const q = inp.value.trim();
+    if (!q || omBusy) return;
+    inp.value = "";
+    omMsgs.push({ role: "user", content: q });
+    omBusy = true; omErr = "";
+    omPaint();
+    try {
+      const { data: ss } = await App.sb.auth.getSession();
+      let res;
+      try {
+        res = await fetch((App.data.site?.outfitApi || OUTFIT_API).trim(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${ss.session?.access_token || ""}` },
+          body: JSON.stringify({ mode: "ooc", genre: omGenre, examples: omExamples(), messages: omMsgs.slice(-8) }),
+        });
+      } catch {
+        throw new Error("생성기 주소에 연결하지 못했어요.");
+      }
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.text) throw new Error(res.status === 403 ? "회원만 쓸 수 있어요." : res.status === 429 ? "지금 요청이 많아요. 잠시 후 다시 해주세요." : "만들지 못했어요. 다시 해주세요.");
+      omMsgs.push({ role: "assistant", content: data.text });
+    } catch (err) {
+      omMsgs.pop();
+      inp.value = q;
+      omErr = err.message;
+    }
+    omBusy = false;
+    omPaint();
+  }
+  document.addEventListener("submit", (e) => {
+    if (e.target.id !== "om-form") return;
+    e.preventDefault();
+    omSend();
+  });
+  document.addEventListener("keydown", (e) => {
+    // 엔터로 보내기, 쉬프트+엔터는 줄바꿈
+    if (e.target.id === "om-in" && e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); omSend(); }
+  });
+  document.addEventListener("click", async (e) => {
+    if (e.target.closest("[data-om-open]")) return openOocMaker();
+    const g = e.target.closest("[data-om-genre]");
+    if (g) { omGenre = g.dataset.omGenre; return omPaint(); }
+    if (e.target.closest("[data-om-reset]")) { omMsgs = []; omErr = ""; return omPaint(); }
+    const sv = e.target.closest("[data-om-save]");
+    if (sv && App.saveData) {
+      const { title, text } = omSplit(omMsgs[Number(sv.dataset.omSave)].content);
+      const next = JSON.parse(JSON.stringify(App.data));
+      next.ooc = next.ooc || [];
+      next.ooc.push({ section: "OOC MAKER", title: title || "OOC MAKER", text });
+      sv.disabled = true;
+      try { await App.saveData(next, ["ooc"]); sv.textContent = "추가했어요"; } catch (err) { sv.disabled = false; alert(`저장하지 못했어요: ${err.message}`); }
+    }
   });
 
   function showOoc(i) {
