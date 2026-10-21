@@ -21,9 +21,20 @@
   const urls = new Map(); // path → { url, at }
   const FRESH = (URL_TTL - 60 * 60) * 1000;
   const isRemote = (src) => src && !/^(https?:|data:|blob:|img\/)/.test(src);
-  App.mediaUrl = (src) => (isRemote(src) ? urls.get(src)?.url || "" : src || "");
+  // 저장소를 공개로 바꾸면(SQL 한 줄) 만료 없는 영구 주소를 씀. 공개가 아니면 예전처럼 임시 주소.
+  let publicMode = false, publicChecked = false;
+  const publicUrl = (p) => `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${p.split("/").map(encodeURIComponent).join("/")}`;
+  async function detectPublic(paths) {
+    if (publicChecked) return;
+    const sample = paths.find(isRemote);
+    if (!sample) return;
+    publicChecked = true;
+    try { publicMode = (await fetch(publicUrl(sample), { method: "HEAD" })).ok; } catch { publicMode = false; }
+  }
+  App.mediaUrl = (src) => (isRemote(src) ? (publicMode ? publicUrl(src) : urls.get(src)?.url || "") : src || "");
 
   App.resolveMedia = async (paths, force = false) => {
+    if (publicMode) return;
     const now = Date.now();
     const need = [...new Set(paths.filter((p) => isRemote(p) && (force || !urls.has(p) || now - urls.get(p).at > FRESH)))];
     if (!need.length) return;
@@ -110,6 +121,7 @@
       const { error: e3 } = await sb.from("site_data").upsert({ id: "main", data: d });
       if (e3) console.warn(e3.message);
     }
+    await detectPublic(imagePaths(d));
     await App.resolveMedia(imagePaths(d));
     App.data = d;
   }

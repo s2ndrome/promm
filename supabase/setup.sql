@@ -187,10 +187,10 @@ grant execute on function
   public.list_members(), public.set_member_role(uuid, text), public.remove_member(uuid)
   to authenticated;
 
--- ---------- 이미지 / 음악 파일 저장소 (비공개) ----------
+-- ---------- 이미지 / 음악 파일 저장소 (공개: 사진 주소가 만료되지 않음. 주소는 무작위라 알아낼 수 없음) ----------
 insert into storage.buckets (id, name, public, file_size_limit)
-values ('media', 'media', false, 52428800)
-on conflict (id) do update set public = false;
+values ('media', 'media', true, 52428800)
+on conflict (id) do update set public = true;
 
 drop policy if exists "members read media" on storage.objects;
 create policy "members read media" on storage.objects for select to authenticated
