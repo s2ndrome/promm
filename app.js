@@ -372,6 +372,8 @@
   });
 
   // ---------- OOC 메이커: 장르 + 대충 적은 상황 → 올려둔 OOC 형식으로 새 OOC (Worker → Gemini) ----------
+  const OOC_API = "https://ooc-maker.jenojeno0423.workers.dev/"; // OOC 메이커 전용 Worker (사이트 정보에서 바꿀 수 있음)
+  const HTML_RULE = "[(HTML출력시참고) - 마크다운사용금지 - 인라인css - html,head,body,태그사용금지 - 임의이미지생성금지(글자로대체) - 속성값 및 모든 내용에 쌍따옴표는모두‘로치환 (ex:style=‘font-size:12px;’) -HTML은줄바꿈없이무조건한줄표시(줄바꿈필요시<br>처리)]";
   const OM_GENRES = ["코믹", "로맨스", "로맨스 코미디", "에로", "피폐 · 집착", "일상", "HTML 출력", "보고서 출력", "테스트", "자유"];
   let omGenre = "로맨스", omMsgs = [], omBusy = false, omErr = "";
   // 장르에 맞는 예시를 고름 (HTML 은 html 이 들어간 글, 보고서는 보고서 글 …), 모자라면 아무거나
@@ -437,17 +439,22 @@
       const { data: ss } = await App.sb.auth.getSession();
       let res;
       try {
-        res = await fetch((App.data.site?.outfitApi || OUTFIT_API).trim(), {
+        res = await fetch((App.data.site?.oocApi || OOC_API).trim(), {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${ss.session?.access_token || ""}` },
-          body: JSON.stringify({ mode: "ooc", genre: omGenre, examples: omExamples(), messages: omMsgs.slice(-8) }),
+          body: JSON.stringify({ genre: omGenre, examples: omExamples(), messages: omMsgs.slice(-8) }),
         });
       } catch {
         throw new Error("생성기 주소에 연결하지 못했어요.");
       }
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.text) throw new Error(res.status === 403 ? "회원만 쓸 수 있어요." : res.status === 429 ? "지금 요청이 많아요. 잠시 후 다시 해주세요." : "만들지 못했어요. 다시 해주세요.");
-      omMsgs.push({ role: "assistant", content: data.text });
+      // HTML 출력이면 마지막에 규칙 문구가 꼭 들어가게
+      let text = data.text;
+      if (omGenre === "HTML 출력" && !text.includes("(HTML출력시참고)")) text += `\n${HTML_RULE}`;
+      // 보고서·HTML·테스트를 뺀 장르는 3000자 이상 출력 지시가 꼭 들어가게
+      if (!/보고서|HTML|테스트/.test(omGenre) && !/3000\s*자/.test(text)) text += "\n출력은 반드시 3000자 이상으로 한다.";
+      omMsgs.push({ role: "assistant", content: text });
     } catch (err) {
       omMsgs.pop();
       inp.value = q;
