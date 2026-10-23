@@ -517,7 +517,7 @@
         <p>${nl(p.body)}</p>
         ${tools("places", i)}
       </article>`).join("");
-    const ch5 = chapter("05", "LOCATIONS", "장소", `<div class="w-places">${places}</div>${addBtn("places", "장소 추가")}`);
+    const ch5 = chapter("05", "LOCATIONS", "장소", `<div class="ag-slot" id="ag-slot"></div><div class="w-places">${places}</div>${addBtn("places", "장소 추가")}`);
 
     // 06 위협
     const threats = (w.threats || []).map((t, i) => `<article class="w-threat">

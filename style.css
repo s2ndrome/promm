@@ -1436,3 +1436,47 @@ body.admin .ooc-card { padding-top: 40px; }
   .jj-open { margin: 0; flex: none; }
   .jj-form input { font-size: 16px; }
 }
+
+/* ---------- 아이기스 3D ---------- */
+.ag-slot { margin: 0 0 28px; }
+.ag3d { position: relative; height: min(72vh, 640px); min-height: 380px; border: 1px solid var(--w-line); background: #0b1420; overflow: hidden; font-family: var(--w-body); user-select: none; -webkit-user-select: none; }
+.ag3d.ag-full, .ag3d:fullscreen { position: fixed; inset: 0; height: 100%; z-index: 200; border: 0; }
+.ag-stage, .ag-stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.ag-stage canvas { touch-action: none; cursor: grab; }
+.ag-stage canvas:active { cursor: grabbing; }
+.ag-tags { position: absolute; inset: 0; pointer-events: none; }
+.ag-tag { position: absolute; left: 0; top: 0; pointer-events: auto; margin: 0; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; }
+.ag-tag { --h: 26px; }
+.ag-tag { white-space: nowrap; color: #f2f6fb; font-size: 11.5px; letter-spacing: .02em; }
+.ag-tag { translate: -50% calc(-100% - var(--h)); padding: 5px 11px; background: rgba(58, 68, 82, .78); border: 1px solid rgba(220, 232, 245, .45); backdrop-filter: blur(3px); transition: background .2s, border-color .2s; }
+.ag-tag::after { content: ""; position: absolute; left: 50%; top: 100%; width: 1px; height: var(--h); background: rgba(230, 240, 250, .7); }
+.ag-tag:hover, .ag-tag.on { background: rgba(28, 72, 128, .92); border-color: #9fd0ff; }
+.ag-tag.sm { --h: 16px; font-size: 10px; padding: 3px 8px; opacity: .9; }
+.ag-hud { position: absolute; left: 0; right: 0; top: 0; display: flex; justify-content: space-between; align-items: flex-start; padding: 14px 16px; pointer-events: none; }
+.ag-title { font-family: var(--w-display); font-weight: 700; letter-spacing: .18em; color: #fff; font-size: 15px; text-shadow: 0 1px 8px rgba(0, 0, 0, .45); }
+.ag-title small { display: block; font-size: 9.5px; letter-spacing: .3em; font-weight: 500; opacity: .75; margin-top: 3px; }
+.ag-btns { display: flex; gap: 6px; pointer-events: auto; }
+.ag-btns button, .ag-nav button { font: 600 10.5px/1 var(--w-body); letter-spacing: .14em; color: #e9f1fa; background: rgba(12, 20, 32, .62); border: 1px solid rgba(220, 232, 245, .35); padding: 7px 11px; cursor: pointer; }
+.ag-btns button:hover, .ag-btns button.on, .ag-nav button:hover { background: rgba(28, 72, 128, .9); border-color: #9fd0ff; }
+.ag-info { position: absolute; right: 14px; top: 56px; max-height: calc(100% - 70px); width: min(340px, 42%); overflow-y: auto; padding: 20px 20px 16px; background: rgba(8, 13, 21, .84); border: 1px solid rgba(160, 200, 240, .3); color: #e8eef5; backdrop-filter: blur(6px); animation: agin .35s ease; }
+.ag-info[hidden] { display: none; }
+@keyframes agin { from { opacity: 0; transform: translateX(14px); } }
+.ag-en { font-size: 10px; letter-spacing: .22em; color: #8fc3ff; margin: 0 0 6px; }
+.ag-info h3 { font-family: var(--w-display); font-size: 19px; margin: 0 0 12px; color: #fff; }
+.ag-body { font-size: 13px; line-height: 1.75; color: #c9d3de; }
+.ag-none { opacity: .6; }
+.ag-x { position: absolute; right: 10px; top: 8px; background: none; border: 0; color: #cfd8e3; font-size: 20px; cursor: pointer; }
+.ag-nav { display: flex; justify-content: space-between; margin-top: 16px; }
+.ag-hint { position: absolute; left: 16px; bottom: 12px; margin: 0; font-size: 10.5px; color: rgba(255, 255, 255, .78); text-shadow: 0 1px 4px rgba(0, 0, 0, .6); pointer-events: none; }
+.ag-load { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: #8fb4d8; font-size: 12px; letter-spacing: .3em; animation: agblink 1.2s ease-in-out infinite; }
+@keyframes agblink { 50% { opacity: .35; } }
+@media (max-width: 700px) {
+  .ag3d { height: 64vh; min-height: 340px; }
+  .ag-info { left: 10px; right: 10px; top: auto; bottom: 10px; width: auto; max-height: 46%; padding: 14px 16px; }
+  .ag-info h3 { font-size: 16px; margin-bottom: 8px; }
+  .ag-body { font-size: 12px; line-height: 1.7; }
+  .ag-hint { display: none; }
+  .ag-tag { font-size: 10.5px; padding: 4px 8px; --h: 18px; }
+  .ag-tag.sm { display: none; }
+  .ag-tag.sm.on { display: block; }
+}
