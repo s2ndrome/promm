@@ -1143,6 +1143,7 @@
     if (renderer) resize();
   }
   App.agStart = () => { if (visible) start(); };
+  App.loadThree = loadThree;
   window.addEventListener("resize", resize);
   document.addEventListener("fullscreenchange", () => setTimeout(resize, 60));
   document.addEventListener("visibilitychange", () => { if (!document.hidden && visible) start(); });

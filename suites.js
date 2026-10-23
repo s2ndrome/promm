@@ -27,7 +27,7 @@
   ];
   while (SUITES.length < 8) SUITES.push(null);
 
-  let el = null, room = 0, sp = 0;
+  let el = null, room = 0, sp = 0, mode = "walk", walk = null;
   const no = (i) => String(i + 1).padStart(2, "0");
 
   function roomHtml(s, i) {
@@ -43,7 +43,9 @@
         <p class="st-title">${esc(s.title)}</p>
         <ul class="st-meta">${s.meta.map((m) => `<li>${esc(m)}</li>`).join("")}</ul>
       </div>
-      <div class="st-grid">
+      <div class="st-modes"><button type="button" data-mode="walk" class="${mode === "walk" ? "on" : ""}">3D WALK</button><button type="button" data-mode="photo" class="${mode === "photo" ? "on" : ""}">PHOTOS</button></div>
+      <div class="st-walk" ${mode === "walk" ? "" : "hidden"}><p class="st-loading">LOADING 3D…</p></div>
+      <div class="st-grid" ${mode === "photo" ? "" : "hidden"}>
         <div class="st-plan"><img src="${s.dir}plan.webp" alt="${esc(s.name)} 도면" draggable="false">${hots}</div>
         <figure class="st-view">
           <div class="st-photo"><img alt=""><button type="button" class="st-arrow prev" data-step="-1" aria-label="이전">‹</button><button type="button" class="st-arrow next" data-step="1" aria-label="다음">›</button></div>
@@ -53,10 +55,14 @@
       <div class="st-list">${s.spaces.map((x, k) => `<button type="button" data-sp="${k}"><b>${x.c}</b>${esc(x.ko)}</button>`).join("")}</div>`;
   }
 
-  function showSpace(k) {
+  function mark(k) {
+    el.querySelectorAll("[data-sp]").forEach((b) => b.classList.toggle("on", +b.dataset.sp === k));
+  }
+  function showSpace(k, fromWalk) {
     const s = SUITES[room];
     if (!s) return;
     sp = (k + s.spaces.length) % s.spaces.length;
+    if (mode === "walk" && walk && !fromWalk) walk.goto(s.spaces[sp].c);
     const x = s.spaces[sp];
     const img = el.querySelector(".st-photo img");
     img.classList.remove("in");
@@ -66,17 +72,49 @@
     el.querySelector(".st-view b").textContent = x.c;
     el.querySelector(".st-view span").textContent = x.ko;
     el.querySelector(".st-view small").textContent = x.en;
-    el.querySelectorAll("[data-sp]").forEach((b) => b.classList.toggle("on", +b.dataset.sp === sp));
+    mark(sp);
+  }
+  // 3D 워크스루 켜기 (처음 열 때만 만들고, 사진 모드로 가면 정리)
+  async function startWalk() {
+    const s = SUITES[room], box = el?.querySelector(".st-walk");
+    if (!s || !box || walk || !App.Room3D || !App.loadThree) return;
+    const token = (startWalk.n = (startWalk.n || 0) + 1);
+    try {
+      const w = await App.Room3D(box, s, (code) => {
+        const k = s.spaces.findIndex((x) => x.c === code);
+        if (k >= 0) showSpace(k, true);
+      });
+      if (token !== startWalk.n || !el || !box.isConnected) return w.destroy();
+      walk = w;
+      box.querySelector(".st-loading")?.remove();
+    } catch (err) {
+      box.querySelector(".st-loading").textContent = "3D 를 불러오지 못했어요. PHOTOS 로 봐주세요.";
+    }
+  }
+  function stopWalk() {
+    startWalk.n = (startWalk.n || 0) + 1;
+    walk?.destroy();
+    walk = null;
+  }
+  function setMode(m) {
+    mode = m;
+    el.querySelectorAll("[data-mode]").forEach((b) => b.classList.toggle("on", b.dataset.mode === m));
+    el.querySelector(".st-walk").hidden = m !== "walk";
+    el.querySelector(".st-grid").hidden = m !== "photo";
+    if (m === "walk") { el.querySelector(".st-walk").innerHTML = '<p class="st-loading">LOADING 3D…</p>'; startWalk(); }
+    else stopWalk();
   }
 
   function showRoom(i) {
+    stopWalk();
     room = i;
     el.querySelector(".st-body").innerHTML = roomHtml(SUITES[i], i);
     el.querySelectorAll("[data-room]").forEach((b) => b.classList.toggle("on", +b.dataset.room === i));
-    if (SUITES[i]) showSpace(0);
+    if (SUITES[i]) { showSpace(0, true); if (mode === "walk") startWalk(); }
   }
 
   function close() {
+    stopWalk();
     el?.remove();
     el = null;
     document.body.classList.remove("st-lock");
@@ -85,6 +123,7 @@
   }
   function onKey(e) {
     if (e.key === "Escape") close();
+    else if (mode === "walk") return;
     else if (e.key === "ArrowRight") showSpace(sp + 1);
     else if (e.key === "ArrowLeft") showSpace(sp - 1);
   }
@@ -102,14 +141,15 @@
       <nav class="st-rooms">${SUITES.map((s, k) => `<button type="button" data-room="${k}" class="${s ? "" : "vacant"}"><b>${no(k)}</b>${s ? esc(s.name) : "VACANT"}</button>`).join("")}</nav>
       <section class="st-body"></section>`;
     el.addEventListener("click", (e) => {
-      const t = e.target.closest("[data-close],[data-room],[data-sp],[data-step]");
+      const t = e.target.closest("[data-close],[data-room],[data-sp],[data-step],[data-mode]");
       if (!t) return;
       if (t.dataset.close != null) close();
       else if (t.dataset.room != null) showRoom(+t.dataset.room);
+      else if (t.dataset.mode != null) setMode(t.dataset.mode);
       else if (t.dataset.sp != null) {
         showSpace(+t.dataset.sp);
         // 모바일: 도면은 사진 아래에 있으니 사진으로 올려줌
-        if (window.innerWidth <= 800) el.querySelector(".st-view").scrollIntoView({ behavior: "smooth", block: "start" });
+        if (mode === "photo" && window.innerWidth <= 800) el.querySelector(".st-view").scrollIntoView({ behavior: "smooth", block: "start" });
       }
       else showSpace(sp + +t.dataset.step);
     });
