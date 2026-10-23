@@ -88,7 +88,7 @@
         }
         for (let x = 0; x < w; x += 16) {
           const r = rand();
-          const lit = r > .965 ? "#ff6fe0" : r > .93 ? "#ffc070" : r > .78 ? "#d9fbff" : r > .55 ? "#59c8ff" : r > .35 ? "#0e3550" : "#000";
+          const lit = r > .965 ? "#ffffff" : r > .93 ? "#9fe8ff" : r > .78 ? "#d9fbff" : r > .55 ? "#59c8ff" : r > .35 ? "#0e3550" : "#000";
           g.fillStyle = glow || r > .55 ? lit : "#0a1220";
           g.fillRect(x + 2, y + 166, 12, 58);
         }
@@ -126,14 +126,14 @@
       for (let i = 0; i < 24; i++) { const a = (i / 24) * Math.PI * 2; g.beginPath(); g.moveTo(c + Math.cos(a) * 120, c + Math.sin(a) * 120); g.lineTo(c + Math.cos(a) * c, c + Math.sin(a) * c); g.stroke(); }
       for (let i = 0; i < 70; i++) {
         const a = rand() * Math.PI * 2, r = between(150, c - 30), s = between(12, 40);
-        g.fillStyle = glow ? (rand() < .25 ? pick(["#2bd8ff", "#ff4fd8", "#ffb347"]) : "#000") : rand() < .5 ? "#0c0f14" : "#39424e";
+        g.fillStyle = glow ? (rand() < .25 ? pick(["#2bd8ff", "#8fdcff", "#e6faff"]) : "#000") : rand() < .5 ? "#0c0f14" : "#39424e";
         g.save(); g.translate(c + Math.cos(a) * r, c + Math.sin(a) * r); g.rotate(a); g.fillRect(-s / 2, -s / 3, s, s * .66); g.restore();
       }
       g.strokeStyle = glow ? "#4fe8ff" : "#2d6a85"; g.lineWidth = 7; g.beginPath(); g.arc(c, c, c - 24, 0, 7); g.stroke();
       if (kind === "pad") {
         g.fillStyle = glow ? "#000" : "#151a21"; g.beginPath(); g.arc(c, c, 330, 0, 7); g.fill();
-        g.strokeStyle = glow ? "#ffb347" : "#c9a050"; g.lineWidth = 14; g.beginPath(); g.arc(c, c, 300, 0, 7); g.stroke();
-        g.fillStyle = glow ? "#ffd27a" : "#e8c070"; g.font = "700 380px Arial"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("H", c, c + 20);
+        g.strokeStyle = glow ? "#4fe8ff" : "#4a8aa8"; g.lineWidth = 14; g.beginPath(); g.arc(c, c, 300, 0, 7); g.stroke();
+        g.fillStyle = glow ? "#cff8ff" : "#b8d8e8"; g.font = "700 380px Arial"; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("H", c, c + 20);
       }
       if (kind === "core") { g.fillStyle = "#000"; g.beginPath(); g.arc(c, c, 260, 0, 7); g.fill(); }
     });
@@ -149,7 +149,7 @@
       }
       g.fillStyle = "#e9fdff"; g.textAlign = "center";
       g.font = "700 170px Georgia, 'Times New Roman', serif"; g.fillText("ARCH", w / 2, 200);
-      g.shadowColor = "#ff4fd8"; g.fillStyle = "#ffd6f6";
+      g.shadowColor = "#38e1ff"; g.fillStyle = "#d6f6ff";
       g.font = "600 62px Georgia, 'Times New Roman', serif"; g.fillText("A E G I S", w / 2, 300);
     });
   }
@@ -222,10 +222,10 @@
       for (let i = 0; i < 70; i++) {
         const x = between(60, 450), y = between(100, 170) - Math.sin((x / w) * Math.PI) * 40, r = between(26, 74);
         const gr = g.createRadialGradient(x, y, 0, x, y, r);
-        gr.addColorStop(0, "rgba(40,34,70,.7)"); gr.addColorStop(1, "rgba(40,34,70,0)");
+        gr.addColorStop(0, "rgba(22,32,54,.7)"); gr.addColorStop(1, "rgba(22,32,54,0)");
         g.fillStyle = gr; g.fillRect(0, 0, w, h);
       }
-      const sh = g.createLinearGradient(0, 110, 0, 230); sh.addColorStop(0, "rgba(0,0,0,0)"); sh.addColorStop(1, "rgba(255,70,200,.35)");
+      const sh = g.createLinearGradient(0, 110, 0, 230); sh.addColorStop(0, "rgba(0,0,0,0)"); sh.addColorStop(1, "rgba(50,150,255,.28)");
       g.globalCompositeOperation = "source-atop"; g.fillStyle = sh; g.fillRect(0, 0, w, h);
     });
   }
@@ -236,7 +236,7 @@
   function skyMesh() {
     return new THREE.Mesh(new THREE.SphereGeometry(2400, 48, 24), new THREE.ShaderMaterial({
       side: THREE.BackSide, depthWrite: false, fog: false,
-      uniforms: { moon: { value: new THREE.Vector3(...MOON).normalize() }, top: { value: col(0x020309) }, mid: { value: col(0x0b0d2c) }, hor: { value: col(0x3a1452) }, glow: { value: col(0xff3d9a) }, sea: { value: col(0x02040a) } },
+      uniforms: { moon: { value: new THREE.Vector3(...MOON).normalize() }, top: { value: col(0x020309) }, mid: { value: col(0x06112a) }, hor: { value: col(0x0b2442) }, glow: { value: col(0x1f78c8) }, sea: { value: col(0x02040a) } },
       vertexShader: "varying vec3 vDir; void main(){ vDir = normalize(position); gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }",
       fragmentShader: `uniform vec3 moon, top, mid, hor, glow, sea; varying vec3 vDir;
         float hash(vec3 p){ return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719))) * 43758.5453); }
@@ -315,7 +315,7 @@
     const win = wallTex(false), glow = wallTex(true), panel = panelTex(), roof = panelTex(40);
     const std = (o) => new THREE.MeshStandardMaterial(o);
     const basic = (c, o = {}) => new THREE.MeshBasicMaterial({ color: c, toneMapped: false, ...o });
-    C = { cyan: neon(.3, 1.9, 2.8), mag: neon(2.6, .35, 1.9), amber: neon(2.8, 1.3, .35), red: neon(3.5, .25, .25), white: neon(2.4, 2.6, 3) };
+    C = { cyan: neon(.3, 1.9, 2.8), mag: neon(.35, 1.1, 3), amber: neon(1.5, 2.3, 3), red: neon(1.2, 2.2, 3.2), white: neon(2.4, 2.6, 3) };
     M = {
       win: std({ map: win, emissiveMap: glow, emissive: 0xffffff, emissiveIntensity: 2.2, metalness: .85, roughness: .28, envMapIntensity: 1.3 }),
       hull: std({ map: panel, bumpMap: panel, bumpScale: .02, metalness: .9, roughness: .3, envMapIntensity: 1.5 }),
@@ -325,7 +325,7 @@
       steel: std({ color: col(0x8d97a6), metalness: 1, roughness: .16, envMapIntensity: 1.8 }),
       cyan: basic(C.cyan), mag: basic(C.mag), amber: basic(C.amber), red: basic(C.red), white: basic(C.white),
       halo: basic(neon(.1, .6, 1.1), { transparent: true, opacity: .5, blending: THREE.AdditiveBlending, depthWrite: false }),
-      haloM: basic(neon(.9, .1, .7), { transparent: true, opacity: .5, blending: THREE.AdditiveBlending, depthWrite: false }),
+      haloM: basic(neon(.1, .4, 1.2), { transparent: true, opacity: .5, blending: THREE.AdditiveBlending, depthWrite: false }),
       glass: std({ color: col(0x5ac8ff), metalness: 1, roughness: .05, transparent: true, opacity: .35, envMapIntensity: 2, emissive: col(0x0a3050), emissiveIntensity: .6 }),
       leaf: std({ color: col(0x1e5a3c), roughness: .8, emissive: col(0x062a1a), emissiveIntensity: .5 }),
       leaf2: std({ color: col(0x2c6e46), roughness: .8, emissive: col(0x0a3422), emissiveIntensity: .5 }),
@@ -511,7 +511,7 @@
         if (rand() < .2) continue;
         const px = c * (from + d) + ox * side * 3.6, pz = s * (from + d) + oz * side * 3.6, h = between(2, 8);
         block(px, 2.1, pz, 4.2, h, between(5, 9), rot);
-        if (h > 5 && n++ % 3 === 0) sign(pick(["ARCH", "AEGIS", "SENTINEL", "GUIDE", "가이딩", "센티넬", "ZONE 7", "아크"]), pick(["#38e1ff", "#ff4fd8", "#ffb347"]), px + ox * side * 2.2, 2.1 + h + 2.4, pz + oz * side * 2.2, rot + Math.PI / 2, false, .45);
+        if (h > 5 && n++ % 3 === 0) sign(pick(["ARCH", "AEGIS", "SENTINEL", "GUIDE", "가이딩", "센티넬", "ZONE 7", "아크"]), pick(["#38e1ff", "#8fdcff", "#e6faff"]), px + ox * side * 2.2, 2.1 + h + 2.4, pz + oz * side * 2.2, rot + Math.PI / 2, false, .45);
       }
     }
     for (const sd of [-1, 1]) lanes.push({ a: [x1 + ox * sd * .8, 2.4, z1 + oz * sd * .8], b: [x2 + ox * sd * .8, 2.4, z2 + oz * sd * .8], dir: sd, n: Math.ceil(len / 10) });
@@ -530,7 +530,7 @@
       part(new THREE.BoxGeometry(.12, 1.4, 1.4), M.hull, sx * .7, .7, 2.2).rotation.z = sx * .4;
       part(new THREE.CylinderGeometry(.45, .45, 1.8, 10), M.dark, sx * 3.3, -.1, .7).rotation.x = Math.PI / 2;
       part(new THREE.CircleGeometry(.42, 10), M.cyan, sx * 3.3, -.1, 1.62);
-      part(new THREE.SphereGeometry(.13, 6, 4), sx < 0 ? M.red : new THREE.MeshBasicMaterial({ color: neon(.2, 3, .6), toneMapped: false }), sx * 4.2, 0, .7);
+      part(new THREE.SphereGeometry(.13, 6, 4), sx < 0 ? M.red : new THREE.MeshBasicMaterial({ color: neon(1.2, 2.2, 3.2), toneMapped: false }), sx * 4.2, 0, .7);
     }
     part(new THREE.BoxGeometry(.8, .3, 1.2), M.cyan, 0, .3, -1.6);
     const b = part(new THREE.SphereGeometry(.16, 6, 4), M.red, 0, .55, -.6); b.userData.phase = rand() * 6; blinkers.push(b);
@@ -601,7 +601,7 @@
 
   function buildScene() {
     scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(col(0x140c2a), .0021);
+    scene.fog = new THREE.FogExp2(col(0x061226), .0021);
     camera = new THREE.PerspectiveCamera(36, 1, 1, 6000);
     view.target = new THREE.Vector3(0, 22, 0);
     makeMaterials();
@@ -626,7 +626,7 @@
     const moon = new THREE.DirectionalLight(col(0x9fb4ff), .9);
     moon.position.set(MOON[0] * 300, MOON[1] * 300 + 100, MOON[2] * 300);
     scene.add(moon);
-    for (const [c, x, y, z, d] of [[0x2bd8ff, 0, 40, 0, 160], [0xff3dc8, 0, 14, 60, 110], [0x2bd8ff, -60, 20, 20, 110], [0xff8a3d, 60, 20, 30, 110]]) {
+    for (const [c, x, y, z, d] of [[0x2bd8ff, 0, 40, 0, 160], [0x5aa8ff, 0, 14, 60, 110], [0x2bd8ff, -60, 20, 20, 110], [0x7fd8ff, 60, 20, 30, 110]]) {
       const l = new THREE.PointLight(col(c), 2.2, d, 1.6); l.position.set(x, y, z); scene.add(l);
     }
 
@@ -720,7 +720,7 @@
     signM.position.set(0, tops[0] + 4.1, 24.62); scene.add(signM);
 
     // 지하 특별통제 훈련장 (물 아래 희미한 보랏빛)
-    add(new THREE.CylinderGeometry(14, 14, 7, 8, 1, true), new THREE.MeshBasicMaterial({ color: neon(.4, .2, 1.2), transparent: true, opacity: .4, toneMapped: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false }), 0, -1.5, 0, Z.arena);
+    add(new THREE.CylinderGeometry(14, 14, 7, 8, 1, true), new THREE.MeshBasicMaterial({ color: neon(.2, .6, 1.4), transparent: true, opacity: .4, toneMapped: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false }), 0, -1.5, 0, Z.arena);
 
     // 허브 위 작은 시설 (라운지 · 상담실 · 연구실)
     add(boxG(7, 3.2, 4.5), M.glass, -13, tops[1] + 1.6, 15, Z.lounge).rotation.y = -.7;
@@ -738,7 +738,7 @@
       for (let z = 40; z < 156; z += 17) {
         const h = between(4, 10);
         block(s * 13, 0, z + 7, 9, h, 15, 0, Z.gate);
-        if (rand() < .6) sign(pick(["ARCH", "아이기스", "SENTINEL", "가이드", "ZONE 01", "출입통제"]), pick(["#38e1ff", "#ff4fd8", "#ffb347"]), s * 8.4, h + 3.5, z + 7, s * Math.PI / 2, true, .5);
+        if (rand() < .6) sign(pick(["ARCH", "아이기스", "SENTINEL", "가이드", "ZONE 01", "출입통제"]), pick(["#38e1ff", "#8fdcff", "#e6faff"]), s * 8.4, h + 3.5, z + 7, s * Math.PI / 2, true, .5);
       }
       tower(s * 10, 2.2, 38, 2.6, 26, Z.gate, 10, M.mag);
       const ban = new THREE.Mesh(new THREE.PlaneGeometry(3.6, 15), new THREE.MeshBasicMaterial({ map: neonTex("ARCH", "#38e1ff", true), transparent: true, toneMapped: false, color: neon(1.4, 1.6, 1.8), blending: THREE.AdditiveBlending, depthWrite: false }));
@@ -770,14 +770,14 @@
     top = platform(...PLAT.sclass, [[16, 5], [12.5, 5], [9, 4]], Z.sclass);
     tower(PLAT.sclass[0], top, PLAT.sclass[1], 4.4, 16, Z.sclass, 6, M.amber);
     greeble(PLAT.sclass[0], top, PLAT.sclass[1], 5.5, 8.5, 10);
-    sign("S-CLASS", "#ffb347", PLAT.sclass[0] - 5, top + 10, PLAT.sclass[1] + 5, -.7, true, .55);
+    sign("S-CLASS", "#e6faff", PLAT.sclass[0] - 5, top + 10, PLAT.sclass[1] + 5, -.7, true, .55);
 
     // ── 의무실
     top = platform(...PLAT.med, [[13, 4], [9.5, 3]], Z.med);
     add(new THREE.BoxGeometry(6, .3, 1.8), M.white, PLAT.med[0], top + .2, PLAT.med[1]);
     add(new THREE.BoxGeometry(1.8, .3, 6), M.white, PLAT.med[0], top + .2, PLAT.med[1]);
     greeble(PLAT.med[0], top, PLAT.med[1], 5, 9, 10);
-    sign("의무실", "#ff4fd8", PLAT.med[0], top + 7, PLAT.med[1], -1.3, false, .5);
+    sign("의무실", "#8fdcff", PLAT.med[0], top + 7, PLAT.med[1], -1.3, false, .5);
 
     // ── 선착장
     top = platform(...PLAT.dock, [[15, 3.2]], Z.dock, "pad");
@@ -791,7 +791,7 @@
     add(new THREE.BoxGeometry(7.6, 4.8, 7.6), M.cell, PLAT.stab[0], top + 2.4, PLAT.stab[1], Z.stab);
     add(new THREE.BoxGeometry(8.6, .25, 8.6), M.red, PLAT.stab[0], top + 4.5, PLAT.stab[1]);
     for (const [dx, dz] of [[-4.4, -4.4], [4.4, -4.4], [-4.4, 4.4], [4.4, 4.4]]) blinker(PLAT.stab[0] + dx, top + 5.2, PLAT.stab[1] + dz, .4);
-    sign("WARNING", "#ff3b3b", PLAT.stab[0], top + 9, PLAT.stab[1], .9, false, .5);
+    sign("WARNING", "#38e1ff", PLAT.stab[0], top + 9, PLAT.stab[1], .9, false, .5);
 
     // ── 뒤쪽 첨탑 단지 + 탐조등
     top = platform(...PLAT.back, [[19, 4], [14, 4]], Z.core);
@@ -807,7 +807,7 @@
     });
     for (const s of [-1, 1]) {
       const b = new THREE.Group();
-      b.add(new THREE.Mesh(new THREE.CylinderGeometry(8, .4, 260, 24, 1, true).translate(0, 130, 0), beamMat(neon(1.4, .4, 1.2), .6)));
+      b.add(new THREE.Mesh(new THREE.CylinderGeometry(8, .4, 260, 24, 1, true).translate(0, 130, 0), beamMat(neon(.6, 1.2, 2.2), .6)));
       b.position.set(s * 10, 39, 38); b.userData = { ph: s > 0 ? 1 : 4, sp: .3 };
       beams.push(b); scene.add(b);
     }
