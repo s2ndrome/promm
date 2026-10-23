@@ -1495,3 +1495,71 @@ body.admin .ooc-card { padding-top: 40px; }
   .ag-tag.sm { display: none; }
   .ag-tag.sm.on { display: block; }
 }
+
+/* ---------- S급 숙소 룸투어 ---------- */
+.st-open { display: flex; justify-content: space-between; align-items: center; width: 100%; margin: -16px 0 28px; padding: 13px 16px; background: #04070d; color: #dffcff; border: 1px solid rgba(80, 230, 255, .35); border-top: 0; font: 600 11px/1.2 var(--w-body); letter-spacing: .2em; cursor: pointer; text-align: left; }
+.st-open span { letter-spacing: .02em; font-weight: 500; color: #7fe9ff; }
+.st-open:hover { background: rgba(0, 60, 90, .55); }
+body.st-lock { overflow: hidden; }
+.st-tour { position: fixed; inset: 0; z-index: 300; display: flex; flex-direction: column; background: radial-gradient(ellipse at 50% 0%, #0a1a2c, #020409 70%); color: #e6f2fa; font-family: var(--w-body, Pretendard, sans-serif); animation: stin .35s ease; }
+@keyframes stin { from { opacity: 0; } }
+.st-top { display: flex; justify-content: space-between; align-items: center; padding: 16px 22px 10px; }
+.st-brand { margin: 0; font-family: var(--w-display, inherit); font-weight: 700; letter-spacing: .24em; font-size: 14px; text-shadow: 0 0 12px rgba(80, 230, 255, .5); }
+.st-brand small { margin-left: 10px; font-size: 9.5px; letter-spacing: .3em; color: #7fe9ff; font-weight: 500; }
+.st-x { background: none; border: 1px solid rgba(80, 230, 255, .4); color: #dffcff; width: 34px; height: 34px; font-size: 20px; line-height: 1; cursor: pointer; }
+.st-rooms { display: flex; gap: 6px; padding: 0 22px 12px; overflow-x: auto; scrollbar-width: none; border-bottom: 1px solid rgba(80, 230, 255, .14); }
+.st-rooms::-webkit-scrollbar { display: none; }
+.st-rooms button { flex: 0 0 auto; display: flex; gap: 8px; align-items: baseline; padding: 8px 12px; background: rgba(3, 12, 22, .7); border: 1px solid rgba(80, 230, 255, .22); color: #bcd6e2; font: 600 10.5px/1 var(--w-body, sans-serif); letter-spacing: .12em; cursor: pointer; white-space: nowrap; }
+.st-rooms button b { color: #5fe6ff; font-weight: 700; }
+.st-rooms button.vacant { color: #4f6470; }
+.st-rooms button.vacant b { color: #31505c; }
+.st-rooms button.on { background: rgba(0, 70, 100, .85); border-color: #9ff4ff; color: #fff; box-shadow: 0 0 14px rgba(80, 230, 255, .3); }
+.st-body { flex: 1; overflow-y: auto; padding: 18px 22px 26px; }
+.st-head { margin-bottom: 16px; }
+.st-kicker { margin: 0 0 6px; font-size: 10px; letter-spacing: .26em; color: #6ff0ff; }
+.st-head h2 { margin: 0; font-family: var(--w-display, inherit); font-size: clamp(24px, 3.4vw, 38px); letter-spacing: .08em; color: #fff; text-shadow: 0 0 20px rgba(80, 230, 255, .35); }
+.st-title { margin: 6px 0 10px; font-size: 11px; letter-spacing: .2em; color: #8ea9b8; }
+.st-meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.st-meta li { font-size: 10px; letter-spacing: .14em; color: #bfe9f5; border: 1px solid rgba(80, 230, 255, .25); padding: 4px 8px; }
+.st-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr); gap: 18px; align-items: start; }
+.st-plan { position: relative; border: 1px solid rgba(80, 230, 255, .25); background: #050b14; line-height: 0; }
+.st-plan img { width: 100%; height: auto; filter: invert(.93) hue-rotate(180deg) saturate(.6) brightness(.95); opacity: .92; user-select: none; }
+.st-plan::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(rgba(60, 200, 255, .06), rgba(60, 200, 255, .02)); mix-blend-mode: screen; }
+.st-hot { position: absolute; padding: 0; margin: 0; background: transparent; border: 1px solid transparent; cursor: pointer; transition: background .2s, border-color .2s, box-shadow .2s; z-index: 1; }
+.st-hot span { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 26px; height: 26px; display: grid; place-items: center; border-radius: 50%; background: rgba(2, 10, 18, .85); border: 1px solid rgba(80, 230, 255, .7); color: #bff8ff; font: 700 11px/1 var(--w-body, sans-serif); line-height: 1; box-shadow: 0 0 10px rgba(60, 220, 255, .35); }
+.st-hot:hover { background: rgba(60, 220, 255, .08); border-color: rgba(80, 230, 255, .45); }
+.st-hot.on { background: rgba(60, 220, 255, .14); border-color: #7ff0ff; box-shadow: inset 0 0 24px rgba(60, 220, 255, .25), 0 0 16px rgba(60, 220, 255, .25); }
+.st-hot.on span { background: #5fe6ff; color: #02121c; }
+.st-view { margin: 0; }
+.st-photo { position: relative; aspect-ratio: 3 / 2; background: #000; border: 1px solid rgba(80, 230, 255, .25); overflow: hidden; }
+.st-photo img { width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.03); transition: opacity .45s ease, transform 1.2s ease; }
+.st-photo img.in { opacity: 1; transform: none; }
+.st-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 38px; height: 54px; background: rgba(2, 8, 14, .55); border: 1px solid rgba(80, 230, 255, .3); color: #dffcff; font-size: 26px; cursor: pointer; }
+.st-arrow.prev { left: 10px; } .st-arrow.next { right: 10px; }
+.st-arrow:hover { background: rgba(0, 70, 100, .8); }
+.st-view figcaption { display: flex; align-items: baseline; gap: 10px; padding: 12px 2px 0; }
+.st-view figcaption b { color: #02121c; background: #5fe6ff; font-size: 11px; padding: 3px 7px; }
+.st-view figcaption span { font-size: 17px; font-weight: 700; color: #fff; }
+.st-view figcaption small { font-size: 10px; letter-spacing: .18em; color: #7fa6b8; }
+.st-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+.st-list button { display: flex; gap: 7px; align-items: center; padding: 7px 10px; background: rgba(3, 12, 22, .7); border: 1px solid rgba(80, 230, 255, .2); color: #c8dde8; font: 500 12px/1 var(--w-body, sans-serif); cursor: pointer; }
+.st-list button b { color: #5fe6ff; font-size: 10.5px; }
+.st-list button.on { border-color: #9ff4ff; background: rgba(0, 70, 100, .8); color: #fff; }
+.st-vacant { display: grid; place-content: center; text-align: center; min-height: 50vh; color: #4f6c7a; }
+.st-vacant span { font-family: var(--w-display, inherit); font-size: 64px; font-weight: 700; color: rgba(80, 230, 255, .18); letter-spacing: .1em; }
+.st-vacant p { margin: 4px 0; letter-spacing: .5em; color: #7fa6b8; font-size: 13px; }
+.st-vacant small { font-size: 12px; }
+.ag-tour { display: block; width: 100%; margin-top: 14px; padding: 10px 12px; background: rgba(0, 70, 100, .55); border: 1px solid rgba(80, 230, 255, .6); color: #e6fdff; font: 600 11px/1.2 var(--w-body); letter-spacing: .08em; cursor: pointer; text-align: left; }
+.ag-tour[hidden] { display: none; }
+.ag-tour:hover { background: rgba(0, 100, 140, .8); }
+@media (max-width: 800px) {
+  .st-top { padding: 12px 14px 8px; }
+  .st-rooms { padding: 0 14px 10px; }
+  .st-body { padding: 14px 14px 22px; }
+  .st-grid { grid-template-columns: 1fr; }
+  .st-view { order: -1; }
+  .st-hot span { width: 20px; height: 20px; font-size: 9.5px; }
+  .st-title { font-size: 9.5px; letter-spacing: .12em; }
+  .st-view figcaption span { font-size: 15px; }
+  .st-open { font-size: 9.5px; letter-spacing: .12em; }
+}

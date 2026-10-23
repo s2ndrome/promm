@@ -896,6 +896,7 @@
       <aside class="ag-info" hidden>
         <button type="button" class="ag-x" data-ag="close" aria-label="닫기">×</button>
         <p class="ag-en"></p><h3></h3><div class="ag-body"></div>
+        <button type="button" class="ag-tour" data-suites hidden>ROOM TOUR · 숙소 8개 둘러보기 ›</button>
         <div class="ag-nav"><button type="button" data-ag="prev">‹ PREV</button><button type="button" data-ag="next">NEXT ›</button></div>
       </aside>
       <p class="ag-hint">드래그로 회전 · 휠/두 손가락으로 확대 · 시설을 누르면 설명</p>
@@ -931,6 +932,7 @@
     info.querySelector(".ag-en").textContent = p?.en || z.en;
     info.querySelector("h3").textContent = p?.name || z.label;
     info.querySelector(".ag-body").innerHTML = p?.body ? App.esc(p.body).replace(/\n/g, "<br>") : `<span class="ag-none">아직 설명이 없어요.${App.admin ? `<br>05 장소에 '${App.esc(z.match)}'(이)가 들어간 이름으로 장소를 추가하면 여기 떠요.` : ""}</span>`;
+    info.querySelector(".ag-tour").hidden = z.key !== "sclass";
     info.scrollTop = 0;
     tags.forEach((t) => t.el.classList.toggle("on", t.z === z));
   }
@@ -1015,7 +1017,7 @@
   const ease = (t) => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   function frame() {
     if (!running) return;
-    if (!root.isConnected || !visible || document.hidden) { running = false; return; }
+    if (!root.isConnected || !visible || document.hidden || document.body.classList.contains("st-lock")) { running = false; return; }
     requestAnimationFrame(frame);
     const dt = Math.min(clock.getDelta(), .1), t = clock.elapsedTime, now = performance.now();
 
@@ -1140,6 +1142,7 @@
     io.observe(slot);
     if (renderer) resize();
   }
+  App.agStart = () => { if (visible) start(); };
   window.addEventListener("resize", resize);
   document.addEventListener("fullscreenchange", () => setTimeout(resize, 60));
   document.addEventListener("visibilitychange", () => { if (!document.hidden && visible) start(); });
