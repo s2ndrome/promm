@@ -1625,3 +1625,4 @@ body.st-lock { overflow: hidden; }
   .rv-room { font-size: 13px; }
   .rv-mini { width: 32%; }
 }
+.st-host { position: absolute; inset: 0; }

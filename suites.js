@@ -13,7 +13,7 @@
       dir: "img/rooms/syndrome-lia/",
       plan: { w: 930, h: 910 },
       planOff: [60, 255],
-      model: true, // 도면 3D (room3d.js)
+      model: "syndrome", // 도면 3D (room3d.js 의 LAYOUTS)
       links: {
         A: [["B", .72, .68]],
         B: [["A", .2, .72], ["D", .07, .6], ["I", .57, .54], ["G", .84, .5], ["C", .95, .62]],
@@ -49,6 +49,7 @@
       dir: "img/rooms/feather-haemi/",
       plan: { w: 600, h: 815 },
       planOff: [120, 215],
+      model: "feather",
       // box 는 잘라낸 도면(plan.webp) 기준 픽셀
       spaces: [
         { c: "A", ko: "현관 · 복도", en: "FOYER & CORRIDOR", box: [265, 205, 335, 475] },
@@ -73,7 +74,7 @@
         H: [["B", .12, .6], ["F", .04, .48]],
       },
       spots: {
-        A: [425, 680, 425, 430], B: [500, 700, 420, 900], B2: [430, 800, 650, 640], C: [560, 760, 640, 560], D: [330, 470, 180, 300],
+        A: [425, 680, 425, 430], B: [500, 700, 420, 900], B2: [430, 800, 650, 640], C: [560, 760, 640, 560], D: [325, 455, 250, 290],
         E: [470, 395, 520, 260], F: [300, 700, 150, 800], G: [480, 490, 540, 430], H: [300, 960, 550, 980],
       },
     },
@@ -134,16 +135,23 @@
     const engine = mode === "road" ? App.RoadView : App.Room3D;
     if (!s || !box || walk || !engine || !App.loadThree) return;
     const token = (startWalk.n = (startWalk.n || 0) + 1);
+    // 화면마다 자기 칸을 따로 씀 (늦게 끝난 이전 화면이 정리하면서 새 화면을 지우지 않게)
+    const host = document.createElement("div");
+    host.className = "st-host";
+    box.appendChild(host);
     try {
-      const w = await engine(box, s, (code) => {
+      const w = await engine(host, s, (code) => {
         const k = s.spaces.findIndex((x) => x.c === code);
         if (k >= 0) showSpace(k, true);
       });
-      if (token !== startWalk.n || !el || !box.isConnected) return w.destroy();
+      if (token !== startWalk.n || !el || !box.isConnected) { w.destroy(); host.remove(); return; }
       walk = w;
       box.querySelector(".st-loading")?.remove();
     } catch (err) {
-      box.querySelector(".st-loading").textContent = "3D 를 불러오지 못했어요. PHOTOS 로 봐주세요.";
+      host.remove();
+      if (token !== startWalk.n) return;
+      const msg = box.querySelector(".st-loading");
+      if (msg) msg.textContent = "3D 를 불러오지 못했어요. PHOTOS 로 봐주세요.";
     }
   }
   function stopWalk() {

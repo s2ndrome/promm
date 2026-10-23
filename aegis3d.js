@@ -3,7 +3,7 @@
 (function () {
   const App = window.App;
   const THREE_SRC = "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js";
-  const EXTRAS_SRC = "vendor/three-extras.js?v=1";
+  const EXTRAS_SRC = "vendor/three-extras.js?v=2";
 
   // 시설 위치. match 는 05 장소 목록에서 설명을 찾아올 때 쓰는 이름 일부
   const ZONES = [
@@ -41,7 +41,7 @@
   function loadThree() {
     loading ||= (async () => {
       if (!window.THREE) await script(THREE_SRC);
-      if (!window.THREE.EffectComposer) await script(EXTRAS_SRC);
+      if (!window.THREE.SSAOPass) await script(EXTRAS_SRC);
       return window.THREE;
     })().catch(() => { loading = null; throw new Error("3D 엔진을 불러오지 못했어요"); });
     return loading;
