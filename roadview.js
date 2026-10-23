@@ -3,27 +3,10 @@
   const App = window.App;
   const R = 10;          // 사진을 감는 원통 반지름
   const VFOV = 58;       // 사진 한 장의 세로 시야각
-  // 방마다 사진 속 이동 화살표 [가는 방, 사진 가로 위치 0~1, 세로 위치 0~1]
-  const LINKS = {
-    A: [["B", .72, .68]],
-    B: [["A", .2, .72], ["D", .07, .6], ["I", .57, .54], ["G", .84, .5], ["C", .95, .62]],
-    C: [["B", .12, .7], ["G", .24, .56], ["H", .88, .68]],
-    D: [["I", .1, .56], ["B", .78, .6], ["E", .93, .66]],
-    E: [["D", .12, .68], ["F", .88, .68]],
-    F: [["E", .08, .68]],
-    G: [["B", .9, .68], ["C", .62, .7]],
-    H: [["B", .08, .7], ["C", .32, .66]],
-    I: [["B", .88, .6], ["D", .14, .6]],
-  };
-  // 미니맵에서 서 있는 자리와 사진이 바라보는 방향 (원본 도면 픽셀, room3d 와 같음)
-  const SPOTS = {
-    A: [503, 1105, 503, 940], B: [430, 905, 575, 520], C: [640, 700, 905, 760], D: [335, 695, 130, 540], E: [230, 742, 220, 905],
-    F: [255, 985, 120, 1080], G: [720, 590, 880, 430], H: [650, 985, 905, 1060], I: [610, 318, 180, 318],
-  };
-  const PLAN_OFF = [60, 255];
-
   App.RoadView = async function (container, suite, onRoom) {
     const THREE = await App.loadThree();
+    // 방마다 사진 속 이동 화살표 { 방: [[가는 방, 가로 0~1, 세로 0~1]] }, 미니맵 자리 { 방: [서는 x, y, 보는 x, y] } (원본 도면 픽셀)
+    const LINKS = suite.links || {}, SPOTS = suite.spots || {}, PLAN_OFF = suite.planOff || [0, 0];
     const mobile = window.innerWidth < 800;
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -96,7 +79,7 @@
     hud.innerHTML = `<div class="rv-hots"></div>
       <div class="rv-room"></div>
       <div class="rv-mini"><img src="${suite.dir}plan.webp" alt="" draggable="false"><i class="rv-cone"></i><i class="rv-dot"></i></div>
-      <div class="rv-thumbs">${suite.spaces.map((s) => `<button type="button" data-rv="${s.c}"><img src="${suite.dir}${s.c.toLowerCase()}.webp" alt="" loading="lazy"><span><b>${s.c}</b>${App.esc(s.ko)}</span></button>`).join("")}</div>
+      <div class="rv-thumbs">${suite.spaces.map((s) => `<button type="button" data-rv="${s.c}"><img src="${suite.dir}${s.c.toLowerCase()}.webp" alt="" loading="lazy"><span><b>${s.c[0]}</b>${App.esc(s.ko)}</span></button>`).join("")}</div>
       <p class="rv-help">${mobile ? "드래그로 둘러보기 · 화살표를 누르면 이동" : "드래그로 둘러보기 · 휠로 확대 · 화살표를 누르면 다음 방으로"}</p>
       <div class="rv-flash"></div>`;
     container.appendChild(hud);
@@ -148,7 +131,7 @@
       view.yaw = 0; view.pitch = 0; view.span = cur.userData.span; view.h = cur.userData.h;
       placeHots();
       if (old) dispose(old), (old = null);
-      roomEl.innerHTML = (() => { const s = suite.spaces.find((x) => x.c === to); return s ? `<b>${s.c}</b>${App.esc(s.ko)}<small>${App.esc(s.en)}</small>` : ""; })();
+      roomEl.innerHTML = (() => { const s = suite.spaces.find((x) => x.c === to); return s ? `<b>${s.c[0]}</b>${App.esc(s.ko)}<small>${App.esc(s.en)}</small>` : ""; })();
       roomEl.classList.remove("in"); void roomEl.offsetWidth; roomEl.classList.add("in");
       hud.querySelectorAll(".rv-thumbs [data-rv]").forEach((b) => b.classList.toggle("on", b.dataset.rv === to));
       hud.querySelector(`.rv-thumbs [data-rv="${to}"]`)?.scrollIntoView({ block: "nearest", inline: "center", behavior: "smooth" });
@@ -252,7 +235,7 @@
       }
     }
     raf = requestAnimationFrame(frame);
-    await goto("A", null, null, true);
+    await goto(suite.spaces[0].c, null, null, true);
 
     return {
       goto: (c) => goto(c),
