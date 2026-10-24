@@ -111,8 +111,6 @@ export default {
     let clean = text.replace(/^```\w*\n?|```$/g, "").trim();
     // HTML 출력이면 마지막에 규칙 문구가 꼭 들어가게 (빠졌으면 붙임)
     if (String(body.genre || "").includes("HTML") && clean && !clean.includes("(HTML출력시참고)")) clean += `\n${HTML_RULE}`;
-    // 보고서·HTML·테스트를 뺀 장르는 3000자 이상 출력 지시가 꼭 들어가게
-    if (clean && !/보고서|HTML|테스트/.test(String(body.genre || "")) && !/3000\s*자/.test(clean)) clean += "\n출력은 반드시 3000자 이상으로 한다.";
     if (!clean) return json({ error: "empty", detail: data.candidates?.[0]?.finishReason || "" }, 502);
     return json({ text: clean });
   },

@@ -460,8 +460,8 @@
       // HTML 출력이면 마지막에 규칙 문구가 꼭 들어가게
       let text = data.text;
       if (omGenre === "HTML 출력" && !text.includes("(HTML출력시참고)")) text += `\n${HTML_RULE}`;
-      // 보고서·HTML·테스트를 뺀 장르는 3000자 이상 출력 지시가 꼭 들어가게
-      if (!/보고서|HTML|테스트/.test(omGenre) && !/3000\s*자/.test(text)) text += "\n출력은 반드시 3000자 이상으로 한다.";
+      // 예전 Worker 가 맨 끝에 덧붙이던 "출력은 반드시 3000자 이상으로 한다." 줄은 지움
+      text = text.replace(/\n*출력은 반드시 3000자 이상으로 한다\.?\s*$/, "");
       omMsgs.push({ role: "assistant", content: text });
     } catch (err) {
       omMsgs.pop();
