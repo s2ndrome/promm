@@ -80,6 +80,7 @@
     },
   ];
   while (SUITES.length < 8) SUITES.push(null);
+  App.SUITES = SUITES;
 
   let el = null, room = 0, sp = 0, mode = "road", walk = null;
   const live = () => mode === "road" || mode === "walk"; // 로드뷰 · 3D 도면은 같은 화면 칸을 씀

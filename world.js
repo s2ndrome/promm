@@ -537,7 +537,9 @@
     const ch7 = chapter("07", "GLOSSARY", "기타 용어", `<div class="w-terms">${terms}</div>${addBtn("terms", "용어 추가")}`);
 
     return `<div class="world-page">${hero}<div class="w-body">${ch1}${ch2}${ch3}${ch4}${ch5}${ch6}${ch7}</div>
-      <p class="w-end">— END OF DOCUMENT —</p>${addBtn("jj", "쭌식이 메모 (채팅 전용 설정)")}</div>`;
+      <p class="w-end">— END OF DOCUMENT —</p>
+      <div class="w-export"><span>프롬프트용 TXT</span><button type="button" data-arch-txt="world">세계관 전체</button><button type="button" data-arch-txt="agents">요원 정보</button></div>
+      ${addBtn("jj", "쭌식이 메모 (채팅 전용 설정)")}</div>`;
   };
 
   // 페이지가 그려진 뒤: 스크롤 등장 효과
@@ -550,6 +552,19 @@
     const dy = (e.clientY - (r.top + r.height / 2)) / window.innerHeight;
     em.style.setProperty("--ry", `${(dx * 28).toFixed(2)}deg`);
     em.style.setProperty("--rx", `${(-dy * 28).toFixed(2)}deg`);
+  });
+
+  // ARCH 정보를 프롬프트용 텍스트 파일로 내려받기 (지금 사이트에 저장된 최신 내용 그대로)
+  document.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-arch-txt]");
+    if (!b || !window.ArchText) return;
+    const w = App.data.world, kind = b.dataset.archTxt;
+    const text = kind === "agents" ? ArchText.agents(w) : ArchText.world(w, { suites: App.SUITES || [] });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob(["\ufeff" + text], { type: "text/plain;charset=utf-8" }));
+    a.download = kind === "agents" ? "ARCH_요원정보.txt" : "ARCH_세계관.txt";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   });
 
   App.afterWorld = function () {

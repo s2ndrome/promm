@@ -1626,3 +1626,9 @@ body.st-lock { overflow: hidden; }
   .rv-mini { width: 32%; }
 }
 .st-host { position: absolute; inset: 0; }
+
+/* ARCH 프롬프트용 TXT 내보내기 */
+.w-export { display: flex; justify-content: center; align-items: center; gap: 8px; flex-wrap: wrap; margin: 6px 0 24px; }
+.w-export span { font-size: 10px; letter-spacing: .24em; color: var(--w-dim); margin-right: 4px; }
+.w-export button { padding: 8px 14px; background: transparent; border: 1px solid var(--w-line); color: var(--w-ink); font: 600 11px/1 var(--w-body); letter-spacing: .08em; cursor: pointer; }
+.w-export button:hover { border-color: var(--w-gold); }
