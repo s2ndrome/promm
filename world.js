@@ -559,7 +559,7 @@
     const b = e.target.closest("[data-arch-txt]");
     if (!b || !window.ArchText) return;
     const w = App.data.world, kind = b.dataset.archTxt;
-    const text = kind === "agents" ? ArchText.agents(w) : ArchText.world(w, { suites: App.SUITES || [] });
+    const text = kind === "agents" ? ArchText.agents(w, { pairs: App.data.pairs, girls: App.data.girls, cards: window.AGENT_CARDS }) : ArchText.world(w, { suites: App.SUITES || [] });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(new Blob(["\ufeff" + text], { type: "text/plain;charset=utf-8" }));
     a.download = kind === "agents" ? "ARCH_요원정보.txt" : "ARCH_세계관.txt";

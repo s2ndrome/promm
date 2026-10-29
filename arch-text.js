@@ -70,10 +70,44 @@
     return o.replace(/\n{3,}/g, "\n\n").trim() + "\n";
   }
 
-  // 요원 정보 전부 (팀 · 속성 · 관계 + 상세 프로필 HTML 의 내용)
-  function agents(w) {
+  // 페어 · ONLY GIRL 에 적힌 캐릭터 프로필
+  const LABELS = { realname: "이름", team: "소속", grade: "등급", element: "속성", age: "나이" };
+  const blank = (v) => !v || /^(남캐|여캐) (이름|캐릭터 프롬프트)$|^(남자|여자) 캐릭터 프롬프트$|^캐릭터 이름$/.test(String(v).trim());
+  function charText(c, pair, partner) {
+    const pr = c.profile || {}, lb = pr.labels || {};
+    let o = "";
+    o += line("코드네임", pr.codename);
+    for (const k of Object.keys(LABELS)) o += line(lb[k] || LABELS[k], pr[k]);
+    if (pair) o += line("페어", `${pair.title || ""}${partner ? ` (파트너: ${partner})` : ""}${pair.tag ? ` · ${pair.tag}` : ""}`);
+    o += line("성격", pr.personality) + line("비밀 설정", pr.secret) + line("TMI", pr.tmi);
+    if (pair?.info?.intro) o += line("페어 설명", pair.info.intro);
+    if (!blank(c.base)) o += line("외형 프롬프트", c.base);
+    o += line("공식 프롬프트", pr.photoPrompt);
+    return o;
+  }
+  function outfits(pair, side) {
+    return (pair.variants || []).map((v) => { const x = v[side] || {}; const t = [x.top, x.bottom, x.shoes].filter(Boolean).join(" "); return t ? `- ${v.label || "의상"}${v.sub ? ` (${v.sub})` : ""}: ${t}` : ""; }).filter(Boolean).join("\n");
+  }
+  function characters(extra) {
+    const list = [];
+    for (const p of extra.pairs || []) for (const [side, other] of [["male", "female"], ["female", "male"]]) {
+      const c = p[side];
+      if (!c || blank(c.name)) continue;
+      list.push({ name: c.name.trim(), text: charText(c, p, blank(p[other]?.name) ? "" : p[other].name), outfit: outfits(p, side) });
+    }
+    for (const g of extra.girls || []) {
+      const c = g.female;
+      if (!c || blank(c.name)) continue;
+      list.push({ name: c.name.trim(), text: charText(c, null) + line("캐릭터 설명", g.info?.intro) + line("부제", g.title), outfit: outfits(g, "female") });
+    }
+    return list;
+  }
+
+  // 요원 정보 전부 (팀 · 속성 · 관계 + 상세 프로필 HTML 의 내용 + 페어 · ONLY GIRL 프로필)
+  function agents(w, extra = {}) {
     w = w || {};
-    let o = "# ARCH 요원 정보\n(ARCH 페이지에 등록된 모든 요원. 상세 프로필(HTML 소개 카드)의 내용을 글로 옮김)\n";
+    const chars = characters(extra), used = new Set();
+    let o = "# ARCH 요원 정보\n(ARCH 페이지에 등록된 모든 요원 + 메인 페어 · ONLY GIRL 캐릭터. 상세 프로필(HTML 소개 카드)의 내용을 글로 옮김)\n";
     for (const t of w.teams || []) {
       if (!(t.members || []).length) continue;
       o += head(`${t.name}${t.cls ? ` · ${t.cls}` : ""}`);
@@ -82,8 +116,18 @@
         o += line("소속", `${t.name}${t.cls ? ` (${t.cls})` : ""}`) + line("등급 · 속성", m.attr) + line("한 줄 소개", m.desc);
         const rel = (t.relations || []).filter((r) => r.from === m.name || r.to === m.name);
         if (rel.length) o += "관계:\n" + rel.map((r) => `- ${r.from} ${r.dir === "both" ? "↔" : r.dir === "none" ? "—" : "→"} ${r.to}${r.label ? ` : ${r.label}` : ""}`).join("\n") + "\n";
-        const card = htmlToText(m.card);
-        o += card ? `\n[상세 프로필]\n${card}\n` : "(상세 프로필 없음)\n";
+        const mine = chars.filter((c) => c.name === (m.name || "").trim());
+        for (const c of mine) { used.add(c); o += `\n[캐릭터 프로필]\n${c.text}${c.outfit ? `의상 프롬프트:\n${c.outfit}\n` : ""}`; }
+        const card = htmlToText(m.card || (extra.cards || {})[(m.name || "").trim()]);
+        o += card ? `\n[상세 프로필]\n${card}\n` : mine.length ? "" : "(상세 프로필 없음)\n";
+      }
+    }
+    const rest = chars.filter((c) => !used.has(c));
+    if (rest.length) {
+      o += head("페어 · ONLY GIRL 캐릭터 (요원 명단 밖)");
+      for (const c of rest) {
+        const card = htmlToText((extra.cards || {})[c.name]);
+        o += `\n■ ${c.name}\n${c.text}${c.outfit ? `의상 프롬프트:\n${c.outfit}\n` : ""}${card ? `\n[상세 프로필]\n${card}\n` : ""}`;
       }
     }
     if (w.jj?.notes?.trim()) o += head("추가 설정") + w.jj.notes.trim() + "\n";
