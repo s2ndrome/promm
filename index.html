@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <!-- 외부 사진 주소(단축 URL · 이미지 호스팅)가 다른 사이트에서 불러오는 걸 막지 않도록, 어느 페이지에서 요청했는지 보내지 않음 -->
+  <meta name="referrer" content="no-referrer">
   <title>ZZON</title>
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="icon" type="image/png" href="favicon.png">
@@ -16,7 +18,7 @@
     // 다크/라이트: 처음엔 라이트, 버튼으로 고른 게 있으면 그걸 씀 (깜빡임 방지로 맨 먼저 실행)
     try { var t = localStorage.getItem("zzon_theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   </script>
-  <link rel="stylesheet" href="style.css?v=202610292154">
+  <link rel="stylesheet" href="style.css?v=202611010816">
 </head>
 <body class="locked">
   <div id="gate" class="gate"></div>
@@ -90,17 +92,17 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <script src="world-default.js?v=202610292154"></script>
-  <script src="agent-cards.js?v=202610292154"></script>
-  <script src="app.js?v=202610292154"></script>
-  <script src="arch-text.js?v=202610292154"></script>
-  <script src="world.js?v=202610292154"></script>
-  <script src="roadview.js?v=202610292154"></script>
-  <script src="room3d.js?v=202610292154"></script>
-  <script src="suites.js?v=202610292154"></script>
-  <script src="aegis3d.js?v=202610292154"></script>
-  <script src="admin.js?v=202610292154"></script>
-  <script src="bgm.js?v=202610292154"></script>
-  <script src="auth.js?v=202610292154"></script>
+  <script src="world-default.js?v=202611010816"></script>
+  <script src="agent-cards.js?v=202611010816"></script>
+  <script src="app.js?v=202611010816"></script>
+  <script src="arch-text.js?v=202611010816"></script>
+  <script src="world.js?v=202611010816"></script>
+  <script src="roadview.js?v=202611010816"></script>
+  <script src="room3d.js?v=202611010816"></script>
+  <script src="suites.js?v=202611010816"></script>
+  <script src="aegis3d.js?v=202611010816"></script>
+  <script src="admin.js?v=202611010816"></script>
+  <script src="bgm.js?v=202611010816"></script>
+  <script src="auth.js?v=202611010816"></script>
 </body>
 </html>
