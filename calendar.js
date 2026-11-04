@@ -112,12 +112,12 @@
     const list = up.slice(0, 14).map((e) => `<li class="${e.ev ? "custom" : ""}" ${e.ev ? `data-cal-edit="${esc(e.ev.id)}"` : ""}>
         <span class="cl-dd">${ddTxt(e.left)}</span>
         <div><p class="cl-what"><i class="cl-dot" style="background:${colorOf(e)}"></i>${esc(e.name)}</p><p class="cl-who">${esc(whoOf(e))}${e.auto ? " · 자동" : e.ev.repeat === "once" ? " · 한 번" : " · 매년"}</p></div>
-        <span class="cl-when">${md(e.date)} (${WK[e.date.getDay()]})</span>
+        <span class="cl-when">${md(e.date)} (${WK[e.date.getDay()]})${e.ev ? `<span class="cl-acts adm-inline"><button type="button" data-cal-edit="${esc(e.ev.id)}">수정</button><button type="button" data-cal-del="${esc(e.ev.id)}">삭제</button></span>` : ""}</span>
       </li>`).join("");
     const noStart = pairs.length && pairs.every((x) => !x.start);
     return `<div class="cl-page">
-      <div class="cl-top"><div><h1>CALENDAR</h1><p>ANNIVERSARY · D-DAY</p></div>
-        <div class="adm-bar cl-adm"><button type="button" class="pill-btn" data-cal-add>+ 기념일</button></div></div>
+      <div class="cl-top"><div><h1>SCHEDULE</h1><p>ANNIVERSARY · D-DAY</p></div>
+        <div class="adm-bar cl-adm"><button type="button" class="pill-btn" data-cal-add>+ 기념일</button><button type="button" class="pill-btn" data-cal-manage>기념일 관리</button></div></div>
       <div class="cl-pairs">${pairs.map(pairCard).join("") || `<p class="cl-empty">메인 페어가 없어요.</p>`}</div>
       ${noStart ? `<p class="cl-tip">편집 모드에서 페어마다 <b>날짜 설정</b>을 누르면 처음 만난 날부터 D+일수가 세어지고, 50일 · 주년 기념일이 자동으로 떠요.</p>` : ""}
       <div class="cl-body">
@@ -170,14 +170,41 @@
     f.querySelector("[data-del]")?.addEventListener("click", () => { if (confirm("이 기념일을 지울까요?")) save((c) => { c.events = c.events.filter((x) => x.id !== evId); }); });
   }
 
+  function del(id) {
+    const ev = (cal().events || []).find((x) => x.id === id);
+    if (ev && confirm(`'${ev.name}' 기념일을 지울까요?`)) save((c) => { c.events = c.events.filter((x) => x.id !== id); });
+  }
+  // 직접 넣은 기념일 전부 (지난 것 · 먼 것 포함) 한눈에 보고 수정 · 삭제
+  function manage() {
+    const pairs = mainPairs(), t = today();
+    const list = (cal().events || []).map((ev) => {
+      const ed = parse(ev.date);
+      let next = ed;
+      if (ed && ev.repeat !== "once") { next = new Date(t.getFullYear(), ed.getMonth(), ed.getDate()); if (next < t) next.setFullYear(next.getFullYear() + 1); if (next < ed) next = ed; }
+      return { ev, next, x: pairs.find((p) => p.p.id === ev.pair) };
+    }).sort((a, b) => (a.next && b.next ? Math.abs(diff(a.next, t)) - Math.abs(diff(b.next, t)) : 0));
+    App.openModal(`<div class="form cl-form cl-manage">
+      <h2>기념일 관리</h2><p class="desc">직접 넣은 기념일이에요. 50일 · 주년은 자동이라 여기 없어요.</p>
+      ${list.length ? `<ul>${list.map(({ ev, next, x }) => {
+        const left = next ? diff(next, t) : null;
+        return `<li><div><p class="cl-what"><i class="cl-dot" style="background:${x?.color || COLORS[8]}"></i>${esc(ev.name)}</p>
+          <p class="cl-who">${esc(x?.title || "공통")} · ${esc(ev.date.replaceAll("-", "."))} · ${ev.repeat === "once" ? "한 번" : "매년"}${left == null ? "" : left < 0 ? " · 지남" : ` · ${ddTxt(left)}`}</p></div>
+          <span class="cl-acts"><button type="button" data-cal-edit="${esc(ev.id)}">수정</button><button type="button" data-cal-del="${esc(ev.id)}">삭제</button></span></li>`;
+      }).join("")}</ul>` : `<p class="cl-empty">아직 직접 넣은 기념일이 없어요.</p>`}
+      <div class="cl-btns"><button type="button" class="pill-btn solid" data-cal-add>+ 기념일 추가</button></div>
+    </div>`);
+  }
+
   document.addEventListener("click", (e) => {
     if (!document.querySelector(".cl-page")) return;
-    const b = e.target.closest("[data-cal-month],[data-cal-day],[data-cal-add],[data-cal-start],[data-cal-edit]");
+    const b = e.target.closest("[data-cal-month],[data-cal-day],[data-cal-add],[data-cal-start],[data-cal-edit],[data-cal-del],[data-cal-manage]");
     if (!b) return;
     if (b.dataset.calMonth != null) { monthOff = +b.dataset.calMonth ? monthOff + +b.dataset.calMonth : 0; picked = null; App.render(); }
     else if (b.dataset.calDay) { picked = picked === b.dataset.calDay ? null : b.dataset.calDay; App.render(); }
     else if (b.dataset.calAdd != null) eventForm(null);
     else if (b.dataset.calStart) startForm(b.dataset.calStart);
+    else if (b.dataset.calDel) { e.stopPropagation(); del(b.dataset.calDel); }
+    else if (b.dataset.calManage != null) manage();
     else if (b.dataset.calEdit && App.admin) eventForm(b.dataset.calEdit);
   });
 })();
