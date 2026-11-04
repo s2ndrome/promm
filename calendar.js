@@ -1,12 +1,13 @@
 // archive a: 캘린더. 메인 페어마다 처음 만난 날부터 D+일수, 50일 단위 · 주년 기념일 자동, 직접 넣는 기념일
-// 데이터: App.data.calendar = { starts: { 페어id: "YYYY-MM-DD" }, events: [{ id, name, date, pair, repeat: "yearly" | "once" }] }
+// 데이터: App.data.calendar = { starts: { 페어id: "YYYY-MM-DD" }, events: [{ id, name, date, pair, type: "birthday" | "pair" | "etc", repeat: "yearly" | "once" }] }
 (function () {
   const App = window.App;
   const esc = App.esc;
   const DAY = 864e5;
   const WK = ["일", "월", "화", "수", "목", "금", "토"];
   const COLORS = ["#c9a4b4", "#8fb2c9", "#b8a77c", "#9cb88a", "#a99ac4", "#d09a8a", "#7fb3b0", "#c4a0b8", "#a8a8a8"];
-  let monthOff = 0, picked = null;
+  let monthOff = 0, picked = null, filter = "all";
+  const TYPES = [["birthday", "생일"], ["pair", "페어 기념일"], ["etc", "기타"]];
 
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
   const parse = (s) => (s && /^\d{4}-\d{2}-\d{2}$/.test(s) ? new Date(`${s}T00:00:00`) : null);
@@ -17,16 +18,20 @@
   const ddTxt = (n) => (n === 0 ? "D-DAY" : `D-${n}`);
   const cal = () => App.data.calendar || {};
 
-  // 메인에 보이는 페어 (장르 토글 안에 들어간 페어는 빼고)
-  function mainPairs() {
-    const { pairs = [], genres = [] } = App.data;
-    return pairs.filter((p) => !genres.includes(p.genre)).map((p, i) => ({
-      p, color: COLORS[i % COLORS.length],
-      title: p.title || `페어 ${i + 1}`,
-      names: [p.male?.name, p.female?.name].filter(Boolean).join(" · "),
-      start: parse((cal().starts || {})[p.id]),
-    }));
+  // 모든 페어 (메인 → 장르별 페어 → ONLY GIRL). 메인 페어는 D-DAY 카드에도 나옴
+  function allPairs() {
+    const { pairs = [], genres = [], girls = [] } = App.data;
+    const starts = cal().starts || {}, out = [];
+    const item = (p, group, main, title, names) => ({ p, group, main, title, names, color: COLORS[out.length % COLORS.length], start: main ? parse(starts[p.id]) : null });
+    const mains = pairs.filter((p) => !genres.includes(p.genre));
+    mains.forEach((p, i) => out.push(item(p, "메인 페어", true, p.title || `페어 ${i + 1}`, [p.male?.name, p.female?.name].filter(Boolean).join(" · "))));
+    for (const g of genres) pairs.filter((p) => p.genre === g).forEach((p) => out.push(item(p, g, false, p.title || [p.male?.name, p.female?.name].filter(Boolean).join(" X ") || "페어", "")));
+    girls.forEach((c) => out.push(item(c, "ONLY GIRL", false, c.female?.name || c.title || "캐릭터", "")));
+    return out;
   }
+  const mainPairs = () => allPairs().filter((x) => x.main);
+  // 기념일 구분: 50일 · 주년은 페어 기념일, 직접 넣은 건 고른 구분 (예전 것은 이름에 '생일' 이 있으면 생일)
+  const typeOf = (e) => (e.auto ? "pair" : e.ev?.type || (/생일|birthday/i.test(e.name) ? "birthday" : "etc"));
   const sinceDays = (start, d = today()) => diff(d, start) + 1; // 처음 만난 날 = 1일
 
   // 그 날짜에 있는 기념일 (자동 + 직접)
@@ -108,10 +113,11 @@
   }
 
   App.renderCalendar = function () {
-    const pairs = mainPairs(), up = upcoming(pairs);
+    const all = allPairs(), pairs = all.filter((x) => x.main), upAll = upcoming(all);
+    const up = filter === "all" ? upAll : upAll.filter((e) => typeOf(e) === filter);
     const list = up.slice(0, 14).map((e) => `<li class="${e.ev ? "custom" : ""}" ${e.ev ? `data-cal-edit="${esc(e.ev.id)}"` : ""}>
         <span class="cl-dd">${ddTxt(e.left)}</span>
-        <div><p class="cl-what"><i class="cl-dot" style="background:${colorOf(e)}"></i>${esc(e.name)}</p><p class="cl-who">${esc(whoOf(e))}${e.auto ? " · 자동" : e.ev.repeat === "once" ? " · 한 번" : " · 매년"}</p></div>
+        <div><p class="cl-what"><i class="cl-dot" style="background:${colorOf(e)}"></i>${esc(e.name)}</p><p class="cl-who">${esc(whoOf(e))}</p></div>
         <span class="cl-when">${md(e.date)} (${WK[e.date.getDay()]})${e.ev ? `<span class="cl-acts adm-inline"><button type="button" data-cal-edit="${esc(e.ev.id)}">수정</button><button type="button" data-cal-del="${esc(e.ev.id)}">삭제</button></span>` : ""}</span>
       </li>`).join("");
     const noStart = pairs.length && pairs.every((x) => !x.start);
@@ -121,8 +127,9 @@
       <div class="cl-pairs">${pairs.map(pairCard).join("") || `<p class="cl-empty">메인 페어가 없어요.</p>`}</div>
       ${noStart ? `<p class="cl-tip">편집 모드에서 페어마다 <b>날짜 설정</b>을 누르면 처음 만난 날부터 D+일수가 세어지고, 50일 · 주년 기념일이 자동으로 떠요.</p>` : ""}
       <div class="cl-body">
-        <div class="cl-cal">${calGrid(pairs)}</div>
-        <div class="cl-up"><h3>UPCOMING</h3>${list ? `<ul>${list}</ul>` : `<p class="cl-empty">다가오는 기념일이 없어요.</p>`}</div>
+        <div class="cl-cal">${calGrid(all)}</div>
+        <div class="cl-up"><h3>UPCOMING</h3>
+          <div class="cl-filter">${[["all", "전체"], ...TYPES].map(([k, t]) => `<button type="button" class="${filter === k ? "on" : ""}" data-cal-filter="${k}">${t}<small>${k === "all" ? upAll.length : upAll.filter((e) => typeOf(e) === k).length}</small></button>`).join("")}</div>${list ? `<ul>${list}</ul>` : `<p class="cl-empty">${filter === "all" ? "다가오는 기념일이 없어요." : "이 구분의 기념일이 없어요."}</p>`}</div>
       </div>
     </div>`;
   };
@@ -148,12 +155,14 @@
     f.querySelector("[data-clear]")?.addEventListener("click", () => save((c) => { delete c.starts[id]; }));
   }
   function eventForm(evId) {
-    const ev = (cal().events || []).find((e) => e.id === evId) || { name: "", date: ymd(today()), pair: "", repeat: "yearly" };
-    const pairs = mainPairs();
+    const ev = (cal().events || []).find((e) => e.id === evId) || { name: "", date: ymd(today()), pair: "", repeat: "yearly", type: filter === "all" ? "" : filter };
+    const type = ev.type || (evId ? typeOf({ name: ev.name, ev: {} }) : ""); // 새로 넣을 땐 안 고르면 이름으로 정함
+    const pairs = allPairs(), groups = [...new Set(pairs.map((x) => x.group))];
     App.openModal(`<form class="form cl-form" id="cl-form">
       <h2>${evId ? "기념일 수정" : "기념일 추가"}</h2><p class="desc">생일, 결혼기념일 같은 날을 직접 넣어요. 50일 · 주년은 따로 안 넣어도 자동으로 떠요.</p>
       <div class="field"><label>이름</label><input type="text" name="name" value="${esc(ev.name)}" placeholder="예) 리아 생일" required maxlength="40"></div>
-      <div class="field"><label>페어</label><select name="pair"><option value="">공통 (페어 없음)</option>${pairs.map((x) => `<option value="${esc(x.p.id)}" ${x.p.id === ev.pair ? "selected" : ""}>${esc(x.title)}</option>`).join("")}</select></div>
+      <div class="field"><label>구분 <small>(안 고르면 이름에 '생일' 이 있을 때 생일, 아니면 기타)</small></label><div class="cl-seg">${TYPES.map(([k, t]) => `<label><input type="radio" name="type" value="${k}" ${type === k ? "checked" : ""}><span>${t}</span></label>`).join("")}</div></div>
+      <div class="field"><label>페어 · 캐릭터</label><select name="pair"><option value="">공통 (페어 없음)</option>${groups.map((g) => `<optgroup label="${esc(g)}">${pairs.filter((x) => x.group === g).map((x) => `<option value="${esc(x.p.id)}" ${x.p.id === ev.pair ? "selected" : ""}>${esc(x.title)}</option>`).join("")}</optgroup>`).join("")}</select></div>
       <div class="field"><label>날짜</label><input type="date" name="date" value="${esc(ev.date)}" required></div>
       <div class="field"><label>반복</label><div class="cl-seg">
         <label><input type="radio" name="repeat" value="yearly" ${ev.repeat !== "once" ? "checked" : ""}><span>매년</span></label>
@@ -163,7 +172,7 @@
     const f = document.getElementById("cl-form");
     f.onsubmit = (e) => {
       e.preventDefault();
-      const item = { id: evId || uid(), name: f.name.value.trim(), date: f.date.value, pair: f.pair.value, repeat: f.repeat.value };
+      const item = { id: evId || uid(), name: f.name.value.trim(), date: f.date.value, pair: f.pair.value, type: f.type.value || (/생일|birthday/i.test(f.name.value) ? "birthday" : "etc"), repeat: f.repeat.value };
       if (!item.name || !item.date) return;
       save((c) => { const k = c.events.findIndex((x) => x.id === item.id); k >= 0 ? (c.events[k] = item) : c.events.push(item); });
     };
@@ -176,7 +185,7 @@
   }
   // 직접 넣은 기념일 전부 (지난 것 · 먼 것 포함) 한눈에 보고 수정 · 삭제
   function manage() {
-    const pairs = mainPairs(), t = today();
+    const pairs = allPairs(), t = today();
     const list = (cal().events || []).map((ev) => {
       const ed = parse(ev.date);
       let next = ed;
@@ -188,7 +197,7 @@
       ${list.length ? `<ul>${list.map(({ ev, next, x }) => {
         const left = next ? diff(next, t) : null;
         return `<li><div><p class="cl-what"><i class="cl-dot" style="background:${x?.color || COLORS[8]}"></i>${esc(ev.name)}</p>
-          <p class="cl-who">${esc(x?.title || "공통")} · ${esc(ev.date.replaceAll("-", "."))} · ${ev.repeat === "once" ? "한 번" : "매년"}${left == null ? "" : left < 0 ? " · 지남" : ` · ${ddTxt(left)}`}</p></div>
+          <p class="cl-who">${esc(x?.title || "공통")} · ${(TYPES.find(([k]) => k === typeOf({ name: ev.name, ev })) || [])[1]} · ${esc(ev.date.replaceAll("-", "."))} · ${ev.repeat === "once" ? "한 번" : "매년"}${left == null ? "" : left < 0 ? " · 지남" : ` · ${ddTxt(left)}`}</p></div>
           <span class="cl-acts"><button type="button" data-cal-edit="${esc(ev.id)}">수정</button><button type="button" data-cal-del="${esc(ev.id)}">삭제</button></span></li>`;
       }).join("")}</ul>` : `<p class="cl-empty">아직 직접 넣은 기념일이 없어요.</p>`}
       <div class="cl-btns"><button type="button" class="pill-btn solid" data-cal-add>+ 기념일 추가</button></div>
@@ -197,8 +206,9 @@
 
   document.addEventListener("click", (e) => {
     if (!document.querySelector(".cl-page")) return;
-    const b = e.target.closest("[data-cal-month],[data-cal-day],[data-cal-add],[data-cal-start],[data-cal-edit],[data-cal-del],[data-cal-manage]");
+    const b = e.target.closest("[data-cal-month],[data-cal-day],[data-cal-add],[data-cal-start],[data-cal-edit],[data-cal-del],[data-cal-manage],[data-cal-filter]");
     if (!b) return;
+    if (b.dataset.calFilter) { filter = b.dataset.calFilter; App.render(); return; }
     if (b.dataset.calMonth != null) { monthOff = +b.dataset.calMonth ? monthOff + +b.dataset.calMonth : 0; picked = null; App.render(); }
     else if (b.dataset.calDay) { picked = picked === b.dataset.calDay ? null : b.dataset.calDay; App.render(); }
     else if (b.dataset.calAdd != null) eventForm(null);

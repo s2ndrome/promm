@@ -1667,7 +1667,7 @@ body.st-lock { overflow: hidden; }
 .cl-d { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 78px; padding: 6px 5px; border: 0; border-top: 1px solid var(--line); background: none; font: inherit; font-size: 13px; color: var(--ink); text-align: left; cursor: pointer; min-width: 0; }
 .cl-d.out .n, .cl-d.out .cl-chips { opacity: .35; }
 .cl-d.picked { background: var(--soft); }
-.cl-d.today .n { background: var(--ink); color: var(--on-ink, #fff); border-radius: 50%; display: inline-grid; place-items: center; width: 24px; height: 24px; margin: -3px; }
+.cl-d.today .n { background: var(--ink); color: var(--on-ink, #fff); border-radius: 50%; display: inline-grid; place-items: center; width: 19px; height: 19px; margin: -2px 0 -2px -3px; font-size: 11px; font-weight: 600; }
 .cl-chips { display: flex; flex-direction: column; gap: 2px; width: 100%; }
 .cl-chip { display: block; font-size: 10px; padding: 1px 4px; border-radius: 3px; background: color-mix(in srgb, var(--c) 22%, transparent); border-left: 2px solid var(--c); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
 .cl-more { font-size: 9px; color: var(--muted); }
@@ -1727,3 +1727,8 @@ body.admin .cl-up li.custom:hover { background: var(--soft); }
   .side-list a.active { background: var(--ink); color: var(--on-ink, #fff); border-color: var(--ink); font-weight: 600; }
   .side-list a.active span { color: inherit; opacity: .7; }
 }
+.cl-filter { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0 6px; }
+.cl-filter button { display: inline-flex; align-items: center; gap: 5px; padding: 5px 11px; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); color: var(--text-2, var(--ink)); font: 500 11.5px var(--it, var(--sans)); cursor: pointer; }
+.cl-filter button small { font-size: 10px; color: var(--muted); }
+.cl-filter button.on { background: var(--ink); color: var(--on-ink, #fff); border-color: var(--ink); }
+.cl-filter button.on small { color: inherit; opacity: .65; }
