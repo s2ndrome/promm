@@ -1746,3 +1746,18 @@ body.admin .cl-up li.custom:hover { background: var(--soft); }
 .cl-color { display: flex; align-items: center; gap: 10px; }
 .cl-color input[type=color] { width: 48px; height: 34px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 3px; cursor: pointer; }
 .cl-color .cl-dot { width: 12px; height: 12px; margin: 0; border: 1px solid var(--line); }
+/* schedule: 메인 외 페어 목록 */
+.cl-others { margin-top: 0; border-bottom: 1px solid var(--line); }
+.cl-others summary { display: flex; align-items: center; gap: 8px; padding: 12px 2px; cursor: pointer; list-style: none; font-size: 12px; font-weight: 600; letter-spacing: .08em; color: var(--ink); }
+.cl-others summary::-webkit-details-marker { display: none; }
+.cl-others summary::after { content: "+"; margin-left: auto; color: var(--muted); font-weight: 400; font-size: 15px; }
+.cl-others[open] summary::after { content: "–"; }
+.cl-others summary small { font-size: 11px; color: var(--muted); font-weight: 500; letter-spacing: 0; }
+.cl-og { padding: 0 0 14px; }
+.cl-og-h { margin: 0 0 6px; font-size: 10px; letter-spacing: .18em; color: var(--muted); text-transform: uppercase; }
+.cl-og-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 0 18px; }
+.cl-or { display: flex; align-items: center; gap: 4px; padding: 8px 0; border-bottom: 1px solid var(--soft); min-width: 0; }
+.cl-or-t { flex: 1; min-width: 0; font-size: 12.5px; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cl-or-d { font-family: Montserrat, var(--brand); font-size: 14px; color: var(--ink); white-space: nowrap; }
+.cl-or-d .cl-none { font-size: 11px; font-weight: 400; }
+.cl-set2 { margin-left: 6px; font-size: 10px; padding: 2px 7px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; border-radius: 999px; }

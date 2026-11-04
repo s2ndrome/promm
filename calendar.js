@@ -6,7 +6,7 @@
   const DAY = 864e5;
   const WK = ["일", "월", "화", "수", "목", "금", "토"];
   const COLORS = ["#c9a4b4", "#8fb2c9", "#b8a77c", "#9cb88a", "#a99ac4", "#d09a8a", "#7fb3b0", "#c4a0b8", "#a8a8a8"];
-  let monthOff = 0, picked = null, filter = "all";
+  let monthOff = 0, picked = null, filter = "all", othersOpen = false;
   const TYPES = [["birthday", "생일"], ["pair", "페어 기념일"], ["etc", "기타"]];
 
   const today = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
@@ -22,7 +22,7 @@
   function allPairs() {
     const { pairs = [], genres = [], girls = [] } = App.data;
     const starts = cal().starts || {}, colors = cal().colors || {}, out = [];
-    const item = (p, group, main, title, names) => ({ p, group, main, title, names, color: /^#[0-9a-f]{6}$/i.test(colors[p.id] || "") ? colors[p.id] : COLORS[out.length % COLORS.length], start: main ? parse(starts[p.id]) : null });
+    const item = (p, group, main, title, names) => ({ p, group, main, title, names, color: /^#[0-9a-f]{6}$/i.test(colors[p.id] || "") ? colors[p.id] : COLORS[out.length % COLORS.length], start: parse(starts[p.id]) });
     const mains = pairs.filter((p) => !genres.includes(p.genre));
     mains.forEach((p, i) => out.push(item(p, "메인 페어", true, p.title || `페어 ${i + 1}`, [p.male?.name, p.female?.name].filter(Boolean).join(" · "))));
     for (const g of genres) pairs.filter((p) => p.genre === g).forEach((p) => out.push(item(p, g, false, p.title || [p.male?.name, p.female?.name].filter(Boolean).join(" X ") || "페어", "")));
@@ -91,6 +91,20 @@
     </div>`;
   }
 
+  // 메인 외 페어 · ONLY GIRL: 접었다 펴는 작은 목록 (D-DAY · 점 색 · 50일 기념일은 메인과 똑같이)
+  function otherList(list) {
+    if (!list.length) return "";
+    const groups = [...new Set(list.map((x) => x.group))];
+    const set = list.filter((x) => x.start).length;
+    return `<details class="cl-others" ${othersOpen ? "open" : ""}>
+      <summary><span>다른 페어</span><small>${list.length}${set ? ` · D-DAY ${set}` : ""}</small></summary>
+      ${groups.map((g) => `<div class="cl-og"><p class="cl-og-h">${esc(g)}</p><div class="cl-og-list">${list.filter((x) => x.group === g).map((x) => `<div class="cl-or">
+        <i class="cl-dot" style="background:${x.color}"></i><span class="cl-or-t">${esc(x.title)}</span>
+        <b class="cl-or-d">${x.start ? `D+${sinceDays(x.start)}` : "<span class=\"cl-none\">미설정</span>"}</b>
+        <button type="button" class="cl-set2 adm-inline" data-cal-start="${esc(x.p.id)}">설정</button></div>`).join("")}</div></div>`).join("")}
+    </details>`;
+  }
+
   function calGrid(pairs) {
     const t = today(), base = new Date(t.getFullYear(), t.getMonth() + monthOff, 1);
     const m = base.getMonth(), start = new Date(base.getFullYear(), m, 1 - base.getDay());
@@ -125,6 +139,7 @@
       <div class="cl-top"><div><h1>SCHEDULE</h1><p>ANNIVERSARY · D-DAY</p></div>
         <div class="adm-bar cl-adm"><button type="button" class="pill-btn" data-cal-add>+ 기념일</button><button type="button" class="pill-btn" data-cal-manage>기념일 관리</button></div></div>
       <div class="cl-pairs">${pairs.map(pairCard).join("") || `<p class="cl-empty">메인 페어가 없어요.</p>`}</div>
+      ${otherList(all.filter((x) => !x.main))}
       ${noStart ? `<p class="cl-tip">편집 모드에서 페어마다 <b>날짜 설정</b>을 누르면 처음 만난 날부터 D+일수가 세어지고, 50일 · 주년 기념일이 자동으로 떠요.</p>` : ""}
       <div class="cl-body">
         <div class="cl-cal">${calGrid(all)}</div>
@@ -143,7 +158,7 @@
     } catch (err) { alert(`저장하지 못했어요: ${err.message}`); }
   }
   function startForm(id) {
-    const x = mainPairs().find((p) => p.p.id === id);
+    const x = allPairs().find((p) => p.p.id === id);
     if (!x) return;
     App.openModal(`<form class="form cl-form" id="cl-form">
       <h2>페어 설정</h2><p class="desc">${esc(x.title)}</p>
@@ -216,6 +231,7 @@
     </div>`);
   }
 
+  document.addEventListener("toggle", (e) => { if (e.target.classList?.contains("cl-others")) othersOpen = e.target.open; }, true);
   document.addEventListener("click", (e) => {
     if (!document.querySelector(".cl-page")) return;
     const b = e.target.closest("[data-cal-month],[data-cal-day],[data-cal-add],[data-cal-start],[data-cal-edit],[data-cal-del],[data-cal-manage],[data-cal-filter]");
