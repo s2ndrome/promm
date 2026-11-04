@@ -253,19 +253,39 @@
   // 저장: 서버의 최신 데이터를 받아서, 이번에 고친 "그 하나"만 바꿔 넣음.
   // 오래 열어둔 탭이나 다른 기기에서 저장해도, 그 사이 다른 곳에서 올린 사진·글·링크를 덮어쓰지 않기 위해서.
   // saveData(d => { ...최신 데이터 d 를 고침... })  또는 예전 방식 saveData(next, keys)
-  async function saveData(next, keys) {
-    const { data: row, error: e1 } = await App.sb.from("site_data").select("data").eq("id", "main").maybeSingle();
-    if (e1) throw new Error(e1.message);
-    let merged;
-    if (typeof next === "function") {
-      merged = row?.data ? App.normalize(row.data) : clone(App.data);
-      next(merged);
-    } else {
-      merged = row?.data ? App.normalize(row.data) : next;
-      for (const k of keys) merged[k] = next[k];
+  // 동시에 여러 명이 저장해도 서로 덮어쓰지 않게: 데이터마다 저장 번호(_rev)를 두고,
+  // "내가 읽은 번호 그대로일 때만" 저장. 그 사이 누가 먼저 저장했으면 최신본을 다시 읽어 내 수정만 다시 얹고 재시도
+  async function commitData(mutate) {
+    const sb = App.sb;
+    for (let attempt = 0; attempt < 8; attempt++) {
+      const { data: row, error: e1 } = await sb.from("site_data").select("data").eq("id", "main").maybeSingle();
+      if (e1) throw new Error(e1.message);
+      if (!row?.data) {
+        const fresh = clone(App.data);
+        mutate(fresh);
+        fresh._rev = 1;
+        const { error } = await sb.from("site_data").upsert({ id: "main", data: fresh, updated_at: new Date().toISOString() });
+        if (error) throw new Error(error.message);
+        return fresh;
+      }
+      const rev = row.data._rev;
+      const merged = App.normalize(row.data);
+      mutate(merged);
+      merged._rev = (Number(rev) || 0) + 1;
+      let q = sb.from("site_data").update({ data: merged, updated_at: new Date().toISOString() }).eq("id", "main");
+      q = rev == null ? q.is("data->>_rev", null) : q.eq("data->>_rev", String(rev));
+      const { data: done, error } = await q.select("id");
+      if (error) throw new Error(error.message);
+      if (done && done.length) return merged;
+      await new Promise((r) => setTimeout(r, 120 + Math.random() * 380 * (attempt + 1)));
     }
-    const { error } = await App.sb.from("site_data").upsert({ id: "main", data: merged, updated_at: new Date().toISOString() });
-    if (error) throw new Error(error.message);
+    throw new Error("다른 사람이 동시에 저장하고 있어요. 잠시 후 다시 저장해 주세요.");
+  }
+  App.commitData = commitData;
+
+  async function saveData(next, keys) {
+    const mutate = typeof next === "function" ? next : (d) => { for (const k of keys) d[k] = next[k]; };
+    const merged = await commitData(mutate);
     App.data = App.normalize(merged);
     App.render();
     App.toast("저장했어요");

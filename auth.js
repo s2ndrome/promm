@@ -118,8 +118,8 @@
     d = App.normalize(d);
     // 쭌식이 처음 들어오면 ARCH 세계관 기본 내용을 저장
     if (oldWorld && App.role === "owner") {
-      const { error: e3 } = await sb.from("site_data").upsert({ id: "main", data: d });
-      if (e3) console.warn(e3.message);
+      // 통째로 덮어쓰지 않고, 저장 직전 최신본에 기본 세계관만 채워서 저장 (normalize 가 채움)
+      try { d = App.normalize(await App.commitData(() => {})); } catch (e3) { console.warn(e3.message); }
     }
     await detectPublic(imagePaths(d));
     await App.resolveMedia(imagePaths(d));

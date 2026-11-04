@@ -1732,3 +1732,17 @@ body.admin .cl-up li.custom:hover { background: var(--soft); }
 .cl-filter button small { font-size: 10px; color: var(--muted); }
 .cl-filter button.on { background: var(--ink); color: var(--on-ink, #fff); border-color: var(--ink); }
 .cl-filter button.on small { color: inherit; opacity: .65; }
+/* UPCOMING: 달력 높이에 맞추고 안에서 스크롤 */
+.cl-up { position: relative; min-height: 360px; }
+.cl-up-in { position: absolute; inset: 0; display: flex; flex-direction: column; }
+.cl-up-in ul { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-right: 6px; scrollbar-width: thin; }
+.cl-up-in ul::-webkit-scrollbar { width: 5px; }
+.cl-up-in ul::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
+@media (max-width: 980px) {
+  .cl-up { min-height: 0; }
+  .cl-up-in { position: static; }
+  .cl-up-in ul { max-height: 440px; }
+}
+.cl-color { display: flex; align-items: center; gap: 10px; }
+.cl-color input[type=color] { width: 48px; height: 34px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); padding: 3px; cursor: pointer; }
+.cl-color .cl-dot { width: 12px; height: 12px; margin: 0; border: 1px solid var(--line); }
