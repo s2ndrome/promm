@@ -97,7 +97,7 @@
     const groups = [...new Set(list.map((x) => x.group))];
     const set = list.filter((x) => x.start).length;
     return `<details class="cl-others" ${othersOpen ? "open" : ""}>
-      <summary><span>다른 페어</span><small>${list.length}${set ? ` · D-DAY ${set}` : ""}</small></summary>
+      <summary><span>etc</span><small>${list.length}${set ? ` · D-DAY ${set}` : ""}</small></summary>
       ${groups.map((g) => `<div class="cl-og"><p class="cl-og-h">${esc(g)}</p><div class="cl-og-list">${list.filter((x) => x.group === g).map((x) => `<div class="cl-or">
         <i class="cl-dot" style="background:${x.color}"></i><span class="cl-or-t">${esc(x.title)}</span>
         <b class="cl-or-d">${x.start ? `D+${sinceDays(x.start)}` : "<span class=\"cl-none\">미설정</span>"}</b>
