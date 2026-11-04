@@ -1,5 +1,5 @@
 // archive a: 캘린더. 메인 페어마다 처음 만난 날부터 D+일수, 50일 단위 · 주년 기념일 자동, 직접 넣는 기념일
-// 데이터: App.data.calendar = { starts: { 페어id: "YYYY-MM-DD" }, colors: { 페어id: "#hex" }, events: [{ id, name, date, pair, type: "birthday" | "pair" | "etc", repeat: "yearly" | "once" }] }
+// 데이터: App.data.calendar = { starts: { 페어id: "YYYY-MM-DD" }, colors: { 페어id: "#hex" }, names: { 페어id: "캘린더에 보일 이름" }, events: [{ id, name, date, pair, type: "birthday" | "pair" | "etc", repeat: "yearly" | "once" }] }
 (function () {
   const App = window.App;
   const esc = App.esc;
@@ -22,7 +22,8 @@
   function allPairs() {
     const { pairs = [], genres = [], girls = [] } = App.data;
     const starts = cal().starts || {}, colors = cal().colors || {}, out = [];
-    const item = (p, group, main, title, names) => ({ p, group, main, title, names, color: /^#[0-9a-f]{6}$/i.test(colors[p.id] || "") ? colors[p.id] : COLORS[out.length % COLORS.length], start: parse(starts[p.id]) });
+    const labels = cal().names || {};
+    const item = (p, group, main, title, names) => ({ p, group, main, orig: title, title: (labels[p.id] || "").trim() || title, names, color: /^#[0-9a-f]{6}$/i.test(colors[p.id] || "") ? colors[p.id] : COLORS[out.length % COLORS.length], start: parse(starts[p.id]) });
     const mains = pairs.filter((p) => !genres.includes(p.genre));
     mains.forEach((p, i) => out.push(item(p, "메인 페어", true, p.title || `페어 ${i + 1}`, [p.male?.name, p.female?.name].filter(Boolean).join(" · "))));
     for (const g of genres) pairs.filter((p) => p.genre === g).forEach((p) => out.push(item(p, g, false, p.title || [p.male?.name, p.female?.name].filter(Boolean).join(" X ") || "페어", "")));
@@ -161,7 +162,8 @@
     const x = allPairs().find((p) => p.p.id === id);
     if (!x) return;
     App.openModal(`<form class="form cl-form" id="cl-form">
-      <h2>페어 설정</h2><p class="desc">${esc(x.title)}</p>
+      <h2>페어 설정</h2><p class="desc">${esc(x.orig)}</p>
+      <div class="field"><label>캘린더에 보일 이름</label><input type="text" name="label" value="${esc(x.title === x.orig ? "" : x.title)}" placeholder="${esc(x.orig)}" maxlength="30"><p class="hint">길어서 잘리면 짧게 바꿔요. 비우면 원래 페어 이름. 이 페이지에서만 바뀌어요.</p></div>
       <div class="field"><label>D-DAY (처음 만난 날 = 1일째)</label><input type="date" name="date" value="${x.start ? ymd(x.start) : ""}"><p class="hint">비우고 저장하면 D-DAY 가 지워져요.</p></div>
       <div class="field"><label>점 색깔</label><div class="cl-color"><input type="color" name="color" value="${x.color}"><span class="cl-dot" style="background:${x.color}"></span><button type="button" class="pill-btn" data-reset>기본색으로</button></div>
         <p class="hint">달력 · UPCOMING · 카드에 보이는 이 페어의 색이에요.</p></div>
@@ -173,9 +175,11 @@
     f.querySelector("[data-reset]").onclick = () => { reset = true; f.querySelector(".cl-color .cl-dot").style.background = "transparent"; };
     f.onsubmit = (e) => {
       e.preventDefault();
-      const v = f.date.value, color = f.color.value;
+      const v = f.date.value, color = f.color.value, label = f.label.value.trim();
       save((c) => {
         if (v) c.starts[id] = v; else delete c.starts[id];
+        c.names ||= {};
+        if (label && label !== x.orig) c.names[id] = label; else delete c.names[id];
         c.colors ||= {};
         if (reset) delete c.colors[id]; else if (color.toLowerCase() !== x.color.toLowerCase()) c.colors[id] = color;
       });
