@@ -1761,3 +1761,5 @@ body.admin .cl-up li.custom:hover { background: var(--soft); }
 .cl-or-d { font-family: Montserrat, var(--brand); font-size: 14px; color: var(--ink); white-space: nowrap; }
 .cl-or-d .cl-none { font-size: 11px; font-weight: 400; }
 .cl-set2 { margin-left: 6px; font-size: 10px; padding: 2px 7px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; border-radius: 999px; }
+/* 홈 장르 보기: '+ 이 장르에 페어 추가' 버튼이 카드 글씨 위로 올라가 겹치지 않게 */
+.rel-view .adm-bar { margin: 22px 0 10px; justify-content: flex-start; }
