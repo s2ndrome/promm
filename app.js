@@ -670,8 +670,8 @@
     "/world": { title: "ARCH", render: () => App.renderWorld() },
     "/link": { title: "Link", render: renderLinks },
     "/ooc": { title: "OOC", render: renderOOC },
-    // archive a / b / c: 아직 준비중인 페이지
-    "/archive-a": { title: "준비중", render: () => renderSoon("a") },
+    // archive a: 캘린더 (calendar.js) · b / c: 아직 준비중인 페이지
+    "/archive-a": { title: "Calendar", render: () => (App.renderCalendar ? App.renderCalendar() : renderSoon("a")) },
     "/archive-b": { title: "준비중", render: () => renderSoon("b") },
     "/archive-c": { title: "준비중", render: () => renderSoon("c") },
   };
