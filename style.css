@@ -1763,3 +1763,13 @@ body.admin .cl-up li.custom:hover { background: var(--soft); }
 .cl-set2 { margin-left: 6px; font-size: 10px; padding: 2px 7px; border: 1px solid var(--line); background: var(--bg); color: var(--ink); cursor: pointer; border-radius: 999px; }
 /* 홈 장르 보기: '+ 이 장르에 페어 추가' 버튼이 카드 글씨 위로 올라가 겹치지 않게 */
 .rel-view .adm-bar { margin: 22px 0 10px; justify-content: flex-start; }
+/* 의상 생성기: 옷 사진 첨부 */
+.oc-pick { flex: none; display: grid; place-items: center; width: 26px; height: 26px; margin-left: -8px; padding: 0; border: 0; background: none; color: var(--muted); cursor: pointer; }
+.oc-pick:hover { color: var(--ink); }
+.oc-pick svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.oc-att { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; padding: 5px 6px; border: 1px dashed var(--line); border-radius: 10px; font-size: 11px; color: var(--text-2, var(--muted)); }
+.oc-att[hidden] { display: none; }
+.oc-att img { width: 38px; height: 38px; object-fit: cover; border-radius: 6px; }
+.oc-att button { margin-left: auto; border: 0; background: none; font-size: 16px; color: var(--muted); cursor: pointer; padding: 0 6px; }
+.oc-q img { display: block; max-width: 140px; max-height: 160px; border-radius: 10px; margin: 2px 0; object-fit: cover; }
+.oc-q p { margin: 0; }

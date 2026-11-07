@@ -127,15 +127,56 @@
 
   // ---------- 의상 프롬프트 생성기 (Supabase 함수 outfit-chat → Claude) ----------
   const OUTFIT_API = "https://outfit-chat.jenojeno0423.workers.dev/"; // 사이트 정보에서 다른 주소로 바꿀 수 있음
-  let ocMsgs = [], ocBusy = false, ocErr = "";
+  let ocMsgs = [], ocBusy = false, ocErr = "", ocImg = null; // ocImg: 보낼 사진 (data URL)
+  const OC_IMG_ASK = "이 사진 속 의상을 프롬프트로 만들어줘";
   function ocLogHtml() {
-    if (!ocMsgs.length && !ocBusy && !ocErr) return `<p class="oc-hint">원하는 분위기나 아이템을 적으면 의상 프롬프트만 만들어줘요.<br>이어서 "치마를 바지로" 처럼 고쳐 달라고 해도 돼요.</p>`;
+    if (!ocMsgs.length && !ocBusy && !ocErr) return `<p class="oc-hint">원하는 분위기나 아이템을 적으면 의상 프롬프트만 만들어줘요.<br>옷 사진을 올리면(📎 · 붙여넣기) 그 옷을 프롬프트로 바꿔줘요.<br>이어서 "치마를 바지로" 처럼 고쳐 달라고 해도 돼요.</p>`;
     return ocMsgs.map((m) => m.role === "user"
-      ? `<p class="oc-q">${esc(m.content)}</p>`
+      ? `<div class="oc-q">${m.image ? `<img src="${esc(m.image)}" alt="첨부한 사진">` : ""}${m.content && !(m.image && m.content === OC_IMG_ASK) ? `<p>${esc(m.content)}</p>` : ""}</div>`
       : `<div class="oc-a"><p>${esc(m.content)}</p><button type="button" class="oc-copy" data-copy="${esc(m.content)}">copy</button></div>`).join("")
       + (ocBusy ? `<p class="oc-wait"><i></i><i></i><i></i></p>` : "")
       + (ocErr ? `<p class="oc-err">${esc(ocErr)}</p>` : "");
   }
+  // 사진: 긴 변 1024px JPEG 로 줄여서 보냄 (용량 · 속도)
+  function ocShrink(file) {
+    return new Promise((ok, no) => {
+      const img = new Image();
+      img.onload = () => {
+        const k = Math.min(1, 1024 / Math.max(img.width, img.height));
+        const c = document.createElement("canvas");
+        c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+        const g = c.getContext("2d");
+        g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height);
+        g.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(img.src);
+        ok(c.toDataURL("image/jpeg", .85));
+      };
+      img.onerror = () => no(new Error("사진을 읽을 수 없어요."));
+      img.src = URL.createObjectURL(file);
+    });
+  }
+  async function ocAttach(file) {
+    if (!file || !/^image\//.test(file.type)) return;
+    try { ocImg = await ocShrink(file); ocErr = ""; } catch (err) { ocErr = err.message; }
+    ocPaintAttach(); ocPaint();
+  }
+  function ocPaintAttach() {
+    const box = document.getElementById("oc-att");
+    if (!box) return;
+    box.hidden = !ocImg;
+    box.innerHTML = ocImg ? `<img src="${esc(ocImg)}" alt=""><span>이 사진으로 만들기</span><button type="button" data-oc-unatt aria-label="사진 빼기">×</button>` : "";
+  }
+  document.addEventListener("change", (e) => { if (e.target.id === "oc-file") { ocAttach(e.target.files[0]); e.target.value = ""; } });
+  document.addEventListener("paste", (e) => {
+    if (e.target.id !== "oc-in") return;
+    const f = [...(e.clipboardData?.files || [])].find((x) => /^image\//.test(x.type));
+    if (f) { e.preventDefault(); ocAttach(f); }
+  });
+  document.addEventListener("click", (e) => {
+    if (e.target.closest("[data-oc-unatt]")) { ocImg = null; ocPaintAttach(); }
+    else if (e.target.closest("[data-oc-pick]")) document.getElementById("oc-file")?.click();
+  });
+
   function ocPaint() {
     const log = document.getElementById("oc-log");
     if (!log) return;
@@ -148,10 +189,11 @@
     if (e.target.id !== "oc-form") return;
     e.preventDefault();
     const inp = document.getElementById("oc-in");
-    const q = inp.value.trim();
+    const img = ocImg, q = inp.value.trim() || (img ? OC_IMG_ASK : "");
     if (!q || ocBusy) return;
     inp.value = "";
-    ocMsgs.push({ role: "user", content: q });
+    ocImg = null; ocPaintAttach();
+    ocMsgs.push(img ? { role: "user", content: q, image: img } : { role: "user", content: q });
     ocBusy = true; ocErr = "";
     ocPaint();
     try {
@@ -162,7 +204,13 @@
         res = await fetch(api, {
           method: "POST",
           headers: { "Content-Type": "application/json", Authorization: `Bearer ${ss.session?.access_token || ""}` },
-          body: JSON.stringify({ messages: ocMsgs.slice(-12) }),
+          // 사진은 이번에 보낸 것만 실어 보냄 (이전 사진은 [사진] 표시만)
+          body: JSON.stringify({ messages: ocMsgs.slice(-12).map((m, i, a) => {
+            if (!m.image) return { role: m.role, content: m.content };
+            if (i !== a.length - 1) return { role: m.role, content: `[사진] ${m.content}` };
+            const [, mime, data] = m.image.match(/^data:([^;]+);base64,(.*)$/) || [];
+            return { role: m.role, content: m.content, image: { mime, data } };
+          }) }),
         });
       } catch {
         throw new Error("생성기 주소에 연결하지 못했어요. 주소를 확인해 주세요.");
@@ -171,9 +219,12 @@
       if (!res.ok) throw new Error(res.status === 403 ? "회원만 쓸 수 있어요." : res.status === 429 ? "지금 요청이 많아요. 잠시 후 다시 해주세요." : "만들지 못했어요. 다시 해주세요.");
       if (!data?.text) throw new Error("만들지 못했어요. 다시 해주세요.");
       ocMsgs.push({ role: "assistant", content: data.text });
+      // 예전 Worker 는 사진을 못 읽고 글자만 보고 만듦 → 알려줌
+      if (img && !data.sawImage) ocErr = "사진은 아직 못 읽어요. Cloudflare 의 outfit-chat Worker 를 새 코드로 바꿔주세요. (지금 답은 글자만 보고 만든 거예요)";
     } catch (err) {
       ocMsgs.pop();
-      inp.value = q;
+      inp.value = q === OC_IMG_ASK ? "" : q;
+      if (img) { ocImg = img; ocPaintAttach(); }
       ocErr = err.message;
     }
     ocBusy = false;
@@ -181,7 +232,7 @@
   });
   document.addEventListener("click", (e) => {
     if (!e.target.closest("[data-oc-reset]")) return;
-    ocMsgs = []; ocErr = "";
+    ocMsgs = []; ocErr = ""; ocImg = null; ocPaintAttach();
     ocPaint();
   });
 
@@ -208,8 +259,11 @@
         <div class="rel-r oc">
           <div class="oc-head"><span class="pb pb-sm">outfit generator</span><button type="button" class="oc-reset" data-oc-reset ${ocMsgs.length ? "" : "hidden"}>reset</button></div>
           <div class="oc-log" id="oc-log">${ocLogHtml()}</div>
+          <div class="oc-att" id="oc-att" ${ocImg ? "" : "hidden"}>${ocImg ? `<img src="${esc(ocImg)}" alt=""><span>이 사진으로 만들기</span><button type="button" data-oc-unatt aria-label="사진 빼기">×</button>` : ""}</div>
           <form class="oc-form" id="oc-form" autocomplete="off">
-            <input type="text" id="oc-in" placeholder="예) 겨울 데이트룩, 니트랑 롱코트" maxlength="300" enterkeyhint="send">
+            <button type="button" class="oc-pick" data-oc-pick aria-label="옷 사진 첨부" title="옷 사진 첨부"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.6 19.9a5.5 5.5 0 0 1-7.8-7.8l8.5-8.5a3.7 3.7 0 0 1 5.2 5.2l-8.5 8.5a1.8 1.8 0 0 1-2.6-2.6l7.8-7.8"/></svg></button>
+            <input type="file" id="oc-file" accept="image/*" hidden>
+            <input type="text" id="oc-in" placeholder="예) 겨울 데이트룩, 니트랑 롱코트 · 옷 사진도 OK" maxlength="300" enterkeyhint="send">
             <button type="submit" class="pb">send</button>
           </form>
         </div>

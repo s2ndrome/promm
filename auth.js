@@ -303,13 +303,16 @@
     document.body.classList.toggle("can-edit", App.rank >= 3);
     document.getElementById("grade").textContent = ROLE_NAMES[role] || role;
     paintNick();
-    showLoading();
+    // 접속 연출(로그 · 심전도 · ACCESS GRANTED)은 처음 들어올 때만. 같은 탭에서 새로고침하면 건너뜀
+    const quick = sessionStorage.getItem("zzon_in") === "1";
+    if (!quick) showLoading();
     try {
       await loadData();
     } catch (err) {
       return showGate(`<p class="gate-msg">CONNECTION FAILED — 불러오지 못했어요: ${esc(err.message)}</p>`);
     }
-    await granted();
+    if (!quick) await granted();
+    try { sessionStorage.setItem("zzon_in", "1"); } catch {}
     gate.hidden = true;
     gate.classList.remove("ok", "leaving");
     gate.innerHTML = "";
@@ -328,6 +331,7 @@
   });
 
   async function logout() {
+    try { sessionStorage.removeItem("zzon_in"); } catch {}
     await sb.auth.signOut();
     location.reload();
   }

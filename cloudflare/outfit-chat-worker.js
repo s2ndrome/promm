@@ -20,6 +20,8 @@ Format:
 Example reply:
 y2k, kawaii, 1::gray beret, newsboy cap::, 2::layered clothing, white oversized zip-up hoodie, star print white turtleneck::, frilled hem, check pattern gray pleated mini skirt, bare legs, grey leg warmers, black shoes,
 
+If a photo is attached, write tags only for the clothing, accessories, legwear and shoes actually visible in the photo (colors, materials, patterns, fit, layers, details), ignoring the person, face, hair, pose and background. If the user also asks for a change, apply it to the outfit in the photo.
+
 Never add explanations, greetings, Korean text, quotes, markdown or line breaks. If the request is vague, still return one complete outfit. If the user asks to change part of the previous outfit, return the whole updated outfit.`;
 
 export default {
@@ -54,11 +56,20 @@ export default {
     } catch {
       return json({ error: "bad request" }, 400);
     }
-    // 최근 대화 12개까지, 글자 수 제한
+    // 최근 대화 12개까지, 글자 수 제한. 사진은 마지막 사용자 메시지의 것만 (JPEG/PNG/WEBP, 4MB 까지)
     const messages = (body.messages || [])
       .filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
       .slice(-12)
-      .map((m) => ({ role: m.role, content: m.content.slice(0, 2000) }));
+      .map((m) => ({ role: m.role, content: m.content.slice(0, 2000), image: m.image }));
+    let sawImage = false;
+    messages.forEach((m, i) => {
+      const img = m.image;
+      delete m.image;
+      if (i === messages.length - 1 && m.role === "user" && img && /^image\/(jpeg|png|webp)$/.test(img.mime || "") && typeof img.data === "string" && img.data.length < 5.5e6) {
+        m.photo = { mimeType: img.mime, data: img.data };
+        sawImage = true;
+      }
+    });
     if (!messages.length || messages[messages.length - 1].role !== "user") return json({ error: "no message" }, 400);
 
     const model = env.GEMINI_MODEL || "gemini-2.5-flash";
@@ -72,7 +83,7 @@ export default {
       headers: { "x-goog-api-key": key, "Content-Type": "application/json" },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: SYSTEM }] },
-        contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: [{ text: m.content }] })),
+        contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: m.photo ? [{ inlineData: m.photo }, { text: m.content }] : [{ text: m.content }] })),
         generationConfig: { temperature: 0.9, maxOutputTokens: 4096 },
       }),
     });
@@ -85,6 +96,6 @@ export default {
       .replace(/\s*\n+\s*/g, " ")
       .trim();
     if (!text) return json({ error: "empty" }, 502);
-    return json({ text });
+    return json({ text, sawImage });
   },
 };
