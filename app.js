@@ -263,7 +263,7 @@
           <form class="oc-form" id="oc-form" autocomplete="off">
             <button type="button" class="oc-pick" data-oc-pick aria-label="옷 사진 첨부" title="옷 사진 첨부"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.6 19.9a5.5 5.5 0 0 1-7.8-7.8l8.5-8.5a3.7 3.7 0 0 1 5.2 5.2l-8.5 8.5a1.8 1.8 0 0 1-2.6-2.6l7.8-7.8"/></svg></button>
             <input type="file" id="oc-file" accept="image/*" hidden>
-            <input type="text" id="oc-in" placeholder="예) 겨울 데이트룩, 니트랑 롱코트 · 옷 사진도 OK" maxlength="300" enterkeyhint="send">
+            <input type="text" id="oc-in" placeholder="예) 겨울 데이트룩, 니트랑 롱코트 · 옷 사진도 OK" enterkeyhint="send">
             <button type="submit" class="pb">send</button>
           </form>
         </div>
@@ -476,7 +476,7 @@
       <div class="om-genres">${OM_GENRES.map((g) => `<button type="button" class="om-g ${g === omGenre ? "on" : ""}" data-om-genre="${esc(g)}">${esc(g)}</button>`).join("")}</div>
       <div class="om-log" id="om-log">${omLogHtml()}</div>
       <form class="om-form" id="om-form" autocomplete="off">
-        <textarea id="om-in" rows="2" maxlength="1000" placeholder="예) 술 취한 NPC 가 새벽에 PC 한테 전화해서 보고 싶다고 함"></textarea>
+        <textarea id="om-in" rows="2" placeholder="예) 술 취한 NPC 가 새벽에 PC 한테 전화해서 보고 싶다고 함"></textarea>
         <button type="submit" class="pb">만들기</button>
       </form>
     </div>`);
@@ -601,7 +601,7 @@
       <p class="jj-sub">롯데리아 ARCH 지점 알바생</p>
       <div class="om-log jj-log" id="jj-log">${jjLogHtml()}</div>
       <form class="oc-form jj-form" id="jj-form" autocomplete="off">
-        <input type="text" id="jj-in" maxlength="500" enterkeyhint="send" aria-label="쭌식이에게 보낼 말">
+        <input type="text" id="jj-in" enterkeyhint="send" aria-label="쭌식이에게 보낼 말">
         <button type="submit" class="pb">send</button>
       </form>
     </div>`);

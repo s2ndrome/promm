@@ -56,11 +56,11 @@ export default {
     } catch {
       return json({ error: "bad request" }, 400);
     }
-    // 최근 대화 12개까지, 글자 수 제한. 사진은 마지막 사용자 메시지의 것만 (JPEG/PNG/WEBP, 4MB 까지)
+    // 최근 대화 12개까지 (글자 수 제한 없음). 사진은 마지막 사용자 메시지의 것만 (JPEG/PNG/WEBP, 4MB 까지)
     const messages = (body.messages || [])
       .filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
       .slice(-12)
-      .map((m) => ({ role: m.role, content: m.content.slice(0, 2000), image: m.image }));
+      .map((m) => ({ role: m.role, content: m.content, image: m.image }));
     let sawImage = false;
     messages.forEach((m, i) => {
       const img = m.image;

@@ -63,7 +63,7 @@ export default {
     const messages = (body.messages || [])
       .filter((m) => (m.role === "user" || m.role === "assistant") && typeof m.content === "string" && m.content.trim())
       .slice(-12)
-      .map((m) => ({ role: m.role, content: m.content.slice(0, 6000) }));
+      .map((m) => ({ role: m.role, content: m.content }));
     if (!messages.length || messages[messages.length - 1].role !== "user") return json({ error: "no message" }, 400);
 
     let system = "";
