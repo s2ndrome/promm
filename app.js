@@ -130,7 +130,7 @@
   let ocMsgs = [], ocBusy = false, ocErr = "", ocImg = null; // ocImg: 보낼 사진 (data URL)
   const OC_IMG_ASK = "이 사진 속 의상을 프롬프트로 만들어줘";
   function ocLogHtml() {
-    if (!ocMsgs.length && !ocBusy && !ocErr) return `<p class="oc-hint">원하는 분위기나 아이템을 적으면 의상 프롬프트만 만들어줘요.<br>옷 사진을 올리면(📎 · 붙여넣기) 그 옷을 프롬프트로 바꿔줘요.<br>이어서 "치마를 바지로" 처럼 고쳐 달라고 해도 돼요.</p>`;
+    if (!ocMsgs.length && !ocBusy && !ocErr) return `<p class="oc-hint">원하는 분위기나 아이템을 적으면 의상 프롬프트만 만들어줘요.<br>옷 사진을 올리면(📎 · 📋 붙여넣기 · Ctrl+V) 그 옷을 프롬프트로 바꿔줘요.<br>이어서 "치마를 바지로" 처럼 고쳐 달라고 해도 돼요.</p>`;
     return ocMsgs.map((m) => m.role === "user"
       ? `<div class="oc-q">${m.image ? `<img src="${esc(m.image)}" alt="첨부한 사진">` : ""}${m.content && !(m.image && m.content === OC_IMG_ASK) ? `<p>${esc(m.content)}</p>` : ""}</div>`
       : `<div class="oc-a"><p>${esc(m.content)}</p><button type="button" class="oc-copy" data-copy="${esc(m.content)}">copy</button></div>`).join("")
@@ -167,14 +167,34 @@
     box.innerHTML = ocImg ? `<img src="${esc(ocImg)}" alt=""><span>이 사진으로 만들기</span><button type="button" data-oc-unatt aria-label="사진 빼기">×</button>` : "";
   }
   document.addEventListener("change", (e) => { if (e.target.id === "oc-file") { ocAttach(e.target.files[0]); e.target.value = ""; } });
+  // 붙여넣기: 입력칸에서, 또는 다른 글자 칸이 아닌 곳에서 붙여넣어도 사진이면 첨부 (홈 화면에 생성기가 있을 때)
   document.addEventListener("paste", (e) => {
-    if (e.target.id !== "oc-in") return;
-    const f = [...(e.clipboardData?.files || [])].find((x) => /^image\//.test(x.type));
+    if (!document.getElementById("oc-form")) return;
+    const t = e.target;
+    if (t.id !== "oc-in" && (t.closest?.("input, textarea, [contenteditable]") || !document.getElementById("modal").hidden)) return;
+    const cd = e.clipboardData;
+    const f = [...(cd?.files || [])].find((x) => /^image\//.test(x.type))
+      || [...(cd?.items || [])].filter((x) => x.kind === "file" && /^image\//.test(x.type)).map((x) => x.getAsFile()).find(Boolean);
     if (f) { e.preventDefault(); ocAttach(f); }
   });
+  // 붙여넣기 버튼: 복사해 둔 사진을 바로 읽음 (휴대폰처럼 입력칸에 사진 붙여넣기가 안 될 때)
+  async function ocPasteBtn() {
+    try {
+      if (!navigator.clipboard?.read) throw new Error("이 브라우저는 버튼 붙여넣기를 지원하지 않아요. 입력칸에 붙여넣거나 📎 로 골라주세요.");
+      for (const item of await navigator.clipboard.read()) {
+        const type = item.types.find((x) => /^image\//.test(x));
+        if (type) { const blob = await item.getType(type); return ocAttach(new File([blob], "paste", { type })); }
+      }
+      throw new Error("복사한 사진이 없어요. 사진을 먼저 복사해 주세요.");
+    } catch (err) {
+      ocErr = err.name === "NotAllowedError" ? "붙여넣기를 허용해 주세요. (브라우저가 물어보면 '붙여넣기' 를 눌러요)" : err.message;
+      ocPaint();
+    }
+  }
   document.addEventListener("click", (e) => {
     if (e.target.closest("[data-oc-unatt]")) { ocImg = null; ocPaintAttach(); }
     else if (e.target.closest("[data-oc-pick]")) document.getElementById("oc-file")?.click();
+    else if (e.target.closest("[data-oc-paste]")) ocPasteBtn();
   });
 
   function ocPaint() {
@@ -262,6 +282,7 @@
           <div class="oc-att" id="oc-att" ${ocImg ? "" : "hidden"}>${ocImg ? `<img src="${esc(ocImg)}" alt=""><span>이 사진으로 만들기</span><button type="button" data-oc-unatt aria-label="사진 빼기">×</button>` : ""}</div>
           <form class="oc-form" id="oc-form" autocomplete="off">
             <button type="button" class="oc-pick" data-oc-pick aria-label="옷 사진 첨부" title="옷 사진 첨부"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5 12.6 19.9a5.5 5.5 0 0 1-7.8-7.8l8.5-8.5a3.7 3.7 0 0 1 5.2 5.2l-8.5 8.5a1.8 1.8 0 0 1-2.6-2.6l7.8-7.8"/></svg></button>
+            <button type="button" class="oc-pick oc-paste" data-oc-paste aria-label="복사한 사진 붙여넣기" title="복사한 사진 붙여넣기"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9 11h6M9 15h4"/></svg></button>
             <input type="file" id="oc-file" accept="image/*" hidden>
             <input type="text" id="oc-in" placeholder="예) 겨울 데이트룩, 니트랑 롱코트 · 옷 사진도 OK" enterkeyhint="send">
             <button type="submit" class="pb">send</button>

@@ -1773,3 +1773,4 @@ body.admin .cl-up li.custom:hover { background: var(--soft); }
 .oc-att button { margin-left: auto; border: 0; background: none; font-size: 16px; color: var(--muted); cursor: pointer; padding: 0 6px; }
 .oc-q img { display: block; max-width: 140px; max-height: 160px; border-radius: 10px; margin: 2px 0; object-fit: cover; }
 .oc-q p { margin: 0; }
+.oc-pick + .oc-paste { margin-left: -6px; }
