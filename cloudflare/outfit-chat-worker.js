@@ -102,7 +102,8 @@ export default {
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: mode === "scene" ? SCENE : SYSTEM }] },
         contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: m.photo ? [{ inlineData: m.photo }, { text: m.content }] : [{ text: m.content }] })),
-        generationConfig: { temperature: 0.9, maxOutputTokens: 4096 },
+        // scene 은 답 길이 제한 없음 (모델 최대치). outfit 은 그대로
+        generationConfig: { temperature: 0.9, maxOutputTokens: mode === "scene" ? 65536 : 4096 },
       }),
     });
     if (res.status === 429) return json({ error: "busy" }, 429);
