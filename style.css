@@ -1779,3 +1779,5 @@ body.admin .cl-up li.custom:hover { background: var(--soft); }
 .oc-modes .pb { background: transparent; color: var(--muted); }
 .oc-modes .pb:hover { color: var(--ink); }
 .oc-modes .pb.on { background: var(--ink); color: var(--on-ink); }
+/* 안내 문구: 한글이 단어 중간에서 잘리지 않게 */
+.oc-hint { word-break: keep-all; overflow-wrap: anywhere; }
