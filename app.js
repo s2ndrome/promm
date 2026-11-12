@@ -130,16 +130,16 @@
   let ocMsgs = [], ocBusy = false, ocErr = "", ocImg = null; // ocImg: 보낼 사진 (data URL)
   // 생성기 종류: outfit(의상) · scene(배경 · 구도). 같은 Worker 에 mode 로 구분해서 보냄. 대화는 종류마다 따로
   const OC_MODES = {
-    outfit: { label: "outfit", ask: "이 사진 속 의상을 프롬프트로 만들어줘", ph: "예) 겨울 데이트룩, 니트랑 롱코트 · 옷 사진도 OK",
+    outfit: { label: "outfit", ask: "이 사진 속 의상을 프롬프트로 만들어줘", ph: "",
       hint: `원하는 분위기나 아이템을 적으면 의상 프롬프트만 만들어줘요.<br>옷 사진을 올리면(📎 · 📋 붙여넣기 · Ctrl+V) 그 옷을 프롬프트로 바꿔줘요.<br>이어서 "치마를 바지로" 처럼 고쳐 달라고 해도 돼요.` },
-    scene: { label: "scene", ask: "이 사진의 장면과 구도를 프롬프트로 만들어줘", ph: "예) 여자가 초콜릿 묻힌 채 울먹이고 남자는 놀리는 얼굴",
+    scene: { label: "scene", ask: "이 사진의 장면과 구도를 프롬프트로 만들어줘", ph: "",
       hint: `상황을 자세히 적을수록 좋아요. 누가 뭘 하고 있는지, 표정, 둘 사이 분위기, 장소를 적으면<br>행동 · 표정 · 소품 · 배경 · 구도까지 자세한 장면 프롬프트로 만들어줘요. (머리 · 옷은 outfit 에서)<br>"하얀 장미 정원 배경" 처럼 배경만 적으면 배경만 자세하게 만들어줘요.<br>사진을 올리면(📎 · 📋 · Ctrl+V) 그 장면을 프롬프트로 바꿔줘요. "더 가까이", "밤으로" 처럼 고쳐도 돼요.` },
   };
   let ocMode = "outfit";
   const ocStore = { outfit: [], scene: [] };
   const OC_ASKS = Object.values(OC_MODES).map((m) => m.ask);
   function ocLogHtml() {
-    if (!ocMsgs.length && !ocBusy && !ocErr) return `<p class="oc-hint">${OC_MODES[ocMode].hint}</p>`;
+    if (!ocMsgs.length && !ocBusy && !ocErr) return ""; // 예시 · 안내 문구 없이 빈 채로
     return ocMsgs.map((m) => m.role === "user"
       ? `<div class="oc-q">${m.image ? `<img src="${esc(m.image)}" alt="첨부한 사진">` : ""}${m.content && !(m.image && OC_ASKS.includes(m.content)) ? `<p>${esc(m.content)}</p>` : ""}</div>`
       : `<div class="oc-a"><p>${esc(m.content)}</p><button type="button" class="oc-copy" data-copy="${esc(m.content)}">copy</button></div>`).join("")
@@ -488,7 +488,7 @@
     return m ? { title: m[1].trim(), text: m[2].trim() } : { title: "", text: String(t).trim() };
   };
   function omLogHtml() {
-    if (!omMsgs.length && !omBusy && !omErr) return `<p class="oc-hint">장르를 고르고 원하는 상황을 대충 적어주세요.<br>올려둔 OOC 들과 같은 형식으로 만들어줘요. 이어서 "더 길게", "말투 바꿔줘" 처럼 고쳐 달라고 해도 돼요.</p>`;
+    if (!omMsgs.length && !omBusy && !omErr) return "";
     const canAdd = App.rank >= 3;
     return omMsgs.map((m, k) => {
       if (m.role === "user") return `<p class="oc-q">${esc(m.content)}</p>`;
@@ -519,7 +519,7 @@
       <div class="om-genres">${OM_GENRES.map((g) => `<button type="button" class="om-g ${g === omGenre ? "on" : ""}" data-om-genre="${esc(g)}">${esc(g)}</button>`).join("")}</div>
       <div class="om-log" id="om-log">${omLogHtml()}</div>
       <form class="om-form" id="om-form" autocomplete="off">
-        <textarea id="om-in" rows="2" placeholder="예) 술 취한 NPC 가 새벽에 PC 한테 전화해서 보고 싶다고 함"></textarea>
+        <textarea id="om-in" rows="2"></textarea>
         <button type="submit" class="pb">만들기</button>
       </form>
     </div>`);
