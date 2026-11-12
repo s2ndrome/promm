@@ -139,7 +139,7 @@
   const ocStore = { outfit: [], scene: [] };
   const OC_ASKS = Object.values(OC_MODES).map((m) => m.ask);
   function ocLogHtml() {
-    if (!ocMsgs.length && !ocBusy && !ocErr) return ""; // 예시 · 안내 문구 없이 빈 채로
+    if (!ocMsgs.length && !ocBusy && !ocErr) return `<p class="oc-hint">${OC_MODES[ocMode].hint}</p>`; // 안내 문구는 채팅창 위에 (입력칸 예시 글씨는 없음)
     return ocMsgs.map((m) => m.role === "user"
       ? `<div class="oc-q">${m.image ? `<img src="${esc(m.image)}" alt="첨부한 사진">` : ""}${m.content && !(m.image && OC_ASKS.includes(m.content)) ? `<p>${esc(m.content)}</p>` : ""}</div>`
       : `<div class="oc-a"><p>${esc(m.content)}</p><button type="button" class="oc-copy" data-copy="${esc(m.content)}">copy</button></div>`).join("")
@@ -488,7 +488,7 @@
     return m ? { title: m[1].trim(), text: m[2].trim() } : { title: "", text: String(t).trim() };
   };
   function omLogHtml() {
-    if (!omMsgs.length && !omBusy && !omErr) return "";
+    if (!omMsgs.length && !omBusy && !omErr) return `<p class="oc-hint">장르를 고르고 원하는 상황을 대충 적어주세요.<br>올려둔 OOC 들과 같은 형식으로 만들어줘요. 이어서 "더 길게", "말투 바꿔줘" 처럼 고쳐 달라고 해도 돼요.</p>`;
     const canAdd = App.rank >= 3;
     return omMsgs.map((m, k) => {
       if (m.role === "user") return `<p class="oc-q">${esc(m.content)}</p>`;
