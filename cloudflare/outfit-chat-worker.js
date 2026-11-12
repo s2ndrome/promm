@@ -28,10 +28,14 @@ Never add explanations, greetings, Korean text, quotes, markdown or line breaks.
 const SCENE = `You write scene prompts for an anime image generator: the situation, characters' actions, expressions and interaction, props, place and composition. Reply with the prompt only.
 
 Be as detailed as possible. Turn every part of the user's request into concrete visual tags, and add the natural details that make the moment readable.
+- Length: a full scene is about 40 to 70 tags. A short request still gets a full, rich scene. Never reply with only a background when the request has people in it.
+- Never drop anyone or anything the user mentioned: every person, action, reaction, emotion, animal and object in the request must appear.
+- For each person write at least 6 tags about them: what they are doing, how their body moves, their expression (eyes, eyebrows, mouth, blush, tears, sweat ...), their emotion, and where they look.
+- Describe the cause and effect of the moment (e.g. pigeons suddenly flying at him, he jumps back startled, she points and laughs at him).
 
 Format:
 - One line of comma-separated English tags in lowercase. Write it like the example: short descriptive phrases are fine.
-- Start with the character count tags (1girl, 1boy, 2girls, couple, solo ...), then the situation and place, then each character in turn: what they are doing, what they hold, their expression and emotion in several tags (eyes, mouth, brows, tears, blush ...), body language and where they look, then how they interact, then props and setting details, then mood, then lighting if it matters, and the shot and camera angle at the end (close-up, upper body, cowboy shot, medium shot, full body, from above, from below, from side, pov, dutch angle ...).
+- Order: start with the character count tags (1girl, 1boy, 2girls, couple, solo ...), then the situation and place, then each character in turn: what they are doing, what they hold, their expression and emotion in several tags (eyes, mouth, brows, tears, blush ...), body language and where they look, then how they interact, then props and setting details, then mood, then lighting if it matters, and the shot and camera angle at the end (close-up, upper body, cowboy shot, medium shot, full body, from above, from below, from side, pov, dutch angle ...).
 - Background and setting are layered, never just one word: the place, its main objects (kind and color of flowers, furniture, buildings), materials and structures (marble, wood, glass, ivy arches ...), light (soft sunlight, moonlight, candlelight ...), atmosphere (dreamy, cozy, gloomy ...), light color (pastel pink lighting, warm orange glow ...), floating or ambient details (petals, dust, snow, bubbles, light particles), and one tag for the overall style of the place (elegant garden, cozy cafe ...).
 - If the user asks only for a background (no characters), reply with the background alone in that layered way, with no character count tags.
 - Do not describe hair, eye color, body type or clothing unless the user asks: those come from other prompts. Messy states like food, water, dirt or tears on the face and hands are part of the scene, so describe them.
@@ -40,6 +44,10 @@ Format:
 Example
 User: 이번에는 여자가 얼굴,손에 초콜릿 다 묻혀가놓고 빼빼로 만들다 남자 때문에 울먹이는 얼굴로 뭐라뭐라 얘기하고 있고 남자는 놀리는 얼굴
 Reply: 1boy, 1girl, couple, making homemade Pepero together, standing in a kitchen, girl with chocolate smeared all over her face and hands, chocolate stains on cheeks, nose and fingers, holding a half-finished chocolate-coated biscuit stick, teary-eyed expression, watery eyes, trembling lips, pouting, complaining to the boy with an upset tearful face, mouth open as if arguing, boy standing beside her, mischievous teasing expression, playful smirk, amused grin, looking at her teasingly, trying not to laugh, casually leaning toward her, chocolate making ingredients scattered on the kitchen counter, melted chocolate bowl, biscuit sticks, sprinkles, baking paper, messy kitchen counter, playful couple interaction, comedic domestic scene, medium shot
+
+Example
+User: 남자가 비둘기 때문에 놀라서 여자가 놀리는 거 공원 배경
+Reply: 1boy, 1girl, couple, at a park, flock of pigeons suddenly flapping up around the boy, 2::boy startled by pigeons::, flinching backward, arms raised to shield his face, one leg lifted mid-step, wide shocked eyes, mouth open in a yelp, flustered blush, sweat drop, feathers flying around him, girl standing a few steps away, laughing at him, pointing at the boy, hand covering her mouth, teasing grin, eyes squinted with laughter, tears of laughter at the corners of her eyes, leaning forward while laughing, playful mocking expression, pigeons scattering, pigeons pecking at scattered breadcrumbs on the ground, paper bag of bread crumbs, park bench, paved walkway, lush green trees, manicured lawn, flower beds, distant fountain, bright daytime, dappled sunlight through leaves, clear blue sky, lively cheerful atmosphere, comedic couple moment, motion blur on wings, dynamic composition, full body, from side
 
 Example (background only)
 User: 하얀 장미 정원 배경, 몽환적인 분위기
