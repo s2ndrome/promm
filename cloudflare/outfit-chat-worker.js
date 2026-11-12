@@ -1,4 +1,4 @@
-// 의상 프롬프트 생성기 (Cloudflare Worker)
+// 의상 프롬프트 생성기 + 배경 · 구도 생성기 (Cloudflare Worker, 사이트가 보내는 mode 로 구분)
 // 설정할 것 (Cloudflare 대시보드 → 이 Worker → Settings → Variables and Secrets):
 //   VERTEX_API_KEY     (Secret)  Google Cloud(Vertex AI) API 키  ← 둘 중 하나만 있으면 됨
 //   GEMINI_API_KEY     (Secret)  Google AI Studio API 키
@@ -23,6 +23,23 @@ y2k, kawaii, 1::gray beret, newsboy cap::, 2::layered clothing, white oversized 
 If a photo is attached, write tags only for the clothing, accessories, legwear and shoes actually visible in the photo (colors, materials, patterns, fit, layers, details), ignoring the person, face, hair, pose and background. If the user also asks for a change, apply it to the outfit in the photo.
 
 Never add explanations, greetings, Korean text, quotes, markdown or line breaks. If the request is vague, still return one complete outfit. If the user asks to change part of the previous outfit, return the whole updated outfit.`;
+
+// 배경 · 구도 생성기 (사이트에서 mode: "scene" 으로 보냄)
+const SCENE = `You write background and composition prompts for an anime image generator. Reply with the prompt only.
+
+Format:
+- One line of comma-separated English tags in lowercase, ending with a comma.
+- Background, setting and camera only: location, indoor/outdoor, props in the scene, time of day, weather, season, lighting, color mood, atmosphere effects, camera angle, shot size, framing, perspective, depth of field.
+- No character appearance, hair, eyes, clothing, character names or quality tags. Pose words only when they decide the composition (e.g. "looking at viewer", "from behind").
+- Weighting syntax may be used: "2::tag, tag::" to strengthen, "1::tag::" for normal, "-1::tag::" to weaken.
+- Order: shot and angle first, then location and props, then time, weather and light, then mood and effects.
+
+Example reply:
+cowboy shot, from below, dutch angle, 2::rooftop, city skyline, chain-link fence, water tower::, night, rain, wet floor, neon lights, reflections, 1::blue and pink lighting::, depth of field, bokeh, cinematic atmosphere,
+
+If a photo is attached, write tags for the background, setting, lighting and camera framing actually visible in the photo, ignoring the people's looks and clothing. If the user also asks for a change, apply it to the scene in the photo.
+
+Never add explanations, greetings, Korean text, quotes, markdown or line breaks. If the request is vague, still return one complete scene. If the user asks to change part of the previous scene, return the whole updated scene.`;
 
 export default {
   async fetch(req, env) {
@@ -72,6 +89,7 @@ export default {
     });
     if (!messages.length || messages[messages.length - 1].role !== "user") return json({ error: "no message" }, 400);
 
+    const mode = body.mode === "scene" ? "scene" : "outfit";
     const model = env.GEMINI_MODEL || "gemini-2.5-flash";
     // Vertex 키가 있으면 Vertex AI, 없으면 AI Studio(Gemini API) 주소로 부름
     const key = env.VERTEX_API_KEY || env.GEMINI_API_KEY;
@@ -82,7 +100,7 @@ export default {
       method: "POST",
       headers: { "x-goog-api-key": key, "Content-Type": "application/json" },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: SYSTEM }] },
+        systemInstruction: { parts: [{ text: mode === "scene" ? SCENE : SYSTEM }] },
         contents: messages.map((m) => ({ role: m.role === "assistant" ? "model" : "user", parts: m.photo ? [{ inlineData: m.photo }, { text: m.content }] : [{ text: m.content }] })),
         generationConfig: { temperature: 0.9, maxOutputTokens: 4096 },
       }),
@@ -96,6 +114,6 @@ export default {
       .replace(/\s*\n+\s*/g, " ")
       .trim();
     if (!text) return json({ error: "empty" }, 502);
-    return json({ text, sawImage });
+    return json({ text, sawImage, mode });
   },
 };

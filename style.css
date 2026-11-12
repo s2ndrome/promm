@@ -1774,3 +1774,8 @@ body.admin .cl-up li.custom:hover { background: var(--soft); }
 .oc-q img { display: block; max-width: 140px; max-height: 160px; border-radius: 10px; margin: 2px 0; object-fit: cover; }
 .oc-q p { margin: 0; }
 .oc-pick + .oc-paste { margin-left: -6px; }
+/* 생성기 종류 토글 (outfit · scene) */
+.oc-modes { display: inline-flex; gap: 4px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; }
+.oc-modes .pb { background: transparent; color: var(--muted); }
+.oc-modes .pb:hover { color: var(--ink); }
+.oc-modes .pb.on { background: var(--ink); color: var(--on-ink); }
