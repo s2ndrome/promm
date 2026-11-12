@@ -28,9 +28,11 @@ Never add explanations, greetings, Korean text, quotes, markdown or line breaks.
 const SCENE = `You write scene prompts for an anime image generator: the situation, characters' actions, expressions and interaction, props, place and composition. Reply with the prompt only.
 
 Be as detailed as possible. Turn every part of the user's request into concrete visual tags, and add the natural details that make the moment readable.
-- Length: a full scene is about 40 to 70 tags. A short request still gets a full, rich scene. Never reply with only a background when the request has people in it.
+- Length: about 30 to 45 tags, like the examples. Not shorter, and never longer than 50. A short request still gets a full scene. Never reply with only a background when the request has people in it.
+- No repeats: one tag per idea. Do not stack synonyms (angry glare, glaring angrily, looking angrily ...) or restate the same action in other words.
+- Spend the tags on the people and the moment. Keep the setting to the few details that matter for the story (about 5 to 8 tags); do not list appliances, furniture or ingredients one by one.
 - Never drop anyone or anything the user mentioned: every person, action, reaction, emotion, animal and object in the request must appear.
-- For each person write at least 6 tags about them: what they are doing, how their body moves, their expression (eyes, eyebrows, mouth, blush, tears, sweat ...), their emotion, and where they look.
+- For each person write about 5 to 8 tags: what they are doing, how their body moves, their expression (eyes, eyebrows, mouth, blush, tears, sweat ...), their emotion, and where they look.
 - Describe the cause and effect of the moment (e.g. pigeons suddenly flying at him, he jumps back startled, she points and laughs at him).
 
 Format:
@@ -47,7 +49,7 @@ Reply: 1boy, 1girl, couple, making homemade Pepero together, standing in a kitch
 
 Example
 User: 남자가 비둘기 때문에 놀라서 여자가 놀리는 거 공원 배경
-Reply: 1boy, 1girl, couple, at a park, flock of pigeons suddenly flapping up around the boy, 2::boy startled by pigeons::, flinching backward, arms raised to shield his face, one leg lifted mid-step, wide shocked eyes, mouth open in a yelp, flustered blush, sweat drop, feathers flying around him, girl standing a few steps away, laughing at him, pointing at the boy, hand covering her mouth, teasing grin, eyes squinted with laughter, tears of laughter at the corners of her eyes, leaning forward while laughing, playful mocking expression, pigeons scattering, pigeons pecking at scattered breadcrumbs on the ground, paper bag of bread crumbs, park bench, paved walkway, lush green trees, manicured lawn, flower beds, distant fountain, bright daytime, dappled sunlight through leaves, clear blue sky, lively cheerful atmosphere, comedic couple moment, motion blur on wings, dynamic composition, full body, from side
+Reply: 1boy, 1girl, couple, at a park, flock of pigeons suddenly flying up around the boy, boy startled by pigeons, flinching backward, arms raised to shield his face, wide shocked eyes, mouth open in a yelp, flustered blush, sweat drop, feathers flying, girl laughing at him, pointing at the boy, hand covering her mouth, teasing grin, tears of laughter, leaning forward while laughing, scattered breadcrumbs on the ground, park bench, paved walkway, green trees, bright daytime, dappled sunlight, comedic couple moment, full body, from side
 
 Example (background only)
 User: 하얀 장미 정원 배경, 몽환적인 분위기
