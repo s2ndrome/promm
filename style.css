@@ -1781,3 +1781,8 @@ body.admin .cl-up li.custom:hover { background: var(--soft); }
 .oc-modes .pb.on { background: var(--ink); color: var(--on-ink); }
 /* 안내 문구: 한글이 단어 중간에서 잘리지 않게 */
 .oc-hint { word-break: keep-all; overflow-wrap: anywhere; }
+/* prompt > NPC: 그림 뒤 회색 배경 없이, 한 줄에 6개 (모바일 3개) */
+.gallery.gallery-npc { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px 14px; }
+.gallery-npc .shot .thumb { background: transparent; }
+.gallery-npc .shot .thumb.empty { background: var(--soft); }
+@media (max-width: 760px) { .gallery.gallery-npc { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 8px; } }

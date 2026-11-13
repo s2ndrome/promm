@@ -344,7 +344,7 @@
     const sections = [...groups].map(([name, idx]) => `<section class="g-section">
         ${name || groups.size > 1 ? `<div class="block-title">${esc(name || "ETC")}
           ${name ? `<span class="adm-inline"><button type="button" class="pill-btn" data-act="rename-section" data-col="${col}" data-section="${esc(name)}">이름 변경</button></span>` : ""}</div>` : ""}
-        <div class="gallery">${idx.map(shot).join("")}</div>
+        <div class="gallery gallery-${col}">${idx.map(shot).join("")}</div>
         <div class="adm-bar g-add"><button type="button" class="pill-btn" data-act="add" data-col="${col}" data-section="${esc(name)}">+ 이 줄에 사진 추가</button></div>
       </section>`).join("");
     const tabs = ASSET_PAGES.map((x) => `<a href="#${x.route}" class="${x.col === col ? "on" : ""}">${esc(x.title)}</a>`).join("");
