@@ -317,6 +317,7 @@
 
   // asset 하위 페이지들 (같은 형태). col 은 데이터 이름
   const ASSET_PAGES = [
+    { col: "npc", route: "/npc", title: "NPC" },
     { col: "gallery", route: "/gallery", title: "ASSET" },
     { col: "jaktae", route: "/jaktae", title: "작태" },
   ];
@@ -764,6 +765,7 @@
     "/": { title: "Pairs", render: renderHome },
     "/gallery": { title: "Asset", render: () => renderGallery("gallery") },
     "/jaktae": { title: "작태", render: () => renderGallery("jaktae") },
+    "/npc": { title: "NPC", render: () => renderGallery("npc") },
     "/world": { title: "ARCH", render: () => App.renderWorld() },
     "/link": { title: "Link", render: renderLinks },
     "/ooc": { title: "OOC", render: renderOOC },
@@ -787,7 +789,7 @@
     $(".brand").textContent = brand;
     document.title = `${r.title} · ${brand}`;
     document.querySelectorAll("[data-route]").forEach((a) =>
-      a.classList.toggle("active", a.dataset.route === path || (a.dataset.route === "/gallery" && path === "/jaktae")));
+      a.classList.toggle("active", a.dataset.route === path || (a.dataset.route === "/gallery" && !a.classList.contains("side-sub") && (path === "/jaktae" || path === "/npc"))));
     document.querySelector(".nav-drop")?.classList.remove("open");
   }
 
@@ -1075,6 +1077,7 @@
   App.normalize = (d) => {
     d.links ??= [];
     d.jaktae ??= [];
+    d.npc ??= [];
     d.ooc ??= [];
     d.girls ??= [];
     d.genres ??= ["ARCH", "MO1", "月とナイフ", "ETC"];

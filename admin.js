@@ -196,6 +196,13 @@
     },
   };
 
+  // NPC: asset 과 같은 형태 (구분 자동완성만 NPC 사진 기준)
+  SCHEMAS.npc = {
+    ...SCHEMAS.gallery,
+    title: "NPC",
+    fields: SCHEMAS.gallery.fields.map((f) => (f.type === "section" ? { ...f, source: "npc" } : f)),
+  };
+
   // 작태: asset 과 같은 형태 (구분 자동완성만 작태 사진 기준)
   SCHEMAS.jaktae = {
     ...SCHEMAS.gallery,
@@ -553,7 +560,7 @@
             const file = el.files[0];
             if (file) {
               setPath(item, f.key, await uploadImage(file));
-            } else if (isNew && !getPath(item, f.key) && (col === "gallery" || col === "jaktae")) {
+            } else if (isNew && !getPath(item, f.key) && (col === "gallery" || col === "jaktae" || col === "npc")) {
               throw new Error("사진 파일을 골라주세요.");
             }
           } else if (f.type === "lines") {
@@ -574,7 +581,7 @@
         }
         if (col === "links" && item.url && !/^[a-z][a-z0-9+.-]*:/i.test(item.url.trim())) item.url = `https://${item.url.trim()}`;
         // 갤러리: 비어 있는 개별 프롬프트는 지워서 페어 프롬프트를 쓰게 함
-        if (col === "gallery" || col === "jaktae") {
+        if (col === "gallery" || col === "jaktae" || col === "npc") {
           for (const k of ["male", "female"]) if (item[k] && !item[k].name && !item[k].prompt) delete item[k];
         }
 
@@ -729,7 +736,7 @@
     } else if (act === "move") {
       let j = i + Number(btn.dataset.dir);
       // 갤러리는 같은 구분, 페어는 같은 장르 안에서만 순서 이동
-      const groupKey = ["gallery", "jaktae", "ooc"].includes(col) ? (x) => (x.section || "").trim()
+      const groupKey = ["gallery", "jaktae", "npc", "ooc"].includes(col) ? (x) => (x.section || "").trim()
         : col === "pairs" ? (x) => ((App.data.genres || []).includes(x.genre) ? x.genre : "")
         : col === "links" ? (x) => `${(x.genre || "").trim()}\u0000${(x.section || "").trim()}`
         : null;

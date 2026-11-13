@@ -18,7 +18,7 @@
     // 다크/라이트: 처음엔 라이트, 버튼으로 고른 게 있으면 그걸 씀 (깜빡임 방지로 맨 먼저 실행)
     try { var t = localStorage.getItem("zzon_theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   </script>
-  <link rel="stylesheet" href="style.css?v=202611121753">
+  <link rel="stylesheet" href="style.css?v=202611131025">
 </head>
 <body class="locked">
   <div id="gate" class="gate"></div>
@@ -29,6 +29,7 @@
       <div class="nav-drop">
         <a class="nav-link" href="#/gallery" data-route="/gallery">PROMPT</a><button class="drop-btn" type="button" aria-label="PROMPT 하위 메뉴">▾</button>
         <div class="drop-menu">
+          <a href="#/npc" data-route="/npc">NPC</a>
           <a href="#/gallery">ASSET</a>
           <a href="#/jaktae" data-route="/jaktae">작태</a>
         </div>
@@ -55,6 +56,7 @@
       <a href="#/" data-route="/"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 3 10.5V21h6.5v-6h5v6H21V10.5z"/></svg><span>home</span></a>
       <a href="#/ooc" data-route="/ooc"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v12H8l-4 4z"/></svg><span>ooc</span></a>
       <a href="#/gallery" data-route="/gallery"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 16.8l-6.2 4.5 2.4-7.4L2 9.4h7.6z"/></svg><span>prompt</span></a>
+      <a class="side-sub" href="#/npc" data-route="/npc">npc</a>
       <a class="side-sub" href="#/gallery" data-route="/gallery">asset</a>
       <a class="side-sub" href="#/jaktae" data-route="/jaktae">작태</a>
       <a href="#/world" data-route="/world"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2 4 5v6c0 5 3.4 9.3 8 11 4.6-1.7 8-6 8-11V5z"/></svg><span>arch</span></a>
@@ -92,18 +94,18 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-  <script src="world-default.js?v=202611121753"></script>
-  <script src="agent-cards.js?v=202611121753"></script>
-  <script src="app.js?v=202611121753"></script>
-  <script src="calendar.js?v=202611121753"></script>
-  <script src="arch-text.js?v=202611121753"></script>
-  <script src="world.js?v=202611121753"></script>
-  <script src="roadview.js?v=202611121753"></script>
-  <script src="room3d.js?v=202611121753"></script>
-  <script src="suites.js?v=202611121753"></script>
-  <script src="aegis3d.js?v=202611121753"></script>
-  <script src="admin.js?v=202611121753"></script>
-  <script src="bgm.js?v=202611121753"></script>
-  <script src="auth.js?v=202611121753"></script>
+  <script src="world-default.js?v=202611131025"></script>
+  <script src="agent-cards.js?v=202611131025"></script>
+  <script src="app.js?v=202611131025"></script>
+  <script src="calendar.js?v=202611131025"></script>
+  <script src="arch-text.js?v=202611131025"></script>
+  <script src="world.js?v=202611131025"></script>
+  <script src="roadview.js?v=202611131025"></script>
+  <script src="room3d.js?v=202611131025"></script>
+  <script src="suites.js?v=202611131025"></script>
+  <script src="aegis3d.js?v=202611131025"></script>
+  <script src="admin.js?v=202611131025"></script>
+  <script src="bgm.js?v=202611131025"></script>
+  <script src="auth.js?v=202611131025"></script>
 </body>
 </html>

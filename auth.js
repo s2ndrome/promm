@@ -62,7 +62,7 @@
       out.push(p.image, p.male?.profile?.photo, p.female?.profile?.photo);
       for (const v of p.variants || []) out.push(v.image);
     }
-    for (const g of [...(d.gallery || []), ...(d.jaktae || [])]) out.push(g.image);
+    for (const g of [...(d.gallery || []), ...(d.jaktae || []), ...(d.npc || [])]) out.push(g.image);
     for (const c of d.girls || []) {
       out.push(c.image, c.female?.profile?.photo);
       for (const v of c.variants || []) out.push(v.image);
